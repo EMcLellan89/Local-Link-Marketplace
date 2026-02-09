@@ -5,7 +5,7 @@ import BusinessHubLayout from '../../components/layout/BusinessHubLayout';
 import Card, { CardBody, CardHeader } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import BackButton from '../components/ui/BackButton';
+import BackButton from '../../components/ui/BackButton';
 import { supabase } from '../../lib/supabase';
 
 interface PrintingProduct {

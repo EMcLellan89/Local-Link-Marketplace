@@ -6,7 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Card, { CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import BackButton from '../components/ui/BackButton';
+import BackButton from '../../components/ui/BackButton';
 
 interface Deal {
   id: string;
