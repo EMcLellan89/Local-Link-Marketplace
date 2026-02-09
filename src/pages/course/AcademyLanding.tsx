@@ -123,20 +123,6 @@ export default function AcademyLanding() {
 
   function loadDevModeCourses() {
     const mockCourses: CourseWithPricing[] = [
-      // FREE COURSES
-      {
-        course: {
-          slug: 'blog-growth-system',
-          title: 'Blog Growth System™',
-          subtitle: 'Turn Your Blog Into a Customer-Getting Machine',
-          description: 'Master blogging to attract and convert local customers',
-          thumbnail_url: 'https://images.pexels.com/photos/34600/pexels-photo.jpg',
-          target_audience: 'merchant',
-          is_free: true
-        },
-        products: [],
-        minPrice: 0
-      },
       // PAID COURSES - Tiered (multiple products)
       {
         course: {
@@ -297,6 +283,20 @@ export default function AcademyLanding() {
           { slug: 'local-seo', title: 'Local SEO Course', price_cents: 4900, metadata: {} }
         ],
         minPrice: 4900
+      },
+      {
+        course: {
+          slug: 'blog-growth-system',
+          title: 'Blog Growth System™',
+          subtitle: 'Turn Your Blog Into a Customer-Getting Machine',
+          description: 'Master blogging to attract and convert local customers to YOUR business',
+          thumbnail_url: 'https://images.pexels.com/photos/34600/pexels-photo.jpg',
+          target_audience: 'merchant'
+        },
+        products: [
+          { slug: 'blog-growth-merchant', title: 'Blog Growth Course', price_cents: 9700, metadata: {} }
+        ],
+        minPrice: 9700
       }
     ];
 
@@ -368,14 +368,14 @@ export default function AcademyLanding() {
             <section className="mb-16">
               <div className="flex items-center gap-3 mb-2">
                 <h2 className="text-3xl font-bold text-gray-900">
-                  Free Partner Training
+                  Complimentary Business Resources
                 </h2>
                 <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
                   FREE
                 </span>
               </div>
               <p className="text-gray-600 mb-8">
-                Included with your partner subscription at no additional cost
+                Free introductory resources to help grow your business
               </p>
 
               <div className="grid md:grid-cols-3 gap-6">
