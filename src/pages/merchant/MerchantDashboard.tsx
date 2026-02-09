@@ -513,7 +513,7 @@ export default function MerchantDashboard() {
                     onClick={() => navigate('/academy')}
                     className="bg-white text-blue-700 hover:bg-blue-50 font-bold shadow-lg"
                   >
-                    Browse All Courses <ArrowRight className="w-4 h-4 ml-1" />
+                    <span className="text-blue-700">Browse All Courses</span> <ArrowRight className="w-4 h-4 ml-1 text-blue-700" />
                   </Button>
                 </div>
               </div>

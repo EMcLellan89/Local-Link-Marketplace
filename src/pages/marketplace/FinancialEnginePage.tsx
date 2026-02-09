@@ -1,85 +1,348 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calculator, Check, TrendingUp, FileText, Shield, Clock, DollarSign, Zap, Award, AlertTriangle } from 'lucide-react';
+import {
+  Calculator, Check, TrendingUp, Shield, Clock, DollarSign, Zap,
+  Award, Bot, FileText, AlertCircle, Users, Target, Briefcase,
+  Network, Rocket, Crown
+} from 'lucide-react';
 import Card, { CardBody, CardHeader } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import BackButton from '../../components/ui/BackButton';
 
-interface Plan {
+interface Package {
+  id: string;
   name: string;
-  price: string;
-  period: string;
+  description: string;
+  category: string;
+  tiers?: {
+    name: string;
+    price: string;
+    priceMonthly?: number;
+  }[];
+  price?: string;
+  priceMonthly?: number;
   features: string[];
-  cta: string;
-  route: string;
-  recommended?: boolean;
-  tier: string;
+  icon: typeof Calculator;
+  statementDescriptor: string;
+  unitLabel: string;
+  metadata: Record<string, string>;
+  badge?: string;
 }
 
 export default function FinancialEnginePage() {
   const navigate = useNavigate();
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'annual'>('monthly');
 
-  const plans: Plan[] = [
+  const corePlatform: Package[] = [
     {
-      name: 'Accounting Lite',
-      tier: 'Essential',
-      price: billingPeriod === 'monthly' ? '$79' : '$790',
-      period: billingPeriod === 'monthly' ? '/month' : '/year',
-      route: '/merchant/accounting/lite',
-      cta: 'Get Started',
+      id: 'ai-os',
+      name: 'Local-Link AI OS™',
+      description: 'The core operating system that powers AI automation, bots, analytics, compliance controls, and partner revenue tracking',
+      category: 'platform',
+      icon: Bot,
+      statementDescriptor: 'LOCALLINK AI OS',
+      unitLabel: 'month',
+      metadata: { product_key: 'AI_OS', category: 'platform', billing_type: 'recurring', tiered: 'true' },
+      tiers: [
+        { name: 'Starter', price: '$97', priceMonthly: 97 },
+        { name: 'Growth', price: '$297', priceMonthly: 297 },
+        { name: 'Pro', price: '$597', priceMonthly: 597 },
+        { name: 'Elite', price: '$997', priceMonthly: 997 }
+      ],
       features: [
-        'Monthly revenue & expense tracking',
-        'Basic profit & loss reports',
-        'Invoice management',
-        'Receipt uploads',
-        'Customer tracking',
-        'Email support'
+        'AI job engine + automation runners',
+        'Feature flags & kill switch',
+        'Partner dashboards & revenue attribution',
+        'Circuit breaker & reliability layer'
       ]
     },
     {
-      name: 'Accounting Pro',
-      tier: 'Professional',
-      price: billingPeriod === 'monthly' ? '$197' : '$1,970',
-      period: billingPeriod === 'monthly' ? '/month' : '/year',
-      route: '/merchant/accounting/pro',
-      cta: 'Upgrade Now',
-      recommended: true,
+      id: 'financial-engine',
+      name: 'Local-Link Financial Engine™',
+      description: 'AI-powered bookkeeping, monthly P&L, receipt automation, tax-ready reporting, and financial insights',
+      category: 'financial',
+      icon: Calculator,
+      statementDescriptor: 'LOCALLINK FIN',
+      unitLabel: 'month',
+      metadata: { product_key: 'FIN_ENGINE', category: 'financial', includes_tax_ready_score: 'true' },
+      tiers: [
+        { name: 'Starter', price: '$149', priceMonthly: 149 },
+        { name: 'Growth', price: '$299', priceMonthly: 299 },
+        { name: 'Pro', price: '$499', priceMonthly: 499 }
+      ],
       features: [
-        'Everything in Lite, plus:',
-        'Quarterly tax obligation tracking',
-        'State sales tax calculations',
-        'Federal income tax estimates',
-        'Auto-pay tax scheduling',
-        'Direct IRS & state tax filing links',
-        'Multi-business unit support',
-        'Advanced P&L reports',
-        'Balance sheet',
-        'Cash flow statements',
-        'Priority support'
+        'Monthly P&L + expense reports',
+        'Receipt capture + categorization',
+        'Tax-Ready Score™ (0–100)',
+        'Client Tax Pack generator'
       ]
     },
     {
-      name: 'Full-Service Bookkeeping',
-      tier: 'Enterprise',
-      price: 'Custom',
-      period: 'Based on volume',
-      route: '/merchant/support',
-      cta: 'Contact Sales',
+      id: 'compliance-shield',
+      name: 'Compliance Shield™',
+      description: 'Automated compliance workflows, audit trails, risk monitoring, document vaults, and defensibility tools',
+      category: 'compliance',
+      icon: Shield,
+      statementDescriptor: 'COMPLIANCE SHIELD',
+      unitLabel: 'month',
+      metadata: { product_key: 'COMPLIANCE_SHIELD', category: 'compliance', audit_enabled: 'true' },
+      tiers: [
+        { name: 'Basic', price: '$129', priceMonthly: 129 },
+        { name: 'Growth', price: '$349', priceMonthly: 349 },
+        { name: 'Elite', price: '$699', priceMonthly: 699 }
+      ],
       features: [
-        'Everything in Pro, plus:',
-        'Dedicated bookkeeper',
-        'Daily transaction categorization',
-        'Monthly reconciliation',
-        'Financial statement preparation',
-        'Tax planning & strategy',
-        'CFO advisory services',
-        'Audit support',
-        'White-glove onboarding',
-        '24/7 priority support'
+        'Audit logs & change tracking',
+        'Policy workflows & document vault',
+        'Risk detection bots',
+        'Compliance certification badges'
       ]
     }
   ];
+
+  const growthEngines: Package[] = [
+    {
+      id: 'partner-autopilot',
+      name: 'Partner Growth Autopilot™',
+      description: 'Automated outreach, share kits, follow-ups, lead nurturing, and revenue tracking for partners',
+      category: 'growth',
+      icon: Rocket,
+      statementDescriptor: 'PARTNER AUTOPLT',
+      unitLabel: 'month',
+      metadata: { product_key: 'AUTOPILOT', category: 'growth', partner_focused: 'true' },
+      tiers: [
+        { name: 'Starter', price: '$97', priceMonthly: 97 },
+        { name: 'Growth', price: '$247', priceMonthly: 247 },
+        { name: 'Pro', price: '$497', priceMonthly: 497 }
+      ],
+      features: [
+        'Share Kit generator',
+        'Auto follow-up sequences',
+        'Partner leaderboard & gamification',
+        'Revenue influence tracking'
+      ]
+    },
+    {
+      id: 'lead-command',
+      name: 'Lead Command™',
+      description: 'AI-driven lead qualification, routing, scoring, and conversion automation',
+      category: 'sales',
+      icon: Target,
+      statementDescriptor: 'LEAD COMMAND',
+      unitLabel: 'month',
+      metadata: { product_key: 'LEAD_COMMAND', category: 'sales' },
+      tiers: [
+        { name: 'Core', price: '$99', priceMonthly: 99 },
+        { name: 'Growth', price: '$249', priceMonthly: 249 },
+        { name: 'Pro', price: '$449', priceMonthly: 449 }
+      ],
+      features: [
+        'AI lead scoring',
+        'Qualification bots',
+        'CRM-ready pipelines',
+        'Auto-proposal triggers'
+      ]
+    }
+  ];
+
+  const dfyServices: Package[] = [
+    {
+      id: 'dfy-cleanup',
+      name: 'DFY Bookkeeping Cleanup™',
+      description: 'One-time historical cleanup of books with categorized transactions, reconciliations, and tax-ready reports',
+      category: 'service',
+      icon: FileText,
+      statementDescriptor: 'DFY CLEANUP',
+      unitLabel: 'project',
+      metadata: { product_key: 'DFY_CLEANUP', category: 'service', one_time: 'true' },
+      tiers: [
+        { name: 'Light Cleanup', price: '$499', priceMonthly: 499 },
+        { name: 'Standard Cleanup', price: '$1,200', priceMonthly: 1200 },
+        { name: 'Heavy Cleanup', price: '$2,500+', priceMonthly: 2500 }
+      ],
+      features: [
+        'Historical transaction cleanup',
+        'Receipt recovery',
+        'Tax-ready reports',
+        'Upgrade path to monthly service'
+      ]
+    },
+    {
+      id: 'compliance-setup',
+      name: 'Compliance Setup & Audit Pack™',
+      description: 'DFY compliance framework setup, documentation, audit trail configuration, and risk baseline',
+      category: 'service',
+      icon: Shield,
+      statementDescriptor: 'COMPLIANCE SETUP',
+      unitLabel: 'project',
+      price: '$1,497',
+      priceMonthly: 1497,
+      metadata: { product_key: 'COMPLIANCE_SETUP', category: 'service' },
+      features: [
+        'Compliance framework buildout',
+        'Document vault setup',
+        'Audit trail initialization'
+      ]
+    }
+  ];
+
+  const education: Package[] = [
+    {
+      id: 'partner-cert',
+      name: 'Local-Link Partner Certification™',
+      description: 'Training, testing, and certification to sell Local-Link products and earn recurring commissions',
+      category: 'education',
+      icon: Award,
+      statementDescriptor: 'PARTNER CERT',
+      unitLabel: 'certification',
+      price: '$297',
+      priceMonthly: 297,
+      metadata: { product_key: 'PARTNER_CERT', category: 'education' },
+      features: [
+        'Certification badge',
+        'Sales playbooks',
+        'Commission eligibility'
+      ]
+    },
+    {
+      id: 'merchant-academy',
+      name: 'Local-Link Merchant Academy™',
+      description: 'Step-by-step training for merchants to use automation, financial tools, and compliance systems effectively',
+      category: 'education',
+      icon: Award,
+      statementDescriptor: 'MERCHANT ACAD',
+      unitLabel: 'access',
+      price: '$197',
+      priceMonthly: 197,
+      metadata: { product_key: 'MERCHANT_ACADEMY', category: 'education' },
+      badge: 'or bundled',
+      features: [
+        'Video modules',
+        'Worksheets & SOPs',
+        'Certification tests'
+      ]
+    }
+  ];
+
+  const enterprise: Package[] = [
+    {
+      id: 'enterprise-stack',
+      name: 'Local-Link Enterprise Stack™',
+      description: 'Full AI workforce, compliance, financial automation, and partner infrastructure for multi-location or enterprise organizations',
+      category: 'enterprise',
+      icon: Crown,
+      statementDescriptor: 'LOCALLINK ENT',
+      unitLabel: 'month',
+      price: '$2,500–$5,000',
+      priceMonthly: 2500,
+      metadata: { product_key: 'ENTERPRISE_STACK', category: 'enterprise' },
+      features: [
+        'Dedicated AI workflows',
+        'Enterprise compliance',
+        'Priority support',
+        'Custom integrations'
+      ]
+    }
+  ];
+
+  const addons: Package[] = [
+    {
+      id: 'ai-workforce-addon',
+      name: 'AI Workforce Add-On™',
+      description: 'Additional AI bots, higher job limits, and advanced automation capacity',
+      category: 'addon',
+      icon: Bot,
+      statementDescriptor: 'AI WORKFORCE',
+      unitLabel: 'month',
+      price: '$149',
+      priceMonthly: 149,
+      metadata: { product_key: 'AI_WORKFORCE_ADDON', category: 'addon' },
+      features: [
+        'Additional AI bots',
+        'Higher job limits',
+        'Advanced automation capacity'
+      ]
+    }
+  ];
+
+  const renderPackageCard = (pkg: Package, recommended?: boolean) => (
+    <Card
+      key={pkg.id}
+      variant="bordered"
+      className={`${
+        recommended
+          ? 'border-2 border-blue-600 shadow-xl bg-white relative'
+          : 'bg-white'
+      } hover:shadow-lg transition-shadow`}
+    >
+      {recommended && (
+        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+          <span className="px-4 py-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-bold rounded-full shadow-lg flex items-center gap-1">
+            <Award className="w-4 h-4" />
+            Most Popular
+          </span>
+        </div>
+      )}
+      <CardHeader className="text-center pt-8">
+        <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-100 to-green-100 rounded-2xl flex items-center justify-center">
+          <pkg.icon className="w-8 h-8 text-blue-600" />
+        </div>
+        <h3 className="text-2xl font-bold text-slate-900 mb-2">{pkg.name}</h3>
+        <p className="text-sm text-slate-600 mb-4">{pkg.description}</p>
+      </CardHeader>
+      <CardBody>
+        {pkg.tiers ? (
+          <div className="mb-6">
+            <div className="text-sm font-semibold text-slate-700 mb-3">Available Tiers:</div>
+            <div className="grid grid-cols-2 gap-2">
+              {pkg.tiers.map((tier) => (
+                <div key={tier.name} className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                  <div className="text-sm font-semibold text-slate-900">{tier.name}</div>
+                  <div className="text-lg font-bold text-blue-600">{tier.price}</div>
+                  <div className="text-xs text-slate-500">/month</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : pkg.price ? (
+          <div className="mb-6 text-center">
+            <div className="text-4xl font-bold text-blue-600">{pkg.price}</div>
+            {pkg.category !== 'service' && <div className="text-sm text-slate-500">/month</div>}
+          </div>
+        ) : null}
+
+        {pkg.badge && (
+          <div className="mb-4 text-center">
+            <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
+              {pkg.badge}
+            </span>
+          </div>
+        )}
+
+        <ul className="space-y-2 mb-6">
+          {pkg.features.map((feature, index) => (
+            <li key={index} className="flex items-start gap-2">
+              <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <span className="text-sm text-slate-700">{feature}</span>
+            </li>
+          ))}
+        </ul>
+
+        <Button
+          fullWidth
+          onClick={() => navigate('/merchant/support')}
+          className={
+            recommended
+              ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg'
+              : ''
+          }
+          variant={recommended ? undefined : 'outline'}
+        >
+          Contact Sales
+        </Button>
+      </CardBody>
+    </Card>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -90,228 +353,122 @@ export default function FinancialEnginePage() {
 
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-100 rounded-2xl mb-6">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-100 to-green-100 rounded-2xl mb-6">
             <Calculator className="w-10 h-10 text-blue-600" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-            Financial Engine™
+            AI Bookkeeping Services
           </h1>
           <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-6">
-            AI-powered bookkeeping that keeps your books clean, your taxes paid, and your business compliant
-          </p>
-          <p className="text-lg text-slate-500 max-w-2xl mx-auto">
-            From $79/mo • No setup fees • Cancel anytime
+            Complete AI-powered business automation, financial management, compliance, and growth tools
           </p>
         </div>
 
-        {/* Benefits Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          <Card variant="bordered" className="bg-white">
-            <CardBody className="text-center">
-              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Clock className="w-6 h-6 text-green-600" />
-              </div>
-              <h3 className="font-bold text-slate-900 mb-2">Save 10+ Hours/Month</h3>
-              <p className="text-sm text-slate-600">Let AI handle bookkeeping while you focus on growth</p>
-            </CardBody>
-          </Card>
-
-          <Card variant="bordered" className="bg-white">
-            <CardBody className="text-center">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-6 h-6 text-blue-600" />
-              </div>
-              <h3 className="font-bold text-slate-900 mb-2">Stay Tax Compliant</h3>
-              <p className="text-sm text-slate-600">Automatic tax calculations and quarterly reminders</p>
-            </CardBody>
-          </Card>
-
-          <Card variant="bordered" className="bg-white">
-            <CardBody className="text-center">
-              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <TrendingUp className="w-6 h-6 text-purple-600" />
-              </div>
-              <h3 className="font-bold text-slate-900 mb-2">Real-Time Insights</h3>
-              <p className="text-sm text-slate-600">See your financial health at a glance, anytime</p>
-            </CardBody>
-          </Card>
-
-          <Card variant="bordered" className="bg-white">
-            <CardBody className="text-center">
-              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <DollarSign className="w-6 h-6 text-orange-600" />
-              </div>
-              <h3 className="font-bold text-slate-900 mb-2">Save on Fees</h3>
-              <p className="text-sm text-slate-600">Replaces $300-$1,500/mo traditional bookkeepers</p>
-            </CardBody>
-          </Card>
-        </div>
-
-        {/* Billing Toggle */}
-        <div className="flex justify-center mb-12">
-          <div className="inline-flex items-center bg-white rounded-lg p-1 shadow-sm border border-slate-200">
-            <button
-              onClick={() => setBillingPeriod('monthly')}
-              className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
-                billingPeriod === 'monthly'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setBillingPeriod('annual')}
-              className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
-                billingPeriod === 'annual'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Annual
-              <span className="ml-2 px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded-full">
-                Save 16%
-              </span>
-            </button>
+        {/* Core Platform Products */}
+        <section className="mb-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-slate-900 mb-2">
+              🧱 Core Platform Products
+            </h2>
+            <p className="text-slate-600">Recurring subscription services</p>
           </div>
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {corePlatform.map((pkg, idx) => renderPackageCard(pkg, idx === 1))}
+          </div>
+        </section>
 
-        {/* Pricing Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
-          {plans.map((plan) => (
-            <Card
-              key={plan.name}
-              variant="bordered"
-              className={`${
-                plan.recommended
-                  ? 'border-2 border-blue-600 shadow-xl scale-105 bg-white relative'
-                  : 'bg-white'
-              }`}
-            >
-              {plan.recommended && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="px-4 py-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-bold rounded-full shadow-lg flex items-center gap-1">
-                    <Award className="w-4 h-4" />
-                    Most Popular
-                  </span>
-                </div>
-              )}
-              <CardHeader className="text-center pt-8">
-                <div className="text-sm font-semibold text-blue-600 mb-2">{plan.tier}</div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-2">{plan.name}</h3>
-                <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-4xl font-bold text-slate-900">{plan.price}</span>
-                  {plan.price !== 'Custom' && (
-                    <span className="text-slate-600">{plan.period}</span>
-                  )}
-                </div>
-                {plan.price !== 'Custom' && billingPeriod === 'annual' && (
-                  <p className="text-sm text-green-600 mt-2">
-                    Save ${parseInt(plan.price.replace('$', '').replace(',', '')) * 2} per year
-                  </p>
-                )}
-              </CardHeader>
-              <CardBody>
-                <ul className="space-y-3 mb-6">
-                  {plan.features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                      <span className="text-sm text-slate-700">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  fullWidth
-                  onClick={() => navigate(plan.route)}
-                  className={
-                    plan.recommended
-                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg'
-                      : ''
-                  }
-                  variant={plan.recommended ? undefined : 'outline'}
-                >
-                  {plan.cta}
-                </Button>
-              </CardBody>
-            </Card>
-          ))}
-        </div>
+        {/* Growth & Sales Engines */}
+        <section className="mb-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-slate-900 mb-2">
+              🚀 Growth & Sales Engines
+            </h2>
+            <p className="text-slate-600">Recurring subscription services</p>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {growthEngines.map((pkg) => renderPackageCard(pkg))}
+          </div>
+        </section>
 
-        {/* Trust Indicators */}
-        <Card variant="bordered" className="bg-gradient-to-r from-blue-600 to-blue-700 text-white mb-16">
+        {/* DFY / Service Products */}
+        <section className="mb-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-slate-900 mb-2">
+              🛠️ Done-For-You Services
+            </h2>
+            <p className="text-slate-600">One-time projects + optional recurring</p>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {dfyServices.map((pkg) => renderPackageCard(pkg))}
+          </div>
+        </section>
+
+        {/* Education & Certification */}
+        <section className="mb-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-slate-900 mb-2">
+              🎓 Education, Certification & Partners
+            </h2>
+            <p className="text-slate-600">Training and certification programs</p>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {education.map((pkg) => renderPackageCard(pkg))}
+          </div>
+        </section>
+
+        {/* Enterprise */}
+        <section className="mb-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-slate-900 mb-2">
+              🏆 High-Ticket / Enterprise
+            </h2>
+            <p className="text-slate-600">Full-service enterprise solutions</p>
+          </div>
+          <div className="grid grid-cols-1 max-w-2xl mx-auto">
+            {enterprise.map((pkg) => renderPackageCard(pkg, true))}
+          </div>
+        </section>
+
+        {/* Add-Ons */}
+        <section className="mb-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-slate-900 mb-2">
+              🧾 Optional Add-Ons
+            </h2>
+            <p className="text-slate-600">Recurring monthly add-ons</p>
+          </div>
+          <div className="grid grid-cols-1 max-w-xl mx-auto">
+            {addons.map((pkg) => renderPackageCard(pkg))}
+          </div>
+        </section>
+
+        {/* CTA Banner */}
+        <Card variant="bordered" className="bg-gradient-to-r from-blue-600 to-green-600 text-white">
           <CardBody className="text-center py-12">
             <Zap className="w-12 h-12 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold mb-4">Why Local Business Owners Choose Financial Engine</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
-              <div>
-                <div className="text-3xl font-bold mb-2">10,000+</div>
-                <div className="text-blue-100">Businesses Trust Us</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold mb-2">$2.5B+</div>
-                <div className="text-blue-100">Transactions Processed</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold mb-2">99.9%</div>
-                <div className="text-blue-100">Accuracy Rate</div>
-              </div>
-            </div>
+            <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Business?</h2>
+            <p className="text-lg text-blue-100 mb-6 max-w-2xl mx-auto">
+              Contact our sales team to find the perfect package for your needs
+            </p>
+            <Button
+              onClick={() => navigate('/merchant/support')}
+              className="bg-white text-blue-700 hover:bg-blue-50 font-bold shadow-lg"
+            >
+              Schedule a Demo
+            </Button>
           </CardBody>
         </Card>
 
-        {/* FAQ Section */}
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-slate-900 text-center mb-8">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <Card variant="bordered">
-              <CardBody>
-                <h3 className="font-bold text-slate-900 mb-2">What's included in all plans?</h3>
-                <p className="text-slate-600 text-sm">
-                  All plans include secure data storage, bank-level encryption, unlimited users, mobile access, and regular backups.
-                </p>
-              </CardBody>
-            </Card>
-
-            <Card variant="bordered">
-              <CardBody>
-                <h3 className="font-bold text-slate-900 mb-2">Can I upgrade or downgrade anytime?</h3>
-                <p className="text-slate-600 text-sm">
-                  Yes! You can change plans at any time. We'll prorate the charges so you only pay for what you use.
-                </p>
-              </CardBody>
-            </Card>
-
-            <Card variant="bordered">
-              <CardBody>
-                <h3 className="font-bold text-slate-900 mb-2">Do you file taxes for me?</h3>
-                <p className="text-slate-600 text-sm">
-                  Accounting Pro calculates your tax obligations and provides direct links to IRS Direct Pay and state tax portals. Full-Service Bookkeeping includes tax filing assistance.
-                </p>
-              </CardBody>
-            </Card>
-
-            <Card variant="bordered">
-              <CardBody>
-                <h3 className="font-bold text-slate-900 mb-2">What if I need help?</h3>
-                <p className="text-slate-600 text-sm">
-                  All plans include email support. Pro plans get priority support, and Enterprise customers get dedicated account managers.
-                </p>
-              </CardBody>
-            </Card>
-          </div>
-        </div>
-
-        {/* Warning Banner */}
-        <Card variant="bordered" className="bg-amber-50 border-amber-200 mt-16">
+        {/* Notice */}
+        <Card variant="bordered" className="bg-amber-50 border-amber-200 mt-8">
           <CardBody>
             <div className="flex items-start gap-4">
-              <AlertTriangle className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
+              <AlertCircle className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
               <div>
-                <h3 className="font-bold text-slate-900 mb-2">Important Tax Compliance Notice</h3>
+                <h3 className="font-bold text-slate-900 mb-2">Enterprise Solutions</h3>
                 <p className="text-sm text-slate-700">
-                  While Financial Engine provides accurate calculations and tracking, it is not a substitute for professional tax advice.
-                  We recommend consulting with a CPA for complex tax situations. Financial Engine Pro helps you stay organized and compliant,
-                  but ultimate tax filing responsibility remains with the business owner.
+                  All packages can be customized for enterprise needs. Contact sales for volume pricing,
+                  custom integrations, and dedicated support options.
                 </p>
               </div>
             </div>
