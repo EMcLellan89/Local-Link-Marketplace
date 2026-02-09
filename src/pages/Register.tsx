@@ -257,9 +257,9 @@ export default function Register() {
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center mb-4">
             <img
-              src="/image.png"
+              src="/local-link_marketplace_logo.png"
               alt="Local Link Marketplace"
-              className="h-28 w-auto"
+              className="h-28 w-auto drop-shadow-2xl"
             />
           </div>
           <p className="text-white/90 text-lg">Join the local deals revolution</p>

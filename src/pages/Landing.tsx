@@ -346,7 +346,7 @@ export default function Landing() {
             <Button
               size="lg"
               onClick={() => navigate('/register')}
-              className="text-lg px-12 py-6 bg-white text-emerald-600 hover:bg-slate-50 shadow-2xl hover:shadow-white/50 transition-all hover:scale-105 group"
+              className="text-lg px-12 py-6 bg-white text-blue-600 font-bold hover:bg-slate-50 shadow-2xl hover:shadow-white/50 transition-all hover:scale-105 group"
             >
               Start Your Journey
               <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
