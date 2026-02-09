@@ -117,6 +117,7 @@ const AdminCRMDashboard = lazy(() => import('./pages/admin/AdminCRMDashboard'));
 const AccountingDashboard = lazy(() => import('./pages/admin/AccountingDashboard'));
 const BusinessDashboard = lazy(() => import('./pages/admin/BusinessDashboard'));
 const CommissionPayoutsPage = lazy(() => import('./pages/admin/CommissionPayoutsPage'));
+const Admin1099Manager = lazy(() => import('./pages/admin/Admin1099Manager'));
 const ProfitNetworkPage = lazy(() => import('./pages/partner/ProfitNetworkPage'));
 const ProfitNetworkPlaybookViewer = lazy(() => import('./pages/partner/ProfitNetworkPlaybookViewer'));
 const ProfitNetworkSalesPage = lazy(() => import('./pages/partner/ProfitNetworkSalesPage'));
@@ -1505,6 +1506,7 @@ function AppRoutes() {
       <Route path="/admin/accounting" element={<AccountingDashboard />} />
       <Route path="/admin/business-dashboard" element={<BusinessDashboard />} />
       <Route path="/admin/commission-payouts" element={<CommissionPayoutsPage />} />
+      <Route path="/admin/1099-manager" element={<Admin1099Manager />} />
 
       <Route path="/admin/dfy/orders" element={<AdminDFYOrdersPage />} />
       <Route path="/admin/dfy/orders/:orderId" element={<AdminDFYOrderDetailPage />} />
