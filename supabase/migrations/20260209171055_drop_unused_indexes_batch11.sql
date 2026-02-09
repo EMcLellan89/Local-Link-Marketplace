@@ -1,0 +1,24 @@
+/*
+  # Drop Unused Indexes - Batch 11
+*/
+
+DROP INDEX IF EXISTS idx_email_communications_business_unit_id;
+DROP INDEX IF EXISTS idx_email_communications_customer_id;
+DROP INDEX IF EXISTS idx_email_communications_sent_by;
+DROP INDEX IF EXISTS idx_external_business_webhooks_business_unit_id;
+DROP INDEX IF EXISTS idx_business_api_keys_business_unit_id;
+DROP INDEX IF EXISTS idx_business_api_keys_created_by;
+DROP INDEX IF EXISTS idx_customer_email_segments_business_unit_id;
+DROP INDEX IF EXISTS idx_customer_email_segments_created_by;
+DROP INDEX IF EXISTS idx_marketing_email_campaigns_business_unit_id;
+DROP INDEX IF EXISTS idx_marketing_email_campaigns_created_by;
+DROP INDEX IF EXISTS idx_marketing_email_campaigns_segment_id;
+DROP INDEX IF EXISTS idx_marketplace_affiliate_referrals_marketplace_affiliate_id;
+DROP INDEX IF EXISTS idx_marketplace_affiliate_referrals_referred_user_id;
+DROP INDEX IF EXISTS idx_marketplace_affiliate_commissions_marketplace_affiliate_id;
+DROP INDEX IF EXISTS idx_marketplace_affiliate_commissions_referral_id;
+DROP INDEX IF EXISTS idx_marketplace_affiliate_payouts_marketplace_affiliate_id;
+DROP INDEX IF EXISTS idx_marketplace_affiliate_subscription_locks_marketplace_affili;
+DROP INDEX IF EXISTS idx_marketplace_affiliate_subscription_locks_commission_id;
+DROP INDEX IF EXISTS idx_marketplace_affiliate_badges_marketplace_affiliate_id;
+DROP INDEX IF EXISTS idx_marketplace_affiliate_product_assets_product_sku;
