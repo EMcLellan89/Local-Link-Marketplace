@@ -1,301 +1,255 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { supabase } from '../../lib/supabase';
-import DashboardLayout from '../../components/layout/DashboardLayout';
-import Card, { CardBody, CardHeader } from '../../components/ui/Card';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { supabaseBrowser } from '../../lib/supabase-browser';
+import { apiPost } from '../../lib/api';
+import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import BackButton from '../../components/ui/BackButton';
-import { ArrowLeft, CheckCircle, Upload, Send } from 'lucide-react';
 
-type Job = {
+interface JobTicket {
   id: string;
   title: string;
-  description: string | null;
-  requirements: string | null;
+  description: string;
+  requirements: string;
+  deliverables: string;
+  payout_cents: number;
   status: string;
-  created_at: string;
-  service_type: string;
-  service_name: string | null;
-  service_category: string | null;
-  budget: number | null;
-  partner_payout_cents: number | null;
-  due_date: string | null;
-  merchant_business_name: string | null;
-  selected_partner_id: string | null;
-  merchant_id: string | null;
-};
+  claimed_by: string | null;
+  submission_notes: string | null;
+  proof_urls: string[] | null;
+  exec_cases: {
+    exec_products: {
+      name: string;
+    };
+  };
+}
 
 export default function PartnerJobDetailPage() {
-  const { job_id } = useParams<{ job_id: string }>();
+  const { id } = useParams();
   const navigate = useNavigate();
-
-  const [job, setJob] = useState<Job | null>(null);
-  const [deliverableUrl, setDeliverableUrl] = useState('');
-  const [deliverableNote, setDeliverableNote] = useState('');
+  const [job, setJob] = useState<JobTicket | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [claiming, setClaiming] = useState(false);
+  const [submissionNotes, setSubmissionNotes] = useState('');
+  const [proofUrl, setProofUrl] = useState('');
 
   useEffect(() => {
-    if (job_id) {
-      loadJobData();
-    }
-  }, [job_id]);
+    loadJob();
+  }, [id]);
 
-  const loadJobData = async () => {
+  async function loadJob() {
     try {
-      setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      const { data, error } = await supabaseBrowser
+        .from('job_tickets')
+        .select('*, exec_cases(exec_products(name))')
+        .eq('id', id!)
+        .single();
 
-      const { data: jobData, error: jErr } = await supabase
-        .from('partner_job_board')
-        .select('*')
-        .eq('id', job_id!)
-        .maybeSingle();
-
-      if (jErr) throw jErr;
-      if (!jobData) throw new Error('Job not found');
-
-      setJob(jobData);
-    } catch (err: any) {
-      setMessage({ type: 'error', text: err.message });
+      if (error) throw error;
+      setJob(data);
+    } catch (err) {
+      console.error('Failed to load job:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const claimJob = async () => {
-    setSubmitting(true);
-    setMessage(null);
-
+  async function handleClaim() {
     try {
-      const { data, error } = await supabase.rpc('claim_partner_job', {
-        job_id: job_id!
+      setClaiming(true);
+      const { data: { user } } = await supabaseBrowser.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      await apiPost('jobs-claim', {
+        job_ticket_id: id!,
+        partner_user_id: user.id,
       });
 
-      if (error) throw error;
+      await loadJob();
+      alert('Job claimed successfully!');
+    } catch (err) {
+      console.error('Failed to claim job:', err);
+      alert('Failed to claim job. It may have already been claimed by another partner.');
+    } finally {
+      setClaiming(false);
+    }
+  }
 
-      if (data && data.success) {
-        setMessage({ type: 'success', text: 'Job claimed successfully! You can now start working on it.' });
-        await loadJobData();
-      } else {
-        throw new Error(data?.message || 'Failed to claim job');
+  async function handleSubmit() {
+    try {
+      if (!submissionNotes.trim()) {
+        alert('Please provide submission notes');
+        return;
       }
-    } catch (err: any) {
-      setMessage({ type: 'error', text: err.message });
+
+      setSubmitting(true);
+      const { data: { user } } = await supabaseBrowser.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const proofUrls = proofUrl.trim() ? [proofUrl.trim()] : [];
+
+      await apiPost('jobs-submit', {
+        job_ticket_id: id!,
+        partner_user_id: user.id,
+        submission_notes: submissionNotes,
+        proof_urls: proofUrls,
+      });
+
+      await loadJob();
+      alert('Job submitted for review!');
+      setSubmissionNotes('');
+      setProofUrl('');
+    } catch (err) {
+      console.error('Failed to submit job:', err);
+      alert('Failed to submit job. Please try again.');
     } finally {
       setSubmitting(false);
     }
-  };
+  }
 
-  const submitDeliverable = async () => {
-    if (!deliverableUrl.trim()) {
-      setMessage({ type: 'error', text: 'Please provide a deliverable URL' });
-      return;
-    }
-
-    setSubmitting(true);
-    setMessage(null);
-
-    try {
-      const { data, error } = await supabase.rpc('submit_partner_job', {
-        job_id: job_id!,
-        submission_url: deliverableUrl.trim(),
-        submission_notes: deliverableNote.trim() || null
-      });
-
-      if (error) throw error;
-
-      if (data && data.success) {
-        setMessage({ type: 'success', text: 'Work submitted successfully! Admin will review and approve payment.' });
-        setDeliverableUrl('');
-        setDeliverableNote('');
-        await loadJobData();
-      } else {
-        throw new Error(data?.message || 'Failed to submit work');
-      }
-    } catch (err: any) {
-      setMessage({ type: 'error', text: err.message });
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  if (loading || !job) {
+  if (loading) {
     return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
-      </DashboardLayout>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-600">Loading job details...</div>
+      </div>
     );
   }
 
+  if (!job) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-600">Job not found</div>
+      </div>
+    );
+  }
+
+  const canClaim = job.status === 'open';
+  const isClaimed = job.claimed_by !== null;
+  const { data: { user } } = supabaseBrowser.auth.getUser();
+  const isMyJob = job.claimed_by === (user as any)?.id;
+  const canSubmit = isMyJob && job.status === 'claimed';
+
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        <button
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        <Button
           onClick={() => navigate('/partner/job-board')}
-          className="flex items-center gap-2 text-slate-600 hover:text-slate-900"
+          className="mb-6"
         >
-          <ArrowLeft className="w-4 h-4" />
           Back to Job Board
-        </button>
+        </Button>
 
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">{job.title}</h1>
-          <div className="flex items-center gap-4 mt-2 text-slate-600">
-            <span>{job.service_product_key}</span>
-            <span>•</span>
-            <span>{new Date(job.created_at).toLocaleDateString()}</span>
-            <span>•</span>
-            <span
-              className={`px-3 py-1 rounded-full text-sm font-medium ${
-                job.status === 'open'
-                  ? 'bg-blue-100 text-blue-700'
-                  : job.status === 'assigned'
-                  ? 'bg-yellow-100 text-yellow-700'
-                  : job.status === 'in_progress'
-                  ? 'bg-orange-100 text-orange-700'
-                  : job.status === 'submitted'
-                  ? 'bg-purple-100 text-purple-700'
-                  : 'bg-slate-100 text-slate-700'
-              }`}
-            >
-              {job.status}
-            </span>
+        <Card className="p-8">
+          <div className="flex items-start justify-between mb-6">
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">{job.title}</h1>
+              <p className="text-gray-600">
+                {(job.exec_cases as any)?.exec_products?.name || 'Unknown Product'}
+              </p>
+            </div>
+            <div className="text-right">
+              <div className="text-3xl font-bold text-green-600 mb-2">
+                ${(job.payout_cents / 100).toFixed(2)}
+              </div>
+              <div className="text-sm text-gray-500">
+                Status: {job.status.replace('_', ' ').toUpperCase()}
+              </div>
+            </div>
           </div>
-        </div>
 
-        {message && (
-          <Card
-            variant="bordered"
-            className={message.type === 'error' ? 'border-red-300 bg-red-50' : 'border-green-300 bg-green-50'}
-          >
-            <CardBody>
-              <p className={message.type === 'error' ? 'text-red-800' : 'text-green-800'}>{message.text}</p>
-            </CardBody>
-          </Card>
-        )}
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Description</h3>
+              <p className="text-gray-700">{job.description}</p>
+            </div>
 
-        <Card variant="bordered">
-          <CardHeader>
-            <h2 className="text-xl font-bold text-slate-900">Job Description</h2>
-          </CardHeader>
-          <CardBody>
-            <p className="text-slate-700 whitespace-pre-wrap">
-              {job.description || 'No description provided'}
-            </p>
-            {job.budget && (
-              <div className="mt-4 pt-4 border-t border-slate-200">
-                <p className="text-sm text-slate-600">Budget</p>
-                <p className="text-2xl font-bold text-slate-900">${job.budget.toLocaleString()}</p>
+            {job.requirements && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Requirements</h3>
+                <p className="text-gray-700">{job.requirements}</p>
               </div>
             )}
-          </CardBody>
-        </Card>
 
-        {!assignment ? (
-          <Card variant="bordered">
-            <CardHeader>
-              <h2 className="text-xl font-bold text-slate-900">Apply for This Job</h2>
-            </CardHeader>
-            <CardBody>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Why are you a good fit? (Optional)
-                  </label>
-                  <textarea
-                    value={applicationMessage}
-                    onChange={(e) => setApplicationMessage(e.target.value)}
-                    rows={6}
-                    placeholder="Share your relevant experience, timeline, and why you're the right person for this job..."
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+            {job.deliverables && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Deliverables</h3>
+                <p className="text-gray-700">{job.deliverables}</p>
+              </div>
+            )}
 
+            {canClaim && (
+              <div className="pt-6 border-t">
                 <Button
-                  fullWidth
-                  onClick={applyToJob}
-                  disabled={submitting}
+                  onClick={handleClaim}
+                  disabled={claiming}
+                  className="w-full"
                 >
-                  <Send className="w-4 h-4 mr-2" />
-                  Submit Application
+                  {claiming ? 'Claiming...' : 'Claim This Job'}
                 </Button>
               </div>
-            </CardBody>
-          </Card>
-        ) : (
-          <Card variant="bordered" className="border-green-300">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-                <h2 className="text-xl font-bold text-slate-900">You Are Assigned</h2>
-              </div>
-            </CardHeader>
-            <CardBody>
-              <div className="space-y-4">
-                <p className="text-slate-600">
-                  Assignment status: <span className="font-semibold">{assignment.status}</span>
-                </p>
+            )}
 
-                {assignment.status !== 'submitted' && assignment.status !== 'completed' && (
-                  <>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Deliverable Link <span className="text-red-500">*</span>
-                      </label>
-                      <Input
-                        type="url"
-                        value={deliverableUrl}
-                        onChange={(e) => setDeliverableUrl(e.target.value)}
-                        placeholder="https://drive.google.com/... or https://dropbox.com/..."
-                      />
-                      <p className="text-xs text-slate-500 mt-1">
-                        Share a link to Google Drive, Dropbox, or any other file hosting service
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Notes (Optional)
-                      </label>
-                      <textarea
-                        value={deliverableNote}
-                        onChange={(e) => setDeliverableNote(e.target.value)}
-                        rows={4}
-                        placeholder="Describe what you did, how to use it, next steps, etc..."
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-
-                    <Button
-                      fullWidth
-                      onClick={submitDeliverable}
-                      disabled={submitting || !deliverableUrl.trim()}
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      <Upload className="w-4 h-4 mr-2" />
-                      Submit Deliverable
-                    </Button>
-                  </>
-                )}
-
-                {(assignment.status === 'submitted' || assignment.status === 'completed') && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <p className="text-green-800 font-medium">
-                      ✓ Deliverable submitted! Waiting for admin review and approval.
-                    </p>
+            {canSubmit && (
+              <div className="pt-6 border-t">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Submit Your Work</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Submission Notes
+                    </label>
+                    <textarea
+                      value={submissionNotes}
+                      onChange={(e) => setSubmissionNotes(e.target.value)}
+                      rows={4}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Describe what you've completed..."
+                    />
                   </div>
-                )}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Proof URL (optional)
+                    </label>
+                    <Input
+                      type="url"
+                      value={proofUrl}
+                      onChange={(e) => setProofUrl(e.target.value)}
+                      placeholder="https://..."
+                    />
+                  </div>
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={submitting}
+                    className="w-full"
+                  >
+                    {submitting ? 'Submitting...' : 'Submit for Review'}
+                  </Button>
+                </div>
               </div>
-            </CardBody>
-          </Card>
-        )}
+            )}
+
+            {job.status === 'in_review' && isMyJob && (
+              <div className="pt-6 border-t">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <p className="text-yellow-800 font-medium">
+                    Your submission is under review by the admin team.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {job.status === 'paid' && isMyJob && (
+              <div className="pt-6 border-t">
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <p className="text-green-800 font-medium">
+                    This job has been approved and paid. Great work!
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </Card>
       </div>
-    </DashboardLayout>
+    </div>
   );
 }
