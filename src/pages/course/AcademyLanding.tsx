@@ -56,10 +56,6 @@ export default function AcademyLanding() {
         else if (devRole === 'partner') role = 'partner';
         else if (devRole === 'customer') role = 'general';
         else if (devRole === 'admin') role = 'general';
-
-        setUserRole(role);
-        loadDevModeCourses();
-        return;
       } else if (user) {
         // In production, check database for actual role
         const [merchantCheck, partnerCheck, creatorCheck] = await Promise.all([
@@ -99,6 +95,8 @@ export default function AcademyLanding() {
           ? (productsData?.filter(p => p.metadata?.course_slug === course.slug) || [])
           : [];
 
+        console.log(`Course: ${course.slug}, Free: ${isFree}, Products: ${courseProducts.length}`);
+
         // Display course if it's free OR has products
         if (isFree || courseProducts.length > 0) {
           const minPrice = isFree ? 0 : (
@@ -109,9 +107,11 @@ export default function AcademyLanding() {
 
           courseMap.set(course.slug, {
             course,
-            products: isFree ? [] : courseProducts, // Never show products for free/partner courses
+            products: isFree ? [] : courseProducts,
             minPrice
           });
+        } else {
+          console.warn(`❌ Skipping ${course.slug}: not free and no products found`);
         }
       });
 
@@ -324,6 +324,8 @@ export default function AcademyLanding() {
   const freeCourses = courses.filter(c => c.course.is_free || c.minPrice === 0);
   const tieredCourses = courses.filter(c => !c.course.is_free && c.minPrice > 0 && c.products.length > 1);
   const singleCourses = courses.filter(c => !c.course.is_free && c.minPrice > 0 && c.products.length === 1);
+
+  console.log(`📊 Course breakdown: Free=${freeCourses.length}, Tiered=${tieredCourses.length}, Single=${singleCourses.length}, Total=${courses.length}`);
 
   return (
     <>
