@@ -202,8 +202,11 @@ const PlaybookExecutor = lazy(() => import('./pages/partner/PlaybookExecutor'));
 const PlaybookLessonViewer = lazy(() => import('./pages/partner/PlaybookLessonViewer'));
 const AdminJobsPage = lazy(() => import('./pages/admin/AdminJobsPage'));
 const AdminJobDetailPage = lazy(() => import('./pages/admin/AdminJobDetailPage'));
+const AdminDeliverablesReview = lazy(() => import('./pages/admin/AdminDeliverablesReview'));
+const ExecutiveDashboardV2 = lazy(() => import('./pages/admin/ExecutiveDashboardV2'));
 const PartnerJobBoardPage = lazy(() => import('./pages/partner/PartnerJobBoardPage'));
 const PartnerJobDetailPage = lazy(() => import('./pages/partner/PartnerJobDetailPage'));
+const PartnerJobSubmitPage = lazy(() => import('./pages/partner/PartnerJobSubmitPage'));
 const AccountingLitePage = lazy(() => import('./pages/merchant/AccountingLitePage'));
 const AccountingProPage = lazy(() => import('./pages/merchant/AccountingProPage'));
 const PartnerAccountingProPage = lazy(() => import('./pages/partner/PartnerAccountingProPage'));
@@ -1492,6 +1495,10 @@ function AppRoutes() {
 
       <Route path="/admin/jobs/:job_id" element={<AdminJobDetailPage />} />
 
+      <Route path="/admin/deliverables-review" element={<AdminDeliverablesReview />} />
+
+      <Route path="/admin/executive-dashboard" element={<ExecutiveDashboardV2 />} />
+
       <Route path="/admin/budget-buster" element={<BudgetBusterAnalytics />} />
 
       <Route path="/admin/crm" element={<AdminCRMDashboard />} />
@@ -1717,6 +1724,12 @@ function AppRoutes() {
       <Route path="/partner/job-board/:job_id" element={
         <ProtectedRoute>
           <PartnerJobDetailPage />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/partner/jobs/:jobId/submit" element={
+        <ProtectedRoute>
+          <PartnerJobSubmitPage />
         </ProtectedRoute>
       } />
 
