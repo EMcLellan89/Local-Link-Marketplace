@@ -10,10 +10,17 @@ type Job = {
   id: string;
   title: string;
   description: string | null;
+  requirements: string | null;
   status: string;
   created_at: string;
-  service_product_key: string;
+  service_type: string;
+  service_name: string | null;
+  service_category: string | null;
   budget: number | null;
+  partner_payout_cents: number | null;
+  due_date: string | null;
+  merchant_business_name: string | null;
+  selected_partner_id: string | null;
 };
 
 export default function PartnerJobBoardPage() {
@@ -33,39 +40,18 @@ export default function PartnerJobBoardPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      if (filter === 'my_jobs') {
-        // Load jobs assigned to me
-        const { data: assignments } = await supabase
-          .from('job_assignments')
-          .select('job_id')
-          .eq('partner_id', user.id);
+      let query = supabase.from('partner_job_board').select('*');
 
-        if (!assignments || assignments.length === 0) {
-          setJobs([]);
-          return;
-        }
-
-        const jobIds = assignments.map(a => a.job_id);
-
-        const { data, error } = await supabase
-          .from('jobs')
-          .select('id,title,description,status,created_at,service_product_key,budget')
-          .in('id', jobIds)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        setJobs(data || []);
-      } else {
-        const { data, error } = await supabase
-          .from('jobs')
-          .select('id,title,description,status,created_at,service_product_key,budget')
-          .in('status', filter === 'open' ? ['open'] : ['open', 'assigned', 'in_progress', 'submitted'])
-          .order('created_at', { ascending: false })
-          .limit(200);
-
-        if (error) throw error;
-        setJobs(data || []);
+      if (filter === 'open') {
+        query = query.eq('status', 'open');
+      } else if (filter === 'my_jobs') {
+        query = query.eq('selected_partner_id', user.id);
       }
+
+      const { data, error } = await query.limit(200);
+
+      if (error) throw error;
+      setJobs(data || []);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -156,32 +142,43 @@ export default function PartnerJobBoardPage() {
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
-                        <h3 className="font-bold text-slate-900 text-lg">{job.title}</h3>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-bold text-slate-900 text-lg">{job.title}</h3>
+                          {job.service_category && (
+                            <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs rounded-full">
+                              {job.service_category}
+                            </span>
+                          )}
+                        </div>
                         <p className="text-sm text-slate-600 mt-1">
                           <span className="inline-flex items-center gap-1">
                             <Briefcase className="w-4 h-4" />
-                            {job.service_product_key}
+                            {job.service_name || job.service_type}
                           </span>
+                          {job.merchant_business_name && (
+                            <span className="ml-3 text-slate-500">
+                              for {job.merchant_business_name}
+                            </span>
+                          )}
                         </p>
-                        {job.description && (
+                        {(job.description || job.requirements) && (
                           <p className="text-sm text-slate-700 mt-2 line-clamp-2">
-                            {job.description}
+                            {job.description || job.requirements}
                           </p>
                         )}
                         <div className="flex items-center gap-4 mt-3 text-sm text-slate-500">
                           <span className="flex items-center gap-1">
                             <Calendar className="w-4 h-4" />
-                            {new Date(job.created_at).toLocaleDateString()}
+                            Posted {new Date(job.created_at).toLocaleDateString()}
                           </span>
-                          {job.budget && (
-                            <span className="flex items-center gap-1">
-                              <DollarSign className="w-4 h-4" />
-                              ${job.budget.toLocaleString()} budget
+                          {job.due_date && (
+                            <span className="flex items-center gap-1 text-orange-600">
+                              Due {new Date(job.due_date).toLocaleDateString()}
                             </span>
                           )}
                         </div>
                       </div>
-                      <div className="text-right">
+                      <div className="text-right flex flex-col items-end gap-2">
                         <span
                           className={`inline-block px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap ${
                             job.status === 'open'
@@ -197,6 +194,14 @@ export default function PartnerJobBoardPage() {
                         >
                           {job.status}
                         </span>
+                        {job.partner_payout_cents && (
+                          <div className="text-right">
+                            <div className="text-xs text-slate-500">You earn</div>
+                            <div className="text-lg font-bold text-green-600">
+                              ${(job.partner_payout_cents / 100).toFixed(2)}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </button>

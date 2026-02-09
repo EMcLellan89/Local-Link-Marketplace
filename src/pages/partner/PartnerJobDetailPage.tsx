@@ -12,17 +12,18 @@ type Job = {
   id: string;
   title: string;
   description: string | null;
+  requirements: string | null;
   status: string;
   created_at: string;
-  service_product_key: string;
+  service_type: string;
+  service_name: string | null;
+  service_category: string | null;
   budget: number | null;
-};
-
-type Assignment = {
-  id: string;
-  job_id: string;
-  partner_id: string;
-  status: string;
+  partner_payout_cents: number | null;
+  due_date: string | null;
+  merchant_business_name: string | null;
+  selected_partner_id: string | null;
+  merchant_id: string | null;
 };
 
 export default function PartnerJobDetailPage() {
@@ -30,8 +31,6 @@ export default function PartnerJobDetailPage() {
   const navigate = useNavigate();
 
   const [job, setJob] = useState<Job | null>(null);
-  const [assignment, setAssignment] = useState<Assignment | null>(null);
-  const [applicationMessage, setApplicationMessage] = useState('');
   const [deliverableUrl, setDeliverableUrl] = useState('');
   const [deliverableNote, setDeliverableNote] = useState('');
   const [loading, setLoading] = useState(true);
@@ -51,22 +50,15 @@ export default function PartnerJobDetailPage() {
       if (!user) throw new Error('Not authenticated');
 
       const { data: jobData, error: jErr } = await supabase
-        .from('jobs')
+        .from('partner_job_board')
         .select('*')
         .eq('id', job_id!)
-        .single();
-
-      if (jErr) throw jErr;
-      setJob(jobData);
-
-      const { data: assignmentData } = await supabase
-        .from('job_assignments')
-        .select('*')
-        .eq('job_id', job_id!)
-        .eq('partner_id', user.id)
         .maybeSingle();
 
-      setAssignment(assignmentData);
+      if (jErr) throw jErr;
+      if (!jobData) throw new Error('Job not found');
+
+      setJob(jobData);
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message });
     } finally {
@@ -74,27 +66,23 @@ export default function PartnerJobDetailPage() {
     }
   };
 
-  const applyToJob = async () => {
+  const claimJob = async () => {
     setSubmitting(true);
     setMessage(null);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      const { error } = await supabase
-        .from('job_applications')
-        .insert({
-          job_id: job_id!,
-          partner_id: user.id,
-          message: applicationMessage.trim() || null,
-          status: 'applied',
-        });
+      const { data, error } = await supabase.rpc('claim_partner_job', {
+        job_id: job_id!
+      });
 
       if (error) throw error;
 
-      setMessage({ type: 'success', text: 'Application submitted! Admin will review and may assign you to this job.' });
-      setApplicationMessage('');
+      if (data && data.success) {
+        setMessage({ type: 'success', text: 'Job claimed successfully! You can now start working on it.' });
+        await loadJobData();
+      } else {
+        throw new Error(data?.message || 'Failed to claim job');
+      }
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message });
     } finally {
@@ -112,34 +100,22 @@ export default function PartnerJobDetailPage() {
     setMessage(null);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      const { error } = await supabase
-        .from('job_deliverables')
-        .insert({
-          job_id: job_id!,
-          partner_id: user.id,
-          file_url: deliverableUrl.trim(),
-          note: deliverableNote.trim() || null,
-        });
+      const { data, error } = await supabase.rpc('submit_partner_job', {
+        job_id: job_id!,
+        submission_url: deliverableUrl.trim(),
+        submission_notes: deliverableNote.trim() || null
+      });
 
       if (error) throw error;
 
-      await supabase
-        .from('job_assignments')
-        .update({ status: 'submitted' })
-        .eq('id', assignment!.id);
-
-      await supabase
-        .from('jobs')
-        .update({ status: 'submitted' })
-        .eq('id', job_id!);
-
-      setMessage({ type: 'success', text: 'Deliverable submitted! Admin will review and approve payment.' });
-      setDeliverableUrl('');
-      setDeliverableNote('');
-      await loadJobData();
+      if (data && data.success) {
+        setMessage({ type: 'success', text: 'Work submitted successfully! Admin will review and approve payment.' });
+        setDeliverableUrl('');
+        setDeliverableNote('');
+        await loadJobData();
+      } else {
+        throw new Error(data?.message || 'Failed to submit work');
+      }
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message });
     } finally {
