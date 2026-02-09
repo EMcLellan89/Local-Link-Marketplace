@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../../lib/supabase';
 import {
   Package, TrendingUp, Sparkles, Filter,
   Search, Tag, ArrowRight, Star

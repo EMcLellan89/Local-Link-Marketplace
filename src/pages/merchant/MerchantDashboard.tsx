@@ -492,10 +492,10 @@ export default function MerchantDashboard() {
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold mb-2">Local-Link Academy™</h2>
-                  <p className="text-blue-100 mb-4 max-w-2xl">
+                  <p className="text-white mb-4 max-w-2xl">
                     Master local marketing, sales, and business growth with our expert-led courses. Learn proven strategies to attract more customers and increase revenue.
                   </p>
-                  <div className="flex flex-wrap gap-4 text-sm mb-4">
+                  <div className="flex flex-wrap gap-4 text-sm mb-4 text-white font-medium">
                     <div className="flex items-center gap-2">
                       <BookOpen className="h-4 w-4" />
                       <span>15+ Courses</span>
@@ -511,7 +511,7 @@ export default function MerchantDashboard() {
                   </div>
                   <Button
                     onClick={() => navigate('/academy')}
-                    className="bg-white text-blue-600 hover:bg-blue-50 font-semibold"
+                    className="bg-white text-blue-700 hover:bg-blue-50 font-bold shadow-lg"
                   >
                     Browse All Courses <ArrowRight className="w-4 h-4 ml-1" />
                   </Button>

@@ -270,6 +270,8 @@ const PartnerCampaignsDashboard = lazy(() => import('./pages/partner/PartnerCamp
 const MarketplaceHome = lazy(() => import('./pages/marketplace/MarketplaceHome'));
 const ProductDetail = lazy(() => import('./pages/marketplace/ProductDetail'));
 const CheckoutSuccess = lazy(() => import('./pages/marketplace/CheckoutSuccess'));
+const FinancialEnginePage = lazy(() => import('./pages/marketplace/FinancialEnginePage'));
+const BusinessDealsHub = lazy(() => import('./pages/marketplace/BusinessDealsHub'));
 
 // Executive Solutions
 const ExecutiveSolutions = lazy(() => import('./pages/merchant/ExecutiveSolutions'));
@@ -351,6 +353,8 @@ function AppRoutes() {
       {/* Marketplace Routes - Public */}
       <Route path="/marketplace" element={<MarketplaceHome />} />
       <Route path="/marketplace/products/:slug" element={<ProductDetail />} />
+      <Route path="/marketplace/financial-engine" element={<FinancialEnginePage />} />
+      <Route path="/marketplace/business-deals" element={<BusinessDealsHub />} />
       <Route path="/marketplace/checkout/success" element={<CheckoutSuccess />} />
 
       {/* StoryLab Routes - Public */}
