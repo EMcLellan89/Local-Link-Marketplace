@@ -63,7 +63,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <img
                   src="/image.png"
                   alt="Local Link Marketplace"
-                  className="h-12 w-auto"
+                  className="h-10 w-auto"
                 />
               </Link>
               <div className="hidden sm:ml-8 sm:flex sm:space-x-4">
