@@ -68,9 +68,11 @@ export default function PartnerHubLayout({ children }: PartnerHubLayoutProps) {
                 {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
               <Link to="/" className="flex-shrink-0 flex items-center">
-                <span className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-                  Local-Link
-                </span>
+                <img
+                  src="/local-link_marketplace_logo.png"
+                  alt="Local-Link Marketplace"
+                  className="h-12 w-auto"
+                />
                 <span className="hidden sm:inline ml-2 px-2 py-1 text-xs font-semibold bg-[#2BB673]/10 text-[#2BB673] rounded">
                   Partner Hub
                 </span>

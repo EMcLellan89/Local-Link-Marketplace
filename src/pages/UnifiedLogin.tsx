@@ -114,9 +114,11 @@ export default function UnifiedLogin() {
         <header className="text-center mb-8 animate-fadeIn">
           <div className="relative inline-block">
             <div className="absolute -inset-6 rounded-full bg-gradient-to-r from-blue-500/20 via-cyan-500/20 to-green-500/20 blur-3xl animate-pulse-slow" />
-            <span className="relative text-6xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent drop-shadow-lg">
-              Local-Link
-            </span>
+            <img
+              src="/local-link_marketplace_logo.png"
+              alt="Local-Link Marketplace"
+              className="relative h-32 sm:h-40 w-auto mx-auto drop-shadow-2xl"
+            />
           </div>
           <div className="mt-4">
             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">

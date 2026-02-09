@@ -83,12 +83,12 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center space-x-2">
-              <span
-                className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent cursor-pointer hover:scale-105 transition-transform"
+              <img
+                src="/local-link_marketplace_logo.png"
+                alt="Local-Link Marketplace"
+                className="h-12 w-auto cursor-pointer hover:scale-105 transition-transform"
                 onClick={() => navigate('/')}
-              >
-                Local-Link
-              </span>
+              />
             </div>
             <nav className="hidden md:flex items-center space-x-8">
               <button
@@ -135,6 +135,15 @@ export default function Landing() {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-5xl mx-auto mb-20">
+            {/* Large Logo */}
+            <div className="mb-12 flex justify-center">
+              <img
+                src="/local-link_marketplace_logo.png"
+                alt="Local-Link Marketplace"
+                className="h-48 md:h-64 lg:h-72 w-auto drop-shadow-2xl animate-fadeIn"
+              />
+            </div>
+
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full shadow-lg shadow-emerald-500/20 mb-8 hover:shadow-xl hover:shadow-cyan-500/30 transition-all">
               <Sparkles className="w-4 h-4 text-emerald-400 animate-pulse" />
               <span className="text-sm font-semibold text-white">The Complete Local Business Ecosystem</span>
@@ -329,7 +338,7 @@ export default function Landing() {
             <span className="block mt-2">Local Business Journey?</span>
           </h2>
 
-          <p className="text-xl md:text-2xl text-white/90 mb-12 leading-relaxed max-w-2xl mx-auto">
+          <p className="text-xl md:text-2xl text-emerald-900 mb-12 leading-relaxed max-w-2xl mx-auto font-semibold">
             Join thousands of businesses, partners, and shoppers building a thriving local economy together
           </p>
 
@@ -374,9 +383,11 @@ export default function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
             <div className="lg:col-span-2">
               <div className="flex items-center space-x-2 mb-4">
-                <span className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-                  Local-Link
-                </span>
+                <img
+                  src="/local-link_marketplace_logo.png"
+                  alt="Local-Link Marketplace"
+                  className="h-16 w-auto"
+                />
               </div>
               <p className="text-sm text-slate-400 mb-6 max-w-md">
                 The complete platform for local business growth. Connecting merchants, partners, and shoppers in one powerful ecosystem.
