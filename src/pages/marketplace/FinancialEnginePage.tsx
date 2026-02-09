@@ -503,16 +503,16 @@ export default function FinancialEnginePage() {
         </section>
 
         {/* CTA Banner */}
-        <Card variant="bordered" className="bg-gradient-to-r from-blue-600 to-green-600 text-white">
+        <Card variant="bordered" className="bg-white border-2 border-blue-600">
           <CardBody className="text-center py-12">
-            <Zap className="w-12 h-12 mx-auto mb-4" />
-            <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Business?</h2>
-            <p className="text-lg text-white font-medium mb-6 max-w-2xl mx-auto">
+            <Zap className="w-12 h-12 mx-auto mb-4 text-blue-600" />
+            <h2 className="text-3xl font-bold mb-4 text-slate-900">Ready to Transform Your Business?</h2>
+            <p className="text-lg text-blue-700 font-medium mb-6 max-w-2xl mx-auto">
               Contact our sales team to find the perfect package for your needs
             </p>
             <Button
               onClick={() => setChatOpen(true)}
-              className="bg-white text-blue-700 hover:bg-blue-50 font-bold shadow-lg"
+              className="bg-gradient-to-r from-blue-600 to-green-600 text-white hover:from-blue-700 hover:to-green-700 font-bold shadow-lg"
             >
               <MessageSquare className="w-5 h-5 mr-2" />
               Chat with AI Sales
