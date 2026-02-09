@@ -61,7 +61,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </button>
               <Link to="/" className="flex-shrink-0 flex items-center">
                 <img
-                  src="/locallink-logo.png"
+                  src="/local-link_marketplace_logo.png"
                   alt="Local Link Marketplace"
                   className="h-10 w-auto"
                 />
