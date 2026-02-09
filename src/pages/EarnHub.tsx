@@ -111,21 +111,26 @@ export default function EarnHub() {
                     </div>
                   </div>
 
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                      <p className="text-xs text-slate-600 mb-1">Starter Partner</p>
-                      <p className="text-2xl font-bold text-slate-900">10%</p>
-                      <p className="text-xs text-slate-500 mt-1">$79/month</p>
+                  <div className="grid md:grid-cols-4 gap-3">
+                    <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                      <p className="text-xs text-slate-600 mb-1">Starter</p>
+                      <p className="text-xl font-bold text-slate-900">10%</p>
+                      <p className="text-xs text-slate-500 mt-1">$79/mo</p>
                     </div>
-                    <div className="bg-gradient-to-br from-[#2BB673] to-[#25a062] rounded-lg p-4 border border-[#2BB673]">
-                      <p className="text-xs text-white/90 mb-1">Pro Partner</p>
-                      <p className="text-2xl font-bold text-white">20%</p>
-                      <p className="text-xs text-white/80 mt-1">$498/month</p>
+                    <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                      <p className="text-xs text-slate-600 mb-1">Growth</p>
+                      <p className="text-xl font-bold text-slate-900">15%</p>
+                      <p className="text-xs text-slate-500 mt-1">$218/mo</p>
                     </div>
-                    <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                    <div className="bg-gradient-to-br from-[#2BB673] to-[#25a062] rounded-lg p-3 border border-[#2BB673]">
+                      <p className="text-xs text-white/90 mb-1">Pro</p>
+                      <p className="text-xl font-bold text-white">20%</p>
+                      <p className="text-xs text-white/80 mt-1">$498/mo</p>
+                    </div>
+                    <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                       <p className="text-xs text-slate-600 mb-1">Enterprise</p>
-                      <p className="text-2xl font-bold text-slate-900">30%</p>
-                      <p className="text-xs text-slate-500 mt-1">$1,798/month</p>
+                      <p className="text-xl font-bold text-slate-900">25%</p>
+                      <p className="text-xs text-slate-500 mt-1">$1,798/mo</p>
                     </div>
                   </div>
 

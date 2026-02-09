@@ -91,41 +91,52 @@ export default function PricingPage() {
 
   const partnerTiers = [
     {
-      name: 'Partner',
-      price: { monthly: 69, annual: 662 },
-      territories: 10,
-      revenueShare: '80%',
+      name: 'Starter Partner',
+      price: { monthly: 79, annual: 837 },
+      commission: '10%',
       features: [
         'Partner Dashboard',
         'Territory Management',
         'Merchant Invites',
         'Deal Creation',
-        'Analytics & Payouts'
+        'Analytics & Payouts',
+        'Training & Support'
       ]
     },
     {
-      name: 'Master Partner',
-      price: { monthly: 179, annual: 1722 },
-      territories: 25,
-      revenueShare: '80%',
+      name: 'Growth Partner',
+      price: { monthly: 218, annual: 2310 },
+      commission: '15%',
       features: [
-        'Everything in Partner',
+        'Everything in Starter',
         'Priority Support',
         'Advanced Analytics',
-        'White-Label Options'
+        'AI Prompt Library',
+        '7% Recruiter Override'
       ]
     },
     {
-      name: 'White-Label',
-      price: { monthly: 549, annual: 5270 },
-      territories: 100,
-      revenueShare: '70%',
+      name: 'Pro Partner',
+      price: { monthly: 498, annual: 5278 },
+      commission: '20%',
       features: [
-        'Everything in Master Partner',
-        'Custom Branding',
+        'Everything in Growth',
+        'Enhanced Territory Rights',
+        'White-Label Options',
         'API Access',
-        'Dedicated Support',
-        'Custom Domain'
+        'Dedicated Support'
+      ]
+    },
+    {
+      name: 'Enterprise Partner',
+      price: { monthly: 1798, annual: 19056 },
+      commission: '25%',
+      features: [
+        'Everything in Pro',
+        'Maximum Commission Rate',
+        'Custom Integrations',
+        'Multi-Territory Management',
+        'Priority Payouts'
       ]
     }
   ];
@@ -274,7 +285,7 @@ export default function PricingPage() {
               Partner Program
             </h2>
             <p className="text-xl text-slate-600">
-              Become a territory owner and earn revenue share
+              Earn 10-25% recurring commissions based on your tier
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
@@ -294,13 +305,12 @@ export default function PricingPage() {
                     /{billingCycle === 'monthly' ? 'mo' : 'yr'}
                   </span>
                 </div>
-                <div className="flex items-center justify-between mb-6 p-3 bg-slate-50 rounded-lg">
-                  <span className="text-sm text-slate-600">Territories</span>
-                  <span className="font-bold text-slate-900">{tier.territories}</span>
-                </div>
                 <div className="flex items-center justify-between mb-6 p-3 bg-green-50 rounded-lg">
-                  <span className="text-sm text-slate-600">Revenue Share</span>
-                  <span className="font-bold text-green-700">{tier.revenueShare}</span>
+                  <span className="text-sm text-slate-600">Commission Rate</span>
+                  <span className="font-bold text-green-700">{tier.commission}</span>
+                </div>
+                <div className="text-xs text-slate-500 mb-6 text-center p-2 bg-blue-50 rounded">
+                  + 7% recruiter override on referrals
                 </div>
                 <ul className="space-y-3">
                   {tier.features.map((feature) => (

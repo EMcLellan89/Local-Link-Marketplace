@@ -90,7 +90,7 @@ export default function PartnerApplication() {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Become a Local Link Partner</h1>
           <p className="text-xl text-gray-600 mb-8">
-            Secure your territory and build a local deals marketplace with 70% revenue share
+            Secure your territory and earn 10-25% recurring commissions on every merchant subscription
           </p>
         </div>
 
@@ -106,11 +106,28 @@ export default function PartnerApplication() {
 
           <Card className="p-6">
             <DollarSign className="w-10 h-10 text-green-600 mb-3" />
-            <h3 className="text-lg font-semibold mb-2">70% Revenue Share</h3>
-            <p className="text-gray-600">
-              Industry-leading partner economics. You keep 70% of net revenue from your territory
-              with weekly automated payouts.
+            <h3 className="text-lg font-semibold mb-2">Tiered Commission Structure</h3>
+            <p className="text-gray-600 mb-3">
+              Earn 10-25% recurring commissions based on your tier, plus 7% recruiter override on first-line referrals. Weekly automated payouts.
             </p>
+            <div className="text-sm space-y-1 text-gray-700">
+              <div className="flex justify-between">
+                <span>Starter:</span>
+                <span className="font-semibold">10%</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Growth:</span>
+                <span className="font-semibold">15%</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Pro:</span>
+                <span className="font-semibold">20%</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Enterprise:</span>
+                <span className="font-semibold">25%</span>
+              </div>
+            </div>
           </Card>
 
           <Card className="p-6">
