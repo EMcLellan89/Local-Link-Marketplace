@@ -1,0 +1,327 @@
+{
+  "description": "Seed data for affiliate system testing and demo",
+  "version": "1.0",
+  "tables": {
+    "partners_affiliate_updates": {
+      "description": "Update existing partners to enable affiliate features",
+      "note": "Run UPDATE queries on existing partner records",
+      "sample_updates": [
+        {
+          "partner_id": "EXISTING_UUID_1",
+          "affiliate_enabled": true,
+          "affiliate_tier": "standard",
+          "commission_rate": 0.20,
+          "total_clicks": 0,
+          "total_conversions": 0,
+          "pending_commission_cents": 0
+        },
+        {
+          "partner_id": "EXISTING_UUID_2",
+          "affiliate_enabled": true,
+          "affiliate_tier": "premium",
+          "commission_rate": 0.25,
+          "total_clicks": 0,
+          "total_conversions": 0,
+          "pending_commission_cents": 0
+        }
+      ]
+    },
+    "upsell_offers": {
+      "description": "Already seeded in migration - included for reference",
+      "records": [
+        {
+          "product_slug": "ai-receptionist-script-pack-trades",
+          "name": "AI Receptionist Scripts - Trades",
+          "description": "Pre-written scripts for HVAC, plumbing, electrical, and tree services. Save hours of setup time.",
+          "price_cents": 3900,
+          "stripe_price_id": "price_trades_scripts",
+          "trigger_after_product": "ai-receptionist-missed-call",
+          "display_order": 1,
+          "is_active": true
+        },
+        {
+          "product_slug": "ai-receptionist-script-pack-restaurants",
+          "name": "AI Receptionist Scripts - Restaurants",
+          "description": "Pre-written scripts for restaurants and food service businesses.",
+          "price_cents": 3900,
+          "stripe_price_id": "price_restaurant_scripts",
+          "trigger_after_product": "ai-receptionist-missed-call",
+          "display_order": 2,
+          "is_active": true
+        },
+        {
+          "product_slug": "ai-receptionist-script-pack-mega",
+          "name": "AI Receptionist Scripts - Mega Pack",
+          "description": "ALL industry scripts plus future updates free. Best value!",
+          "price_cents": 14900,
+          "stripe_price_id": "price_mega_pack_scripts",
+          "trigger_after_product": "ai-receptionist-missed-call",
+          "display_order": 6,
+          "is_active": true
+        }
+      ]
+    },
+    "affiliate_clicks": {
+      "description": "Sample affiliate click tracking data",
+      "records": [
+        {
+          "partner_id": "PARTNER_UUID_1",
+          "referral_code": "PARTNER123",
+          "clicked_url": "https://locallink.com/academy?ref=PARTNER123",
+          "ip_address": "192.168.1.100",
+          "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+          "referrer": "https://google.com",
+          "converted": false,
+          "converted_user_id": null,
+          "converted_at": null
+        },
+        {
+          "partner_id": "PARTNER_UUID_1",
+          "referral_code": "PARTNER123",
+          "clicked_url": "https://locallink.com/academy?ref=PARTNER123",
+          "ip_address": "192.168.1.101",
+          "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+          "referrer": "https://facebook.com",
+          "converted": true,
+          "converted_user_id": "USER_UUID_1",
+          "converted_at": "2026-01-04T10:30:00Z"
+        },
+        {
+          "partner_id": "PARTNER_UUID_2",
+          "referral_code": "TOPAFFILIATE",
+          "clicked_url": "https://locallink.com/marketplace/products/online-sales-without-ads?ref=TOPAFFILIATE",
+          "ip_address": "192.168.1.102",
+          "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0)",
+          "referrer": "https://instagram.com",
+          "converted": true,
+          "converted_user_id": "USER_UUID_2",
+          "converted_at": "2026-01-04T14:15:00Z"
+        }
+      ]
+    },
+    "affiliate_commissions": {
+      "description": "Sample commission records for testing",
+      "records": [
+        {
+          "partner_id": "PARTNER_UUID_1",
+          "referred_user_id": "USER_UUID_1",
+          "order_id": "ORDER_UUID_1",
+          "product_slug": "ai-receptionist-missed-call",
+          "product_name": "AI Receptionist & Missed Call Recovery",
+          "order_total_cents": 9700,
+          "commission_cents": 1940,
+          "commission_rate": 0.20,
+          "referral_code": "PARTNER123",
+          "status": "pending"
+        },
+        {
+          "partner_id": "PARTNER_UUID_1",
+          "referred_user_id": "USER_UUID_3",
+          "order_id": "ORDER_UUID_2",
+          "product_slug": "online-sales-without-ads",
+          "product_name": "Local Customers on Autopilot",
+          "order_total_cents": 19700,
+          "commission_cents": 3940,
+          "commission_rate": 0.20,
+          "referral_code": "PARTNER123",
+          "status": "approved"
+        },
+        {
+          "partner_id": "PARTNER_UUID_1",
+          "referred_user_id": "USER_UUID_4",
+          "order_id": "ORDER_UUID_3",
+          "product_slug": "ai-receptionist-script-pack-trades",
+          "product_name": "AI Receptionist Scripts - Trades",
+          "order_total_cents": 3900,
+          "commission_cents": 780,
+          "commission_rate": 0.20,
+          "referral_code": "PARTNER123",
+          "status": "paid",
+          "paid_at": "2026-01-02T09:00:00Z"
+        },
+        {
+          "partner_id": "PARTNER_UUID_2",
+          "referred_user_id": "USER_UUID_2",
+          "order_id": "ORDER_UUID_4",
+          "product_slug": "online-sales-without-ads",
+          "product_name": "Local Customers on Autopilot",
+          "order_total_cents": 29700,
+          "commission_cents": 7425,
+          "commission_rate": 0.25,
+          "referral_code": "TOPAFFILIATE",
+          "status": "approved"
+        },
+        {
+          "partner_id": "PARTNER_UUID_2",
+          "referred_user_id": "USER_UUID_5",
+          "order_id": "ORDER_UUID_5",
+          "product_slug": "ai-receptionist-script-pack-mega",
+          "product_name": "AI Receptionist Scripts - Mega Pack",
+          "order_total_cents": 14900,
+          "commission_cents": 3725,
+          "commission_rate": 0.25,
+          "referral_code": "TOPAFFILIATE",
+          "status": "pending"
+        }
+      ]
+    },
+    "affiliate_payouts": {
+      "description": "Sample payout records",
+      "records": [
+        {
+          "partner_id": "PARTNER_UUID_1",
+          "amount_cents": 780,
+          "payout_method": "paypal",
+          "payout_details": {
+            "paypal_email": "affiliate1@example.com"
+          },
+          "status": "completed",
+          "requested_at": "2026-01-01T12:00:00Z",
+          "processed_at": "2026-01-02T09:00:00Z",
+          "transaction_id": "PAYPAL_TXN_123456",
+          "notes": "First payout - successful"
+        },
+        {
+          "partner_id": "PARTNER_UUID_2",
+          "amount_cents": 15000,
+          "payout_method": "bank_transfer",
+          "payout_details": {
+            "bank_name": "Chase Bank",
+            "account_last4": "1234"
+          },
+          "status": "processing",
+          "requested_at": "2026-01-03T14:30:00Z",
+          "processed_at": null,
+          "transaction_id": null,
+          "notes": "Pending verification"
+        }
+      ]
+    },
+    "partner_contracts": {
+      "description": "Sample contract records",
+      "records": [
+        {
+          "partner_id": "PARTNER_UUID_1",
+          "contract_type": "affiliate",
+          "contract_url": "/contracts/affiliate-agreement-v1.pdf",
+          "signed_at": "2026-01-01T10:00:00Z",
+          "signed_by_name": "John Smith",
+          "ip_address": "192.168.1.100",
+          "terms_version": "1.0"
+        },
+        {
+          "partner_id": "PARTNER_UUID_2",
+          "contract_type": "affiliate",
+          "contract_url": "/contracts/affiliate-agreement-v1.pdf",
+          "signed_at": null,
+          "signed_by_name": null,
+          "ip_address": null,
+          "terms_version": "1.0"
+        },
+        {
+          "partner_id": "PARTNER_UUID_2",
+          "contract_type": "white_label",
+          "contract_url": "/contracts/white-label-agreement-v1.pdf",
+          "signed_at": "2026-01-02T15:30:00Z",
+          "signed_by_name": "Jane Doe",
+          "ip_address": "192.168.1.102",
+          "terms_version": "1.0"
+        }
+      ]
+    },
+    "stripe_customers": {
+      "description": "Sample Stripe customer mappings for upsell testing",
+      "note": "These are created automatically on first purchase",
+      "records": [
+        {
+          "user_id": "USER_UUID_1",
+          "stripe_customer_id": "cus_SAMPLE123456",
+          "email": "user1@example.com"
+        },
+        {
+          "user_id": "USER_UUID_2",
+          "stripe_customer_id": "cus_SAMPLE789012",
+          "email": "user2@example.com"
+        }
+      ]
+    },
+    "upsell_purchases": {
+      "description": "Sample upsell purchase records",
+      "records": [
+        {
+          "user_id": "USER_UUID_1",
+          "upsell_offer_id": "OFFER_UUID_1",
+          "stripe_payment_intent_id": "pi_sample123",
+          "amount_cents": 3900,
+          "status": "succeeded"
+        },
+        {
+          "user_id": "USER_UUID_2",
+          "upsell_offer_id": "OFFER_UUID_6",
+          "stripe_payment_intent_id": "pi_sample456",
+          "amount_cents": 14900,
+          "status": "succeeded"
+        },
+        {
+          "user_id": "USER_UUID_3",
+          "upsell_offer_id": "OFFER_UUID_2",
+          "stripe_payment_intent_id": "pi_sample789",
+          "amount_cents": 3900,
+          "status": "pending"
+        }
+      ]
+    }
+  },
+  "summary": {
+    "total_partners_with_affiliate": 2,
+    "total_clicks": 3,
+    "total_conversions": 2,
+    "total_commissions": 5,
+    "total_commission_value_cents": 17810,
+    "pending_commission_cents": 5665,
+    "approved_commission_cents": 11365,
+    "paid_commission_cents": 780,
+    "total_payouts": 2,
+    "completed_payouts": 1,
+    "contracts_signed": 2,
+    "contracts_pending": 1
+  },
+  "test_scenarios": {
+    "scenario_1_new_referral": {
+      "description": "Test complete affiliate flow from click to commission",
+      "steps": [
+        "1. User clicks referral link with code PARTNER123",
+        "2. Record click in affiliate_clicks table",
+        "3. User completes course purchase",
+        "4. Webhook creates commission record",
+        "5. Partner views pending commission in dashboard",
+        "6. Admin approves commission",
+        "7. Partner requests payout",
+        "8. Admin processes payout"
+      ]
+    },
+    "scenario_2_one_click_upsell": {
+      "description": "Test upsell purchase after course completion",
+      "steps": [
+        "1. User completes AI Receptionist course purchase",
+        "2. Webhook stores Stripe customer ID",
+        "3. User sees upsell offers on success page",
+        "4. User clicks 'Add to Order' on script pack",
+        "5. Frontend calls one-click-upsell function",
+        "6. Payment confirmed with saved card",
+        "7. Webhook grants entitlement"
+      ]
+    },
+    "scenario_3_contract_signing": {
+      "description": "Test digital contract signature",
+      "steps": [
+        "1. Admin creates contract for partner",
+        "2. Partner views contract in dashboard",
+        "3. Partner clicks 'Sign Agreement'",
+        "4. Partner enters legal name and accepts",
+        "5. System records signature with IP",
+        "6. Partner downloads signed PDF"
+      ]
+    }
+  }
+}
