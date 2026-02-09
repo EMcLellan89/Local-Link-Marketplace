@@ -118,6 +118,10 @@ const AccountingDashboard = lazy(() => import('./pages/admin/AccountingDashboard
 const BusinessDashboard = lazy(() => import('./pages/admin/BusinessDashboard'));
 const CommissionPayoutsPage = lazy(() => import('./pages/admin/CommissionPayoutsPage'));
 const Admin1099Manager = lazy(() => import('./pages/admin/Admin1099Manager'));
+const LocalLinkDashboard = lazy(() => import('./pages/admin/LocalLinkDashboard'));
+const ExternalBusinessesDashboard = lazy(() => import('./pages/admin/ExternalBusinessesDashboard'));
+const TopPartnersPage = lazy(() => import('./pages/admin/TopPartnersPage'));
+const QuarterlyTaxEstimatesPage = lazy(() => import('./pages/admin/QuarterlyTaxEstimatesPage'));
 const ProfitNetworkPage = lazy(() => import('./pages/partner/ProfitNetworkPage'));
 const ProfitNetworkPlaybookViewer = lazy(() => import('./pages/partner/ProfitNetworkPlaybookViewer'));
 const ProfitNetworkSalesPage = lazy(() => import('./pages/partner/ProfitNetworkSalesPage'));
@@ -1507,6 +1511,10 @@ function AppRoutes() {
       <Route path="/admin/business-dashboard" element={<BusinessDashboard />} />
       <Route path="/admin/commission-payouts" element={<CommissionPayoutsPage />} />
       <Route path="/admin/1099-manager" element={<Admin1099Manager />} />
+      <Route path="/admin/dash/local-link" element={<LocalLinkDashboard />} />
+      <Route path="/admin/dash/external" element={<ExternalBusinessesDashboard />} />
+      <Route path="/admin/top-partners" element={<TopPartnersPage />} />
+      <Route path="/admin/taxes/quarterly" element={<QuarterlyTaxEstimatesPage />} />
 
       <Route path="/admin/dfy/orders" element={<AdminDFYOrdersPage />} />
       <Route path="/admin/dfy/orders/:orderId" element={<AdminDFYOrderDetailPage />} />
