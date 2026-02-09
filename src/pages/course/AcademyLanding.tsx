@@ -74,17 +74,20 @@ export default function AcademyLanding() {
       }
       setUserRole(role);
 
-      // Fetch all published courses
+      // Fetch merchant courses only for Local-Link Academy
       const { data: coursesData } = await supabase
         .from('academy_courses')
         .select('*')
         .eq('is_published', true)
-        .order('target_audience, title');
+        .eq('target_audience', 'merchant')
+        .order('title');
 
       const { data: productsData } = await supabase
         .from('products_catalog')
         .select('*')
         .eq('is_active', true);
+
+      console.log(`📚 Raw data: ${coursesData?.length || 0} courses, ${productsData?.length || 0} products`);
 
       const courseMap = new Map<string, CourseWithPricing>();
 
@@ -112,7 +115,10 @@ export default function AcademyLanding() {
         }
       });
 
-      setCourses(Array.from(courseMap.values()));
+      const finalCourses = Array.from(courseMap.values());
+      console.log(`📚 Academy: Loaded ${finalCourses.length} merchant courses`);
+      console.log('Course slugs:', finalCourses.map(c => c.course.slug));
+      setCourses(finalCourses);
     } catch (err) {
       console.error('Error loading courses:', err);
     } finally {
@@ -314,23 +320,10 @@ export default function AcademyLanding() {
     );
   }
 
-  // Separate courses by audience
-  const merchantCourses = courses.filter(c => c.course.target_audience === 'merchant');
-  const partnerCourses = courses.filter(c => c.course.target_audience === 'partner');
-
-  // Further separate by pricing model
-  const merchantFreeCourses = merchantCourses.filter(c => c.course.is_free || c.minPrice === 0);
-  const merchantTieredCourses = merchantCourses.filter(c => !c.course.is_free && c.minPrice > 0 && c.products.length > 1);
-  const merchantSingleCourses = merchantCourses.filter(c => !c.course.is_free && c.minPrice > 0 && c.products.length === 1);
-
-  const partnerFreeCourses = partnerCourses.filter(c => c.course.is_free || c.minPrice === 0);
-  const partnerTieredCourses = partnerCourses.filter(c => !c.course.is_free && c.minPrice > 0 && c.products.length > 1);
-  const partnerSingleCourses = partnerCourses.filter(c => !c.course.is_free && c.minPrice > 0 && c.products.length === 1);
-
-  // Legacy variables for backward compatibility
-  const freeCourses = [...merchantFreeCourses, ...partnerFreeCourses];
-  const tieredCourses = [...merchantTieredCourses, ...partnerTieredCourses];
-  const singleCourses = [...merchantSingleCourses, ...partnerSingleCourses];
+  // Separate courses by pricing model (all merchant courses)
+  const freeCourses = courses.filter(c => c.course.is_free || c.minPrice === 0);
+  const tieredCourses = courses.filter(c => !c.course.is_free && c.minPrice > 0 && c.products.length > 1);
+  const singleCourses = courses.filter(c => !c.course.is_free && c.minPrice > 0 && c.products.length === 1);
 
   return (
     <>
@@ -376,258 +369,71 @@ export default function AcademyLanding() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          {/* Merchant Courses Section */}
-          {merchantCourses.length > 0 && (
-            <section className="mb-20">
-              <div className="text-center mb-12">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 rounded-full text-sm font-medium mb-4">
-                  <BookOpen className="h-4 w-4 text-blue-600" />
-                  <span className="text-blue-900">For Business Owners</span>
-                </div>
-                <h2 className="text-4xl font-bold text-gray-900 mb-3">
-                  Merchant Academy Courses
+          {freeCourses.length > 0 && (
+            <section className="mb-16">
+              <div className="flex items-center gap-3 mb-2">
+                <h2 className="text-3xl font-bold text-gray-900">
+                  Complimentary Business Resources
                 </h2>
-                <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                  Master the skills to grow your local business with proven strategies
-                </p>
+                <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
+                  FREE
+                </span>
               </div>
+              <p className="text-gray-600 mb-8">
+                Free introductory resources to help grow your business
+              </p>
 
-              {merchantFreeCourses.length > 0 && (
-                <div className="mb-12">
-                  <div className="flex items-center gap-3 mb-6">
-                    <h3 className="text-2xl font-bold text-gray-900">
-                      Free Merchant Resources
-                    </h3>
-                    <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
-                      FREE
-                    </span>
-                  </div>
-
-                  <div className="grid md:grid-cols-3 gap-6">
-                    {merchantFreeCourses.map(({ course }) => (
-                      <div
-                        key={course.slug}
-                        className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border-2 border-green-200"
-                      >
-                        <div className="aspect-video bg-gradient-to-br from-green-400 to-blue-400 relative">
-                          <img
-                            src={course.thumbnail_url || 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg'}
-                            alt={course.title}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute top-2 right-2 px-3 py-1 bg-green-500 text-white rounded-full text-xs font-bold shadow-lg">
-                            FREE
-                          </div>
-                        </div>
-
-                        <div className="p-4">
-                          <h4 className="text-lg font-bold text-gray-900 mb-2">
-                            {course.title}
-                          </h4>
-
-                          <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                            {course.subtitle}
-                          </p>
-
-                          <Button
-                            onClick={() => navigate(`/academy/${course.slug}`)}
-                            variant="outline"
-                            className="w-full border-green-500 text-green-700 hover:bg-green-50"
-                          >
-                            Start Learning
-                          </Button>
-                        </div>
+              <div className="grid md:grid-cols-3 gap-6">
+                {freeCourses.map(({ course }) => (
+                  <div
+                    key={course.slug}
+                    className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border-2 border-green-200"
+                  >
+                    <div className="aspect-video bg-gradient-to-br from-green-400 to-blue-400 relative">
+                      <img
+                        src={course.thumbnail_url || 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg'}
+                        alt={course.title}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute top-2 right-2 px-3 py-1 bg-green-500 text-white rounded-full text-xs font-bold shadow-lg">
+                        FREE
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+                    </div>
 
-              {merchantTieredCourses.length > 0 && (
-                <div className="mb-12">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                    Professional Certification Programs
-                  </h3>
+                    <div className="p-4">
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">
+                        {course.title}
+                      </h3>
 
-                  <div className="grid md:grid-cols-2 gap-8">
-                    {merchantTieredCourses.map(({ course, products, minPrice }) => (
-                      <div
-                        key={course.slug}
-                        className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+                      <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                        {course.subtitle}
+                      </p>
+
+                      <Button
+                        onClick={() => navigate(`/academy/${course.slug}`)}
+                        variant="outline"
+                        className="w-full border-green-500 text-green-700 hover:bg-green-50"
                       >
-                        <div className="aspect-video bg-gradient-to-br from-blue-500 to-green-500">
-                          <img
-                            src={course.thumbnail_url || 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg'}
-                            alt={course.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-
-                        <div className="p-6">
-                          <h4 className="text-2xl font-bold text-gray-900 mb-2">
-                            {course.title}
-                          </h4>
-
-                          <p className="text-gray-600 mb-4">{course.subtitle}</p>
-
-                          <div className="flex items-center gap-4 mb-4">
-                            <span className="text-sm text-gray-500">Starting at</span>
-                            <span className="text-2xl font-bold text-blue-600">
-                              ${minPrice / 100}
-                            </span>
-                          </div>
-
-                          {products.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mb-6">
-                              {products.map(product => (
-                                <div
-                                  key={product.slug}
-                                  className="px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-700"
-                                >
-                                  {product.title.split('—')[1]?.trim() || product.title}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-
-                          <Button
-                            onClick={() => navigate(`/academy/${course.slug}`)}
-                            className="w-full"
-                          >
-                            View Course
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
+                        Start Learning
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              )}
-
-              {merchantSingleCourses.length > 0 && (
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                    Specialized Training Courses
-                  </h3>
-
-                  <div className="grid md:grid-cols-3 gap-6">
-                    {merchantSingleCourses.map(({ course, products, minPrice }) => (
-                      <div
-                        key={course.slug}
-                        className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
-                      >
-                        <div className="aspect-video bg-gradient-to-br from-blue-400 to-green-400">
-                          <img
-                            src={course.thumbnail_url || 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg'}
-                            alt={course.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-
-                        <div className="p-4">
-                          <h4 className="text-lg font-bold text-gray-900 mb-2">
-                            {course.title}
-                          </h4>
-
-                          <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                            {course.subtitle}
-                          </p>
-
-                          <div className="flex items-center gap-2 mb-4">
-                            <span className="text-2xl font-bold text-blue-600">
-                              ${minPrice / 100}
-                            </span>
-                          </div>
-
-                          <Button
-                            onClick={() => navigate(`/academy/${course.slug}`)}
-                            className="w-full"
-                          >
-                            View Course
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+                ))}
+              </div>
             </section>
           )}
 
-          {/* Partner Courses Section */}
-          {partnerCourses.length > 0 && (
+          {tieredCourses.length > 0 && (
             <section className="mb-16">
-              <div className="text-center mb-12">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 rounded-full text-sm font-medium mb-4">
-                  <Users className="h-4 w-4 text-green-600" />
-                  <span className="text-green-900">For Partners & Sales Professionals</span>
-                </div>
-                <h2 className="text-4xl font-bold text-gray-900 mb-3">
-                  Partner Training & Playbooks
-                </h2>
-                <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                  Learn to sell Local-Link services and earn recurring commissions
-                </p>
-              </div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                Professional Certification Programs
+              </h2>
+              <p className="text-gray-600 mb-8">
+                Choose your tier: Starter, Certified, or Pro
+              </p>
 
-              {partnerFreeCourses.length > 0 && (
-                <div className="mb-12">
-                  <div className="flex items-center gap-3 mb-6">
-                    <h3 className="text-2xl font-bold text-gray-900">
-                      Free Partner Training
-                    </h3>
-                    <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
-                      FREE
-                    </span>
-                  </div>
-
-              <div className="grid md:grid-cols-3 gap-6">
-                    {partnerFreeCourses.map(({ course }) => (
-                      <div
-                        key={course.slug}
-                        className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border-2 border-green-200"
-                      >
-                        <div className="aspect-video bg-gradient-to-br from-green-400 to-blue-400 relative">
-                          <img
-                            src={course.thumbnail_url || 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg'}
-                            alt={course.title}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute top-2 right-2 px-3 py-1 bg-green-500 text-white rounded-full text-xs font-bold shadow-lg">
-                            FREE
-                          </div>
-                        </div>
-
-                        <div className="p-4">
-                          <h4 className="text-lg font-bold text-gray-900 mb-2">
-                            {course.title}
-                          </h4>
-
-                          <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                            {course.subtitle}
-                          </p>
-
-                          <Button
-                            onClick={() => navigate(`/academy/${course.slug}`)}
-                            variant="outline"
-                            className="w-full border-green-500 text-green-700 hover:bg-green-50"
-                          >
-                            Start Learning
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {partnerTieredCourses.length > 0 && (
-                <div className="mb-12">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                    Partner Certification Programs
-                  </h3>
-
-                  <div className="grid md:grid-cols-2 gap-8">
-                    {partnerTieredCourses.map(({ course, products, minPrice }) => (
+              <div className="grid md:grid-cols-2 gap-8">
+                {tieredCourses.map(({ course, products, minPrice }) => (
                   <div
                     key={course.slug}
                     className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
@@ -640,54 +446,57 @@ export default function AcademyLanding() {
                       />
                     </div>
 
-                      <div className="p-6">
-                          <h4 className="text-2xl font-bold text-gray-900 mb-2">
-                            {course.title}
-                          </h4>
+                    <div className="p-6">
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                        {course.title}
+                      </h3>
 
-                          <p className="text-gray-600 mb-4">{course.subtitle}</p>
+                      <p className="text-gray-600 mb-4">{course.subtitle}</p>
 
-                          <div className="flex items-center gap-4 mb-4">
-                            <span className="text-sm text-gray-500">Starting at</span>
-                            <span className="text-2xl font-bold text-green-600">
-                              ${minPrice / 100}
-                            </span>
-                          </div>
-
-                          {products.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mb-6">
-                              {products.map(product => (
-                                <div
-                                  key={product.slug}
-                                  className="px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-700"
-                                >
-                                  {product.title.split('—')[1]?.trim() || product.title}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-
-                          <Button
-                            onClick={() => navigate(`/academy/${course.slug}`)}
-                            className="w-full"
-                          >
-                            View Course
-                          </Button>
-                        </div>
+                      <div className="flex items-center gap-4 mb-4">
+                        <span className="text-sm text-gray-500">Starting at</span>
+                        <span className="text-2xl font-bold text-blue-600">
+                          ${minPrice / 100}
+                        </span>
                       </div>
-                    ))}
+
+                      {products.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-6">
+                          {products.map(product => (
+                            <div
+                              key={product.slug}
+                              className="px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-700"
+                            >
+                              {product.title.split('—')[1]?.trim() || product.title}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <Button
+                        onClick={() => navigate(`/academy/${course.slug}`)}
+                        className="w-full"
+                      >
+                        View Course
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              )}
+                ))}
+              </div>
+            </section>
+          )}
 
-              {partnerSingleCourses.length > 0 && (
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                    Specialized Partner Training
-                  </h3>
+          {singleCourses.length > 0 && (
+            <section>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                Specialized Training Courses
+              </h2>
+              <p className="text-gray-600 mb-8">
+                Focused training on specific skills and topics
+              </p>
 
-                  <div className="grid md:grid-cols-3 gap-6">
-                    {partnerSingleCourses.map(({ course, products, minPrice }) => (
+              <div className="grid md:grid-cols-3 gap-6">
+                {singleCourses.map(({ course, products, minPrice }) => (
                   <div
                     key={course.slug}
                     className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
@@ -710,13 +519,9 @@ export default function AcademyLanding() {
                       </p>
 
                       <div className="flex items-center justify-between mb-4">
-                        {course.is_free || minPrice === 0 ? (
-                          <span className="text-xl font-bold text-green-600">FREE</span>
-                        ) : (
-                          <span className="text-xl font-bold text-blue-600">
-                            ${minPrice / 100}
-                          </span>
-                        )}
+                        <span className="text-xl font-bold text-blue-600">
+                          ${minPrice / 100}
+                        </span>
                         <div className="flex items-center gap-1 text-yellow-500">
                           <Star className="h-4 w-4 fill-current" />
                           <span className="text-sm text-gray-600">Course</span>
@@ -732,10 +537,8 @@ export default function AcademyLanding() {
                       </Button>
                     </div>
                   </div>
-                      ))}
-                  </div>
-                </div>
-              )}
+                ))}
+              </div>
             </section>
           )}
 
