@@ -43,11 +43,9 @@ export default function Login() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center mb-4">
-            <img
-              src="/image copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy.png"
-              alt="Local Link Marketplace"
-              className="h-28 w-auto"
-            />
+            <span className="text-5xl font-bold text-white drop-shadow-lg">
+              Local-Link
+            </span>
           </div>
           <p className="text-white/90 text-lg">Local Deals. Local Loyalty. Local Savings.</p>
         </div>

@@ -83,12 +83,9 @@ export default function BusinessHubLayout({ children }: BusinessHubLayoutProps) 
                 {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
               <Link to="/" className="flex-shrink-0 flex items-center">
-                <img
-                  src="/image copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy.png"
-                  alt="Local Link Marketplace"
-                  className="h-12 w-auto"
-                />
-                <span className="hidden md:inline ml-2 text-lg sm:text-xl font-bold text-slate-900"></span>
+                <span className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                  Local-Link
+                </span>
                 <span className="hidden sm:inline ml-2 px-2 py-1 text-xs font-semibold bg-[#2BB673]/10 text-[#2BB673] rounded">
                   Business Hub
                 </span>

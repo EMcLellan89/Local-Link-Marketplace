@@ -49,7 +49,6 @@ type RoleKey = typeof ROLES[number]['key'];
 
 export default function UnifiedLogin() {
   const navigate = useNavigate();
-  const logoSrc = '/image copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy.png';
   const bypassMode = isBypassEnabled();
 
   const [role, setRole] = useState<RoleKey>('customer');
@@ -115,14 +114,9 @@ export default function UnifiedLogin() {
         <header className="text-center mb-8 animate-fadeIn">
           <div className="relative inline-block">
             <div className="absolute -inset-6 rounded-full bg-gradient-to-r from-blue-500/20 via-cyan-500/20 to-green-500/20 blur-3xl animate-pulse-slow" />
-            <img
-              src={logoSrc}
-              alt="Local-Link Marketplace"
-              className="relative h-32 sm:h-40 w-auto mx-auto rounded-2xl shadow-2xl ring-2 ring-white/10"
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).style.display = 'none';
-              }}
-            />
+            <span className="relative text-6xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent drop-shadow-lg">
+              Local-Link
+            </span>
           </div>
           <div className="mt-4">
             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">

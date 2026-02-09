@@ -38,7 +38,7 @@ export default function Landing() {
       description: 'Build a profitable business helping local merchants succeed',
       color: 'from-orange-500 to-amber-600',
       path: '/earn',
-      stats: 'Up to 50% Commission'
+      stats: 'Up to 25% Commission'
     },
     {
       icon: Tag,
@@ -83,26 +83,25 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center space-x-2">
-              <img
-                src="/image copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy.png"
-                alt="Local-Link"
-                className="h-12 w-auto cursor-pointer hover:scale-105 transition-transform"
+              <span
+                className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent cursor-pointer hover:scale-105 transition-transform"
                 onClick={() => navigate('/')}
-              />
+              >
+                Local-Link
+              </span>
             </div>
             <nav className="hidden md:flex items-center space-x-8">
+              <button
+                onClick={() => navigate('/deals')}
+                className="text-slate-300 hover:text-rose-400 font-medium transition-all hover:scale-105"
+              >
+                Deals For Shoppers
+              </button>
               <button
                 onClick={() => navigate('/business')}
                 className="text-slate-300 hover:text-emerald-400 font-medium transition-all hover:scale-105"
               >
                 For Businesses
-              </button>
-              <button
-                onClick={() => navigate('/academy')}
-                className="text-slate-300 hover:text-cyan-400 font-medium transition-all hover:scale-105 flex items-center gap-2"
-              >
-                <BookOpen className="w-4 h-4" />
-                Academy
               </button>
               <button
                 onClick={() => navigate('/earn')}
@@ -112,12 +111,6 @@ export default function Landing() {
                 Partner Program
                 <span className="absolute -top-2 -right-2 bg-gradient-to-r from-orange-500 to-pink-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-pulse">NEW</span>
               </button>
-              <button
-                onClick={() => navigate('/deals')}
-                className="text-slate-300 hover:text-rose-400 font-medium transition-all hover:scale-105"
-              >
-                Deals
-              </button>
             </nav>
             <div className="flex items-center space-x-4">
               <button
@@ -126,12 +119,6 @@ export default function Landing() {
               >
                 Sign In
               </button>
-              <Button
-                onClick={() => navigate('/register')}
-                className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-600 shadow-lg shadow-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/70 transition-all hover:scale-105"
-              >
-                Get Started Free
-              </Button>
             </div>
           </div>
         </div>
@@ -164,9 +151,9 @@ export default function Landing() {
             </h1>
 
             <p className="text-xl md:text-2xl text-slate-300 mb-12 leading-relaxed max-w-3xl mx-auto">
-              One platform. Four powerful solutions. Unlimited growth potential.
-              <span className="block mt-2 bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-cyan-400 to-purple-400 font-semibold">
-                Merchants • Partners • Learners • Shoppers
+              One platform. Three powerful solutions. Unlimited growth potential.
+              <span className="block mt-2 text-emerald-400 font-semibold">
+                Shoppers • Merchants • Partners
               </span>
             </p>
 
@@ -185,21 +172,6 @@ export default function Landing() {
               >
                 See How It Works
               </button>
-            </div>
-
-            <div className="mt-8 flex items-center justify-center gap-8 text-sm text-slate-400">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-emerald-400" />
-                <span>100% Free to Start</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-cyan-400" />
-                <span>No Credit Card Required</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-purple-400" />
-                <span>Instant Access</span>
-              </div>
             </div>
           </div>
         </div>
@@ -367,7 +339,7 @@ export default function Landing() {
               onClick={() => navigate('/register')}
               className="text-lg px-12 py-6 bg-white text-emerald-600 hover:bg-slate-50 shadow-2xl hover:shadow-white/50 transition-all hover:scale-105 group"
             >
-              Get Started Free
+              Start Your Journey
               <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
             <button
@@ -381,15 +353,15 @@ export default function Landing() {
           <div className="flex items-center justify-center gap-8 text-sm text-white/80">
             <div className="flex items-center gap-2">
               <CheckCircle className="w-4 h-4" />
-              <span>No Setup Fees</span>
+              <span>Professional Support</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="w-4 h-4" />
-              <span>Cancel Anytime</span>
+              <span>Flexible Plans</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="w-4 h-4" />
-              <span>24/7 Support</span>
+              <span>24/7 Access</span>
             </div>
           </div>
         </div>
@@ -402,14 +374,12 @@ export default function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
             <div className="lg:col-span-2">
               <div className="flex items-center space-x-2 mb-4">
-                <img
-                  src="/image copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy.png"
-                  alt="Local-Link"
-                  className="h-10 w-auto"
-                />
+                <span className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                  Local-Link
+                </span>
               </div>
               <p className="text-sm text-slate-400 mb-6 max-w-md">
-                The complete platform for local business growth. Connecting merchants, partners, learners, and shoppers in one powerful ecosystem.
+                The complete platform for local business growth. Connecting merchants, partners, and shoppers in one powerful ecosystem.
               </p>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
