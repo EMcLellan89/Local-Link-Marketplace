@@ -46,13 +46,31 @@ export default function MerchantDashboard() {
   const [hasProSubscription, setHasProSubscription] = useState(false);
   const [enrollingCourse, setEnrollingCourse] = useState(false);
   const [blogCourseAccess, setBlogCourseAccess] = useState<CourseAccessInfo | null>(null);
+  const [totalCourses, setTotalCourses] = useState<number>(0);
 
   useEffect(() => {
     if (user) {
       checkMerchantStatus();
       checkBlogCourse();
     }
+    fetchCourseCount();
   }, [user]);
+
+  const fetchCourseCount = async () => {
+    try {
+      const { count, error } = await supabase
+        .from('academy_courses')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_published', true)
+        .eq('target_audience', 'merchant');
+
+      if (error) throw error;
+      setTotalCourses(count || 0);
+    } catch (err) {
+      console.error('Error fetching course count:', err);
+      setTotalCourses(24); // Fallback to known count
+    }
+  };
 
   const checkBlogCourse = async () => {
     if (!user) return;
@@ -498,7 +516,7 @@ export default function MerchantDashboard() {
                   <div className="flex flex-wrap gap-4 text-sm mb-4 text-white font-medium">
                     <div className="flex items-center gap-2">
                       <BookOpen className="h-4 w-4" />
-                      <span>15+ Courses</span>
+                      <span>{totalCourses > 0 ? `${totalCourses} Courses` : 'Loading...'}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Sparkles className="h-4 w-4" />
