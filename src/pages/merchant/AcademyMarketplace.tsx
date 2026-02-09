@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
-import { GraduationCap, CheckCircle, ArrowRight, Play, DollarSign, Calculator, FileText, TrendingUp, Building } from 'lucide-react';
+import { GraduationCap, CheckCircle, ArrowRight, Play, DollarSign, Calculator, FileText, TrendingUp, Building, Shield, Zap, Award, Users, Target } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Course {
@@ -16,15 +16,20 @@ interface Course {
   is_free: boolean;
 }
 
-interface BookkeepingService {
+interface BookkeepingProduct {
   id: string;
   name: string;
   description: string;
-  price: string;
-  recurring?: boolean;
+  tiers?: {
+    name: string;
+    price: string;
+    interval?: string;
+  }[];
+  price?: string;
   interval?: string;
   features: string[];
   icon: any;
+  category: string;
 }
 
 interface Enrollment {
@@ -40,157 +45,184 @@ export default function AcademyMarketplace() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'courses' | 'bookkeeping'>('courses');
 
-  // Bookkeeping Services catalog
-  const bookkeepingServices: BookkeepingService[] = [
+  // Complete Stripe Product Catalog
+  const bookkeepingProducts: BookkeepingProduct[] = [
     {
-      id: 'fin-engine-starter',
-      name: 'Financial Engine™ - Starter',
-      description: 'AI-powered bookkeeping, monthly P&L, receipt automation, and tax-ready reporting',
-      price: '$149',
-      recurring: true,
-      interval: 'month',
+      id: 'ai-os',
+      name: 'Local-Link AI OS™',
+      description: 'Core operating system that powers AI automation, bots, analytics, compliance controls, and partner revenue tracking',
+      category: 'platform',
+      tiers: [
+        { name: 'Starter', price: '$97', interval: 'month' },
+        { name: 'Growth', price: '$297', interval: 'month' },
+        { name: 'Pro', price: '$597', interval: 'month' },
+        { name: 'Elite', price: '$997', interval: 'month' }
+      ],
+      features: [
+        'AI job engine + automation runners',
+        'Feature flags & kill switch',
+        'Partner dashboards & revenue attribution',
+        'Circuit breaker & reliability layer'
+      ],
+      icon: Calculator
+    },
+    {
+      id: 'financial-engine',
+      name: 'Local-Link Financial Engine™',
+      description: 'AI-powered bookkeeping, monthly P&L, receipt automation, tax-ready reporting, and financial insights',
+      category: 'financial',
+      tiers: [
+        { name: 'Starter', price: '$149', interval: 'month' },
+        { name: 'Growth', price: '$299', interval: 'month' },
+        { name: 'Pro', price: '$499', interval: 'month' }
+      ],
       features: [
         'Monthly P&L + expense reports',
         'Receipt capture + categorization',
         'Tax-Ready Score™ (0–100)',
-        'Basic financial insights'
+        'Client Tax Pack generator'
       ],
-      icon: Calculator
+      icon: DollarSign
     },
     {
-      id: 'fin-engine-growth',
-      name: 'Financial Engine™ - Growth',
-      description: 'Advanced bookkeeping with comprehensive tax tracking and financial analytics',
-      price: '$299',
-      recurring: true,
-      interval: 'month',
-      features: [
-        'Everything in Starter',
-        'Advanced tax tracking',
-        'Multi-entity support',
-        'Client Tax Pack generator',
-        'Priority support'
+      id: 'compliance-shield',
+      name: 'Compliance Shield™',
+      description: 'Automated compliance workflows, audit trails, risk monitoring, document vaults, and defensibility tools',
+      category: 'compliance',
+      tiers: [
+        { name: 'Basic', price: '$129', interval: 'month' },
+        { name: 'Growth', price: '$349', interval: 'month' },
+        { name: 'Elite', price: '$699', interval: 'month' }
       ],
-      icon: TrendingUp
-    },
-    {
-      id: 'fin-engine-pro',
-      name: 'Financial Engine™ - Pro',
-      description: 'Full-service bookkeeping with dedicated support and custom reporting',
-      price: '$499',
-      recurring: true,
-      interval: 'month',
-      features: [
-        'Everything in Growth',
-        'Dedicated bookkeeper',
-        'Custom financial reports',
-        'Quarterly reviews',
-        'CFO insights'
-      ],
-      icon: Building
-    },
-    {
-      id: 'cleanup-light',
-      name: 'DFY Bookkeeping Cleanup™ - Light',
-      description: 'One-time historical cleanup of books with categorized transactions',
-      price: '$499',
-      recurring: false,
-      features: [
-        'Up to 3 months historical',
-        'Transaction categorization',
-        'Basic reconciliations',
-        'Tax-ready export'
-      ],
-      icon: FileText
-    },
-    {
-      id: 'cleanup-standard',
-      name: 'DFY Bookkeeping Cleanup™ - Standard',
-      description: 'Comprehensive cleanup with reconciliations and tax-ready reports',
-      price: '$1,200',
-      recurring: false,
-      features: [
-        'Up to 12 months historical',
-        'Full transaction cleanup',
-        'Bank reconciliations',
-        'Receipt recovery',
-        'Tax-ready reports'
-      ],
-      icon: FileText
-    },
-    {
-      id: 'cleanup-heavy',
-      name: 'DFY Bookkeeping Cleanup™ - Heavy',
-      description: 'Complete multi-year cleanup with comprehensive documentation',
-      price: '$2,500+',
-      recurring: false,
-      features: [
-        '12+ months historical',
-        'Multi-year cleanup',
-        'Complex reconciliations',
-        'Comprehensive documentation',
-        'Tax preparation support'
-      ],
-      icon: FileText
-    },
-    {
-      id: 'compliance-shield-basic',
-      name: 'Compliance Shield™ - Basic',
-      description: 'Automated compliance workflows and audit trails',
-      price: '$129',
-      recurring: true,
-      interval: 'month',
       features: [
         'Audit logs & change tracking',
-        'Basic compliance monitoring',
-        'Document storage'
-      ],
-      icon: Calculator
-    },
-    {
-      id: 'compliance-shield-growth',
-      name: 'Compliance Shield™ - Growth',
-      description: 'Advanced compliance with risk monitoring and policy workflows',
-      price: '$349',
-      recurring: true,
-      interval: 'month',
-      features: [
-        'Everything in Basic',
-        'Policy workflows',
+        'Policy workflows & document vault',
         'Risk detection bots',
-        'Compliance reports'
+        'Compliance certification badges'
       ],
-      icon: TrendingUp
+      icon: Shield
     },
     {
-      id: 'compliance-shield-elite',
-      name: 'Compliance Shield™ - Elite',
-      description: 'Enterprise compliance with certification and defensibility tools',
-      price: '$699',
-      recurring: true,
-      interval: 'month',
-      features: [
-        'Everything in Growth',
-        'Compliance certification badges',
-        'Advanced audit tools',
-        'Legal defensibility',
-        'Priority support'
+      id: 'partner-autopilot',
+      name: 'Partner Growth Autopilot™',
+      description: 'Automated outreach, share kits, follow-ups, lead nurturing, and revenue tracking for partners',
+      category: 'growth',
+      tiers: [
+        { name: 'Starter', price: '$97', interval: 'month' },
+        { name: 'Growth', price: '$247', interval: 'month' },
+        { name: 'Pro', price: '$497', interval: 'month' }
       ],
-      icon: Building
+      features: [
+        'Share Kit generator',
+        'Auto follow-up sequences',
+        'Partner leaderboard & gamification',
+        'Revenue influence tracking'
+      ],
+      icon: Users
+    },
+    {
+      id: 'lead-command',
+      name: 'Lead Command™',
+      description: 'AI-driven lead qualification, routing, scoring, and conversion automation',
+      category: 'sales',
+      tiers: [
+        { name: 'Core', price: '$99', interval: 'month' },
+        { name: 'Growth', price: '$249', interval: 'month' },
+        { name: 'Pro', price: '$449', interval: 'month' }
+      ],
+      features: [
+        'AI lead scoring',
+        'Qualification bots',
+        'CRM-ready pipelines',
+        'Auto-proposal triggers'
+      ],
+      icon: Target
+    },
+    {
+      id: 'dfy-cleanup',
+      name: 'DFY Bookkeeping Cleanup™',
+      description: 'One-time historical cleanup of books with categorized transactions, reconciliations, and tax-ready reports',
+      category: 'service',
+      tiers: [
+        { name: 'Light Cleanup', price: '$499' },
+        { name: 'Standard Cleanup', price: '$1,200' },
+        { name: 'Heavy Cleanup', price: '$2,500+' }
+      ],
+      features: [
+        'Historical transaction cleanup',
+        'Receipt recovery',
+        'Tax-ready reports',
+        'Upgrade path to monthly service'
+      ],
+      icon: FileText
     },
     {
       id: 'compliance-setup',
       name: 'Compliance Setup & Audit Pack™',
-      description: 'DFY compliance framework setup and documentation',
+      description: 'DFY compliance framework setup, documentation, audit trail configuration, and risk baseline',
+      category: 'service',
       price: '$1,497',
-      recurring: false,
       features: [
         'Compliance framework buildout',
         'Document vault setup',
-        'Audit trail initialization',
-        'Risk baseline assessment'
+        'Audit trail initialization'
       ],
-      icon: FileText
+      icon: Shield
+    },
+    {
+      id: 'partner-cert',
+      name: 'Local-Link Partner Certification™',
+      description: 'Training, testing, and certification to sell Local-Link products and earn recurring commissions',
+      category: 'education',
+      price: '$297',
+      features: [
+        'Certification badge',
+        'Sales playbooks',
+        'Commission eligibility'
+      ],
+      icon: Award
+    },
+    {
+      id: 'merchant-academy',
+      name: 'Local-Link Merchant Academy™',
+      description: 'Step-by-step training for merchants to use automation, financial tools, and compliance systems effectively',
+      category: 'education',
+      price: '$197',
+      features: [
+        'Video modules',
+        'Worksheets & SOPs',
+        'Certification tests'
+      ],
+      icon: GraduationCap
+    },
+    {
+      id: 'enterprise-stack',
+      name: 'Local-Link Enterprise Stack™',
+      description: 'Full AI workforce, compliance, financial automation, and partner infrastructure for multi-location or enterprise organizations',
+      category: 'enterprise',
+      price: '$2,500-$5,000',
+      interval: 'month',
+      features: [
+        'Dedicated AI workflows',
+        'Enterprise compliance',
+        'Priority support',
+        'Custom integrations'
+      ],
+      icon: Building
+    },
+    {
+      id: 'ai-workforce',
+      name: 'AI Workforce Add-On™',
+      description: 'Additional AI bots, higher job limits, and advanced automation capacity',
+      category: 'addon',
+      price: '$149',
+      interval: 'month',
+      features: [
+        'Additional AI bots',
+        'Higher job limits',
+        'Advanced automation capacity'
+      ],
+      icon: Zap
     }
   ];
 
@@ -238,7 +270,6 @@ export default function AcademyMarketplace() {
     }
 
     try {
-      // Use the course checkout endpoint
       const { data, error } = await supabase.functions.invoke('course-checkout', {
         body: {
           course_id: course.id,
@@ -256,20 +287,17 @@ export default function AcademyMarketplace() {
     }
   }
 
-  async function handleServicePurchase(service: BookkeepingService) {
+  async function handleServicePurchase(product: BookkeepingProduct) {
     if (!user) {
       navigate('/login');
       return;
     }
 
-    // Navigate to checkout or contact page
-    alert(`Purchase ${service.name} - Checkout integration coming soon!`);
+    alert(`Purchase ${product.name} - Checkout integration coming soon!`);
   }
 
   function getCoursePrice(course: Course): string {
     if (course.is_free) return 'Free';
-
-    // Default pricing based on course type
     if (course.slug.includes('automation') || course.slug.includes('ai')) return '$297';
     if (course.slug.includes('facebook') || course.slug.includes('blog')) return '$197';
     if (course.slug.includes('certified-business-coach')) return '$497';
@@ -295,7 +323,7 @@ export default function AcademyMarketplace() {
             <h1 className="text-4xl font-bold">Local-Link Merchant Academy</h1>
           </div>
           <p className="text-xl text-blue-100">
-            Build Revenue. Scale Your Business. Expert training for local businesses.
+            Training courses and AI-powered business services for local merchants
           </p>
         </div>
       </div>
@@ -326,7 +354,7 @@ export default function AcademyMarketplace() {
           >
             <div className="flex items-center gap-2">
               <DollarSign className="w-5 h-5" />
-              Bookkeeping Services
+              AI Bookkeeping Services ({bookkeepingProducts.length})
             </div>
           </button>
         </div>
@@ -357,23 +385,23 @@ export default function AcademyMarketplace() {
           </div>
         )}
 
-        {/* Bookkeeping Services Tab */}
+        {/* AI Bookkeeping Services Tab */}
         {activeTab === 'bookkeeping' && (
           <div>
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
-                Bookkeeping & Compliance Services
+                AI Bookkeeping Services
               </h2>
               <p className="text-gray-600 mt-2">
-                Professional bookkeeping, tax preparation, and compliance solutions
+                Complete Stripe product catalog - AI automation, bookkeeping, compliance, and growth tools
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {bookkeepingServices.map((service) => (
-                <ServiceCard
-                  key={service.id}
-                  service={service}
+              {bookkeepingProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
                   onPurchase={handleServicePurchase}
                 />
               ))}
@@ -447,13 +475,13 @@ function CourseCard({ course, isEnrolled, price, onPurchase }: CourseCardProps) 
   );
 }
 
-interface ServiceCardProps {
-  service: BookkeepingService;
-  onPurchase: (service: BookkeepingService) => void;
+interface ProductCardProps {
+  product: BookkeepingProduct;
+  onPurchase: (product: BookkeepingProduct) => void;
 }
 
-function ServiceCard({ service, onPurchase }: ServiceCardProps) {
-  const Icon = service.icon;
+function ProductCard({ product, onPurchase }: ProductCardProps) {
+  const Icon = product.icon;
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition border border-gray-200">
@@ -462,26 +490,39 @@ function ServiceCard({ service, onPurchase }: ServiceCardProps) {
           <Icon className="w-6 h-6 text-blue-600" />
         </div>
         <div className="flex-1">
-          <h3 className="text-lg font-bold text-gray-900 mb-1">{service.name}</h3>
-          <p className="text-sm text-gray-600">{service.description}</p>
+          <h3 className="text-lg font-bold text-gray-900 mb-1">{product.name}</h3>
+          <p className="text-sm text-gray-600">{product.description}</p>
         </div>
       </div>
 
+      {/* Pricing Display */}
       <div className="mb-4">
-        <div className="text-3xl font-bold text-gray-900">
-          {service.price}
-          {service.recurring && service.interval && (
-            <span className="text-base text-gray-600 font-normal">/{service.interval}</span>
-          )}
-        </div>
-        {!service.recurring && (
-          <div className="text-sm text-gray-500 mt-1">One-time service</div>
+        {product.tiers ? (
+          <div className="space-y-2">
+            {product.tiers.map((tier, idx) => (
+              <div key={idx} className="flex justify-between items-baseline border-l-2 border-blue-500 pl-3">
+                <span className="text-sm font-medium text-gray-700">{tier.name}</span>
+                <span className="text-lg font-bold text-gray-900">
+                  {tier.price}
+                  {tier.interval && <span className="text-sm text-gray-600">/{tier.interval}</span>}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-3xl font-bold text-gray-900">
+            {product.price}
+            {product.interval && (
+              <span className="text-base text-gray-600 font-normal">/{product.interval}</span>
+            )}
+          </div>
         )}
       </div>
 
+      {/* Features */}
       <div className="mb-6">
         <ul className="space-y-2">
-          {service.features.map((feature, idx) => (
+          {product.features.map((feature, idx) => (
             <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
               <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
               <span>{feature}</span>
@@ -490,11 +531,18 @@ function ServiceCard({ service, onPurchase }: ServiceCardProps) {
         </ul>
       </div>
 
+      {/* Category Badge */}
+      <div className="mb-4">
+        <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full capitalize">
+          {product.category}
+        </span>
+      </div>
+
       <button
-        onClick={() => onPurchase(service)}
+        onClick={() => onPurchase(product)}
         className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 font-semibold text-sm"
       >
-        {service.recurring ? 'Subscribe Now' : 'Get Started'}
+        {product.tiers ? 'View Plans' : 'Get Started'}
         <ArrowRight className="w-4 h-4" />
       </button>
     </div>
