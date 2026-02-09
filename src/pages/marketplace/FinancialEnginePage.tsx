@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Calculator, Check, TrendingUp, Shield, Clock, DollarSign, Zap,
   Award, Bot, FileText, AlertCircle, Users, Target, Briefcase,
-  Network, Rocket, Crown
+  Network, Rocket, Crown, MessageSquare, X, Send
 } from 'lucide-react';
 import Card, { CardBody, CardHeader } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -29,9 +29,24 @@ interface Package {
   badge?: string;
 }
 
+interface ChatMessage {
+  role: 'bot' | 'user';
+  message: string;
+  timestamp: Date;
+}
+
 export default function FinancialEnginePage() {
   const navigate = useNavigate();
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'annual'>('monthly');
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    {
+      role: 'bot',
+      message: "Hi! I'm your AI Sales Assistant. I'm here to help you find the perfect AI Bookkeeping solution for your business. What brings you here today?",
+      timestamp: new Date()
+    }
+  ]);
+  const [userInput, setUserInput] = useState('');
 
   const corePlatform: Package[] = [
     {
@@ -265,6 +280,50 @@ export default function FinancialEnginePage() {
     }
   ];
 
+  const handleSendMessage = () => {
+    if (!userInput.trim()) return;
+
+    // Add user message
+    const newUserMessage: ChatMessage = {
+      role: 'user',
+      message: userInput,
+      timestamp: new Date()
+    };
+    setChatMessages(prev => [...prev, newUserMessage]);
+    setUserInput('');
+
+    // Generate AI response based on user input
+    setTimeout(() => {
+      let botResponse = '';
+      const input = userInput.toLowerCase();
+
+      if (input.includes('price') || input.includes('cost') || input.includes('how much')) {
+        botResponse = "Great question! Our AI Bookkeeping services start at $149/month for the Financial Engine Starter tier, which includes monthly P&L, receipt capture, categorization, and Tax-Ready Score. Would you like me to walk you through our different pricing tiers?";
+      } else if (input.includes('feature') || input.includes('what do') || input.includes('include')) {
+        botResponse = "Our Financial Engine includes: ✅ Monthly P&L & expense reports, ✅ AI-powered receipt capture & categorization, ✅ Tax-Ready Score (0-100), and ✅ Client Tax Pack generator. Plus, all tiers integrate with our AI OS for full automation. Which feature interests you most?";
+      } else if (input.includes('difference') || input.includes('compare') || input.includes('tier')) {
+        botResponse = "We have 3 tiers: Starter ($149/mo) for basic bookkeeping, Growth ($299/mo) adds multi-entity support and advanced reporting, and Pro ($499/mo) includes dedicated support and API access. What size is your business?";
+      } else if (input.includes('demo') || input.includes('try') || input.includes('see')) {
+        botResponse = "I'd love to show you! I can connect you with our sales team for a personalized demo. They'll walk you through the platform live and answer all your questions. Would you like me to schedule that for you?";
+      } else if (input.includes('start') || input.includes('sign up') || input.includes('get started')) {
+        botResponse = "Excellent! Getting started is easy. First, I need to know: Are you currently using any bookkeeping software, or would this be your first system? This helps us tailor the onboarding.";
+      } else if (input.includes('tax') || input.includes('irs') || input.includes('audit')) {
+        botResponse = "Our Tax-Ready Score monitors your books 24/7 and flags potential issues before they become problems. You'll get a score from 0-100 showing how audit-ready your books are, plus the system auto-generates tax packs for your CPA. It's like having a tax advisor watching your back year-round!";
+      } else if (input.includes('help') || input.includes('support')) {
+        botResponse = "We've got you covered! All tiers include email support, and Pro tier gets dedicated support with priority response times. Plus, our AI bots handle routine questions 24/7. What type of support are you most concerned about?";
+      } else {
+        botResponse = "I understand! Let me help you find the right solution. Are you looking for: 1) Basic bookkeeping automation, 2) Full financial management with compliance, or 3) Enterprise-level features for multiple locations? Or would you prefer to speak with a human sales specialist?";
+      }
+
+      const botMessage: ChatMessage = {
+        role: 'bot',
+        message: botResponse,
+        timestamp: new Date()
+      };
+      setChatMessages(prev => [...prev, botMessage]);
+    }, 800);
+  };
+
   const renderPackageCard = (pkg: Package, recommended?: boolean) => (
     <Card
       key={pkg.id}
@@ -330,7 +389,7 @@ export default function FinancialEnginePage() {
 
         <Button
           fullWidth
-          onClick={() => navigate('/merchant/support')}
+          onClick={() => setChatOpen(true)}
           className={
             recommended
               ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg'
@@ -338,7 +397,8 @@ export default function FinancialEnginePage() {
           }
           variant={recommended ? undefined : 'outline'}
         >
-          Contact Sales
+          <MessageSquare className="w-4 h-4 mr-2" />
+          Chat with AI Sales
         </Button>
       </CardBody>
     </Card>
@@ -447,14 +507,15 @@ export default function FinancialEnginePage() {
           <CardBody className="text-center py-12">
             <Zap className="w-12 h-12 mx-auto mb-4" />
             <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Business?</h2>
-            <p className="text-lg text-blue-100 mb-6 max-w-2xl mx-auto">
+            <p className="text-lg text-white font-medium mb-6 max-w-2xl mx-auto">
               Contact our sales team to find the perfect package for your needs
             </p>
             <Button
-              onClick={() => navigate('/merchant/support')}
+              onClick={() => setChatOpen(true)}
               className="bg-white text-blue-700 hover:bg-blue-50 font-bold shadow-lg"
             >
-              Schedule a Demo
+              <MessageSquare className="w-5 h-5 mr-2" />
+              Chat with AI Sales
             </Button>
           </CardBody>
         </Card>
@@ -475,6 +536,86 @@ export default function FinancialEnginePage() {
           </CardBody>
         </Card>
       </div>
+
+      {/* AI Sales Chat Bot */}
+      {chatOpen && (
+        <div className="fixed inset-0 z-50 flex items-end justify-end p-4 sm:p-6">
+          <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => setChatOpen(false)} />
+          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl flex flex-col" style={{ height: '600px' }}>
+            {/* Chat Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-green-600 text-white p-4 rounded-t-2xl flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                  <Bot className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold">AI Sales Assistant</h3>
+                  <p className="text-xs text-blue-100">Online • Instant Response</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setChatOpen(false)}
+                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Chat Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {chatMessages.map((msg, idx) => (
+                <div
+                  key={idx}
+                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                      msg.role === 'user'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-slate-100 text-slate-900'
+                    }`}
+                  >
+                    {msg.role === 'bot' && (
+                      <div className="flex items-center gap-2 mb-1">
+                        <Bot className="w-4 h-4 text-blue-600" />
+                        <span className="text-xs font-semibold text-slate-600">AI Assistant</span>
+                      </div>
+                    )}
+                    <p className="text-sm leading-relaxed">{msg.message}</p>
+                    <p className={`text-xs mt-1 ${msg.role === 'user' ? 'text-blue-100' : 'text-slate-500'}`}>
+                      {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Chat Input */}
+            <div className="border-t border-slate-200 p-4">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={userInput}
+                  onChange={(e) => setUserInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  placeholder="Ask about pricing, features, or schedule a demo..."
+                  className="flex-1 px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
+                />
+                <button
+                  onClick={handleSendMessage}
+                  disabled={!userInput.trim()}
+                  className="px-4 py-3 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-xl hover:from-blue-700 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  <Send className="w-5 h-5" />
+                </button>
+              </div>
+              <p className="text-xs text-slate-500 mt-2 text-center">
+                Powered by Local-Link AI • Instant responses
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
