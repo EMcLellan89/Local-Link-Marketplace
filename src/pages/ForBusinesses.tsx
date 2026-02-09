@@ -125,7 +125,7 @@ export default function ForBusinesses() {
                 onClick={() => navigate('/register')}
                 className="text-lg px-8 py-4"
               >
-                Get Listed — From $249/month
+                Get Listed — From $179/month
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
               <button
@@ -210,45 +210,66 @@ export default function ForBusinesses() {
       </section>
 
       <section className="py-20 bg-gradient-to-b from-slate-50 to-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl font-bold text-slate-900 mb-6">Pricing Snapshot</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <p className="text-lg text-slate-600 mb-12">All plans include LocalLink CRM + Marketplace listing</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             <Card variant="bordered" className="hover:shadow-lg transition-shadow">
               <CardBody className="space-y-4">
-                <h3 className="text-2xl font-bold text-slate-900">Founders</h3>
-                <div className="text-4xl font-bold text-[#2BB673]">$249<span className="text-lg text-slate-600">/mo</span></div>
-                <p className="text-sm text-slate-600">Limited time, first 10 merchants per area</p>
+                <div className="inline-block bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full">BEST VALUE</div>
+                <h3 className="text-2xl font-bold text-slate-900">Starter</h3>
+                <div className="text-4xl font-bold text-[#2BB673]">$179<span className="text-lg text-slate-600">/mo</span></div>
+                <p className="text-sm text-slate-600">Perfect for new businesses</p>
                 <ul className="text-left text-sm space-y-2">
                   <li className="flex items-start"><CheckCircle className="w-4 h-4 text-[#2BB673] mr-2 mt-0.5 flex-shrink-0" />1 postcard spot</li>
+                  <li className="flex items-start"><CheckCircle className="w-4 h-4 text-[#2BB673] mr-2 mt-0.5 flex-shrink-0" />Basic CRM (500 contacts)</li>
                   <li className="flex items-start"><CheckCircle className="w-4 h-4 text-[#2BB673] mr-2 mt-0.5 flex-shrink-0" />Marketplace listing</li>
-                  <li className="flex items-start"><CheckCircle className="w-4 h-4 text-[#2BB673] mr-2 mt-0.5 flex-shrink-0" />Rate locked for life</li>
+                  <li className="flex items-start"><CheckCircle className="w-4 h-4 text-[#2BB673] mr-2 mt-0.5 flex-shrink-0" />QR redemption</li>
+                </ul>
+              </CardBody>
+            </Card>
+
+            <Card variant="bordered" className="hover:shadow-lg transition-shadow">
+              <CardBody className="space-y-4">
+                <div className="inline-block bg-yellow-500 text-white text-xs font-bold px-3 py-1 rounded-full">LOCKED RATE</div>
+                <h3 className="text-2xl font-bold text-slate-900">Founders</h3>
+                <div className="text-4xl font-bold text-[#2BB673]">$279<span className="text-lg text-slate-600">/mo</span></div>
+                <p className="text-sm text-slate-600">Rate locked for life</p>
+                <ul className="text-left text-sm space-y-2">
+                  <li className="flex items-start"><CheckCircle className="w-4 h-4 text-[#2BB673] mr-2 mt-0.5 flex-shrink-0" />Everything in Starter</li>
+                  <li className="flex items-start"><CheckCircle className="w-4 h-4 text-[#2BB673] mr-2 mt-0.5 flex-shrink-0" />Pro CRM (2,500 contacts)</li>
+                  <li className="flex items-start"><CheckCircle className="w-4 h-4 text-[#2BB673] mr-2 mt-0.5 flex-shrink-0" />Email promotions</li>
+                  <li className="flex items-start"><CheckCircle className="w-4 h-4 text-[#2BB673] mr-2 mt-0.5 flex-shrink-0" />Priority support</li>
                 </ul>
               </CardBody>
             </Card>
 
             <Card variant="bordered" className="border-[#2BB673] border-2 hover:shadow-lg transition-shadow">
               <CardBody className="space-y-4">
-                <div className="inline-block bg-[#2BB673] text-white text-xs font-bold px-3 py-1 rounded-full">POPULAR</div>
+                <div className="inline-block bg-[#2BB673] text-white text-xs font-bold px-3 py-1 rounded-full">MOST POPULAR</div>
                 <h3 className="text-2xl font-bold text-slate-900">Standard</h3>
-                <div className="text-4xl font-bold text-[#2BB673]">$299<span className="text-lg text-slate-600">/mo</span></div>
+                <div className="text-4xl font-bold text-[#2BB673]">$349<span className="text-lg text-slate-600">/mo</span></div>
                 <p className="text-sm text-slate-600">Best for growing businesses</p>
                 <ul className="text-left text-sm space-y-2">
                   <li className="flex items-start"><CheckCircle className="w-4 h-4 text-[#2BB673] mr-2 mt-0.5 flex-shrink-0" />Everything in Founders</li>
-                  <li className="flex items-start"><CheckCircle className="w-4 h-4 text-[#2BB673] mr-2 mt-0.5 flex-shrink-0" />Priority placement</li>
-                  <li className="flex items-start"><CheckCircle className="w-4 h-4 text-[#2BB673] mr-2 mt-0.5 flex-shrink-0" />Enhanced analytics</li>
+                  <li className="flex items-start"><CheckCircle className="w-4 h-4 text-[#2BB673] mr-2 mt-0.5 flex-shrink-0" />Business CRM (10k contacts)</li>
+                  <li className="flex items-start"><CheckCircle className="w-4 h-4 text-[#2BB673] mr-2 mt-0.5 flex-shrink-0" />2 email blasts/month</li>
+                  <li className="flex items-start"><CheckCircle className="w-4 h-4 text-[#2BB673] mr-2 mt-0.5 flex-shrink-0" />Social media features</li>
                 </ul>
               </CardBody>
             </Card>
 
             <Card variant="bordered" className="hover:shadow-lg transition-shadow">
               <CardBody className="space-y-4">
+                <div className="inline-block bg-purple-500 text-white text-xs font-bold px-3 py-1 rounded-full">PREMIUM</div>
                 <h3 className="text-2xl font-bold text-slate-900">Premium</h3>
-                <div className="text-4xl font-bold text-[#2BB673]">$349<span className="text-lg text-slate-600">/mo</span></div>
+                <div className="text-4xl font-bold text-[#2BB673]">$449<span className="text-lg text-slate-600">/mo</span></div>
                 <p className="text-sm text-slate-600">Maximum exposure</p>
                 <ul className="text-left text-sm space-y-2">
                   <li className="flex items-start"><CheckCircle className="w-4 h-4 text-[#2BB673] mr-2 mt-0.5 flex-shrink-0" />Top-row placement</li>
-                  <li className="flex items-start"><CheckCircle className="w-4 h-4 text-[#2BB673] mr-2 mt-0.5 flex-shrink-0" />Featured deal badge</li>
-                  <li className="flex items-start"><CheckCircle className="w-4 h-4 text-[#2BB673] mr-2 mt-0.5 flex-shrink-0" />Boosted social media</li>
+                  <li className="flex items-start"><CheckCircle className="w-4 h-4 text-[#2BB673] mr-2 mt-0.5 flex-shrink-0" />Enterprise CRM (unlimited)</li>
+                  <li className="flex items-start"><CheckCircle className="w-4 h-4 text-[#2BB673] mr-2 mt-0.5 flex-shrink-0" />4 email blasts/month</li>
+                  <li className="flex items-start"><CheckCircle className="w-4 h-4 text-[#2BB673] mr-2 mt-0.5 flex-shrink-0" />Dedicated manager</li>
                 </ul>
               </CardBody>
             </Card>
