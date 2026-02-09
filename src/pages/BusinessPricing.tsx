@@ -35,7 +35,7 @@ export default function BusinessPricing() {
                 onClick={() => navigate('/business')}
                 className="text-slate-700 hover:text-slate-900 font-medium transition-colors"
               >
-                For Businesses
+                For Merchants
               </button>
               <Button onClick={() => navigate('/register')}>
                 Get Started

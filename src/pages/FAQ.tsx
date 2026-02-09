@@ -139,7 +139,7 @@ export default function FAQ() {
             </div>
 
             <div>
-              <h2 className="text-3xl font-bold text-slate-900 mb-6">For Businesses</h2>
+              <h2 className="text-3xl font-bold text-slate-900 mb-6">For Merchants</h2>
               <div className="space-y-4">
                 {businessFaqs.map((faq, index) => {
                   const faqIndex = customerFaqs.length + index;

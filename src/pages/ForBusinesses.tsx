@@ -80,10 +80,10 @@ export default function ForBusinesses() {
   return (
     <>
       <SEO
-        title="For Businesses - Fair Deals Platform with Low Commissions"
+        title="For Merchants - Fair Deals Platform with Low Commissions"
         description="Keep 65-80% of every sale with LocalLink. Get instant payouts, customer data, monthly postcard promotion, and QR-based analytics. Better than traditional deal sites."
         keywords="business deals platform, low commission marketplace, merchant services, customer acquisition, local business marketing"
-        canonical="https://locallink.com/for-businesses"
+        canonical="https://locallink.com/for-merchants"
       />
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       <header className="bg-white border-b border-slate-200">

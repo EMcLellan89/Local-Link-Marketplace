@@ -18,7 +18,7 @@ export default function Landing() {
   const mainFeatures = [
     {
       icon: Store,
-      title: 'For Businesses',
+      title: 'For Merchants',
       description: 'Transform your local business with our complete growth platform',
       color: 'from-emerald-500 to-teal-600',
       path: '/business',
@@ -101,7 +101,7 @@ export default function Landing() {
                 onClick={() => navigate('/business')}
                 className="text-slate-300 hover:text-emerald-400 font-medium transition-all hover:scale-105"
               >
-                For Businesses
+                For Merchants
               </button>
               <button
                 onClick={() => navigate('/earn')}
