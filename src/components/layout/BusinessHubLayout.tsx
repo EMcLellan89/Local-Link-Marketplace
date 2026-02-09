@@ -43,7 +43,7 @@ export default function BusinessHubLayout({ children }: BusinessHubLayoutProps) 
     { to: '/merchant/analytics', icon: BarChart3, label: 'Analytics', badge: 'NEW' },
     { to: '/merchant/marketing', icon: Megaphone, label: 'Marketing', badge: 'NEW' },
     { to: '/merchant/crm', icon: Users, label: 'CRM', badge: 'NEW' },
-    { to: '/marketplace/financial-engine', icon: FileStack, label: 'Financial Engine', badge: 'NEW' },
+    { to: '/marketplace/financial-engine', icon: FileStack, label: 'AI Bookkeeping Services', badge: 'NEW' },
     { to: '/merchant/invoices', icon: FileText, label: 'Invoicing', badge: 'NEW' },
     { to: '/merchant/crm-migration', icon: ArrowLeftRight, label: 'CRM Migration', badge: 'NEW' },
     { to: '/merchant/ai-bots', icon: Bot, label: 'AI & Automations', badge: 'NEW' },
