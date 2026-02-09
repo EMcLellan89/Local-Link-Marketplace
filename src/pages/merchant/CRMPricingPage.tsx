@@ -5,50 +5,58 @@ const tiers = [
   {
     name: 'Starter',
     icon: Users,
-    price: 149,
-    crm: 'Starter CRM',
+    price: 179,
+    crm: 'Basic CRM',
     contacts: 500,
-    accounting: 'None',
+    accounting: 'Books Lite',
+    teamMembers: 2,
     color: 'from-slate-500 to-slate-600',
     features: [
       'Contact management & basic pipeline',
       'Email marketing',
       'Deal tracking',
+      'Lead auto-capture',
       'Basic reporting',
-      'Mobile app access'
+      'Mobile app access',
+      'Books Lite accounting'
     ]
   },
   {
     name: 'Founders',
     icon: Zap,
-    price: 249,
+    price: 279,
     crm: 'Professional CRM',
-    contacts: 5000,
-    accounting: 'Books Lite',
+    contacts: 2500,
+    accounting: 'Books Pro',
+    teamMembers: 5,
     color: 'from-blue-500 to-indigo-600',
     badge: 'LOCKED RATE',
     features: [
       'Everything in Starter',
       'Advanced pipelines',
       'Email automation',
+      'AI prompt library',
       'Customer segmentation',
       'Review management',
-      'Books Lite accounting'
+      'Books Pro accounting'
     ]
   },
   {
     name: 'Standard',
     icon: TrendingUp,
-    price: 299,
+    price: 349,
     crm: 'Business CRM',
-    contacts: 25000,
+    contacts: 10000,
     accounting: 'Books Pro',
+    teamMembers: 15,
     color: 'from-[#2BB673] to-[#25a062]',
     badge: 'MOST POPULAR',
     features: [
       'Everything in Founders',
       'SMS marketing',
       'Custom workflows',
+      'AI tools & automation',
+      'CRM automations',
       'A/B testing',
       'Advanced forecasting',
       'Books Pro accounting'
@@ -57,17 +65,21 @@ const tiers = [
   {
     name: 'Premium',
     icon: Crown,
-    price: 349,
+    price: 449,
     crm: 'Enterprise CRM',
-    contacts: 100000,
+    contacts: 999999,
     accounting: 'Books Pro',
+    teamMembers: 'Unlimited',
     color: 'from-amber-500 to-orange-600',
     badge: 'BEST VALUE',
     features: [
       'Everything in Standard',
-      'AI-powered insights',
+      'Unlimited contacts',
+      'Unlimited team members',
+      'Full AI suite',
+      'API access',
+      'White-label CRM',
       'Unlimited communications',
-      'White-label options',
       'Custom integrations',
       'Dedicated account manager'
     ]
@@ -79,15 +91,15 @@ export default function CRMPricingPage() {
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="text-center max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
+          <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
             <CheckCircle2 className="w-4 h-4" />
-            CRM Included with Every Subscription
+            CRM Included with Every Subscription Tier
           </div>
           <h1 className="text-4xl font-bold text-slate-900 mb-4">
-            Local-Link CRM Pricing
+            Bundled Subscription Tiers
           </h1>
           <p className="text-xl text-slate-600">
-            Professional CRM included with your subscription tier—no additional charges. Choose the plan that fits your business size.
+            Every subscription includes marketplace access + LocalLink CRM + bookkeeping. One price, everything included. Choose the tier that fits your business size.
           </p>
         </div>
 
@@ -126,7 +138,13 @@ export default function CRMPricingPage() {
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-slate-600">Contacts:</span>
                         <span className="font-semibold text-slate-900">
-                          {tier.contacts.toLocaleString()}
+                          {typeof tier.contacts === 'number' && tier.contacts < 999999 ? tier.contacts.toLocaleString() : 'Unlimited'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-600">Team Members:</span>
+                        <span className="font-semibold text-slate-900">
+                          {tier.teamMembers}
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">

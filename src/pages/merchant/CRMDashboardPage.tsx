@@ -485,10 +485,6 @@ export default function CRMDashboardPage() {
               <FileText className="w-4 h-4 mr-2" />
               Invoicing
             </Button>
-            <Button variant="outline" onClick={() => navigate('/merchant/crm-marketplace')}>
-              <BarChart3 className="w-4 h-4 mr-2" />
-              View Plans
-            </Button>
             <Button onClick={() => alert('Add lead form coming soon')}>
               <Plus className="w-4 h-4 mr-2" />
               Add Lead

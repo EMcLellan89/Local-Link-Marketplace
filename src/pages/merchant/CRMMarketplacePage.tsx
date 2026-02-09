@@ -37,11 +37,14 @@ interface PerformanceOverview {
 const pricingTiers = [
   {
     name: 'Starter',
-    price: 149,
+    price: 179,
     period: 'month',
-    description: 'Essential CRM for small businesses',
+    description: 'Perfect for new businesses',
     features: [
-      'Starter CRM (500 contacts)',
+      'Basic CRM (500 contacts)',
+      'Books Lite',
+      '2 team members',
+      'Lead auto-capture',
       'Basic marketplace listing',
       'Deal scheduling',
       'QR code redemption',
@@ -50,17 +53,21 @@ const pricingTiers = [
       'Email support'
     ],
     popular: false,
-    crmTier: 'Starter CRM',
-    booksTier: 'None'
+    crmTier: 'Basic CRM',
+    booksTier: 'Books Lite',
+    teamMembers: 2
   },
   {
     name: 'Founders',
-    price: 249,
+    price: 279,
     period: 'month',
     description: 'Locked rate for early adopters',
     features: [
-      'Professional CRM (5,000 contacts)',
-      'Local-Link Books Lite included',
+      'Professional CRM (2,500 contacts)',
+      'Books Pro',
+      '5 team members',
+      'AI prompt library',
+      'Lead auto-capture',
       'Enhanced analytics',
       'Email promotion (1x monthly)',
       'Founders rate locked for life',
@@ -70,16 +77,21 @@ const pricingTiers = [
     popular: true,
     badge: 'MOST POPULAR',
     crmTier: 'Professional CRM',
-    booksTier: 'Books Lite'
+    booksTier: 'Books Pro',
+    teamMembers: 5
   },
   {
     name: 'Standard',
-    price: 299,
+    price: 349,
     period: 'month',
     description: 'For established businesses',
     features: [
-      'Business CRM (25,000 contacts)',
-      'Local-Link Books Pro included',
+      'Business CRM (10,000 contacts)',
+      'Books Pro',
+      '15 team members',
+      'AI tools & automation',
+      'Lead auto-capture',
+      'CRM automations',
       'Featured in 2 email blasts/month',
       'Social media feature (1x/month)',
       'A/B testing tools',
@@ -88,26 +100,32 @@ const pricingTiers = [
     ],
     popular: false,
     crmTier: 'Business CRM',
-    booksTier: 'Books Pro'
+    booksTier: 'Books Pro',
+    teamMembers: 15
   },
   {
     name: 'Premium',
-    price: 349,
+    price: 449,
     period: 'month',
-    description: 'Maximum visibility for high-volume businesses',
+    description: 'Maximum visibility and power',
     features: [
-      'Enterprise CRM (100,000 contacts)',
-      'Local-Link Books Pro included',
+      'Enterprise CRM (Unlimited contacts)',
+      'Books Pro',
+      'Unlimited team members',
+      'Full AI suite',
+      'Lead auto-capture',
+      'CRM automations',
+      'API access',
+      'White-label CRM',
       'TOP ROW premium placement',
       'Featured in 4 email blasts/month',
       'Dedicated account manager',
-      'White-label options',
-      'API access',
       'Custom integrations'
     ],
     popular: false,
     crmTier: 'Enterprise CRM',
-    booksTier: 'Books Pro'
+    booksTier: 'Books Pro',
+    teamMembers: 'Unlimited'
   }
 ];
 
@@ -672,11 +690,14 @@ export default function CRMMarketplacePage() {
 
         <div id="pricing" className="scroll-mt-20">
           <div className="text-center mb-12">
+            <div className="inline-block bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+              CRM Included with Every Tier
+            </div>
             <h2 className="text-4xl font-bold text-slate-900 mb-4">
-              Simple, Transparent Pricing
+              Bundled Pricing: Marketplace + CRM
             </h2>
             <p className="text-xl text-slate-600">
-              Choose the plan that fits your business. Upgrade or downgrade anytime.
+              One subscription includes everything: marketplace placement, CRM system, bookkeeping, and team collaboration. Upgrade or downgrade anytime.
             </p>
           </div>
 
@@ -741,10 +762,10 @@ export default function CRMMarketplacePage() {
                 Ready to Convert More Leads into Customers?
               </h2>
               <p className="text-lg text-slate-600 mb-6">
-                Start managing your marketplace leads like a pro. No credit card required for 14-day trial.
+                Choose your subscription tier to unlock your complete marketplace + CRM system. All plans include automatic lead capture from marketplace deals.
               </p>
-              <Button size="lg" onClick={() => handlePurchase('Professional', 159)} className="text-lg px-8 py-6">
-                Start Free Trial
+              <Button size="lg" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })} className="text-lg px-8 py-6">
+                View Subscription Tiers
               </Button>
             </div>
           </CardBody>
