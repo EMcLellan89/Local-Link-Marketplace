@@ -27,7 +27,11 @@ const CheckoutPage = lazy(() => import('./pages/customer/CheckoutPage'));
 const PaymentStatusPage = lazy(() => import('./pages/customer/PaymentStatusPage'));
 const ReferralLandingPage = lazy(() => import('./pages/customer/ReferralLandingPage'));
 const PartnerReferralLandingPage = lazy(() => import('./pages/ReferralLandingPage'));
+const PulseFeedPage = lazy(() => import('./pages/customer/PulseFeedPage'));
+const PulseLeaderboardPage = lazy(() => import('./pages/customer/PulseLeaderboardPage'));
+const PulseReferralPage = lazy(() => import('./pages/customer/PulseReferralPage'));
 const MerchantDashboard = lazy(() => import('./pages/merchant/MerchantDashboard'));
+const MerchantPulseDashboard = lazy(() => import('./pages/merchant/MerchantPulseDashboard'));
 const MerchantOnboarding = lazy(() => import('./pages/merchant/MerchantOnboarding'));
 const MerchantDealsPage = lazy(() => import('./pages/merchant/MerchantDealsPage'));
 const CreateDealPage = lazy(() => import('./pages/merchant/CreateDealPage'));
@@ -112,6 +116,7 @@ const SwipeFileCheckoutPage = lazy(() => import('./pages/merchant/SwipeFileCheck
 const SwipeFilePaymentCompletePage = lazy(() => import('./pages/merchant/SwipeFilePaymentCompletePage'));
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
 const EnhancedAdminDashboard = lazy(() => import('./pages/admin/EnhancedAdminDashboard'));
+const AdminPulseDashboard = lazy(() => import('./pages/admin/AdminPulseDashboard'));
 const BudgetBusterAnalytics = lazy(() => import('./pages/admin/BudgetBusterAnalytics'));
 const AdminCRMDashboard = lazy(() => import('./pages/admin/AdminCRMDashboard'));
 const AccountingDashboard = lazy(() => import('./pages/admin/AccountingDashboard'));
@@ -456,6 +461,33 @@ function AppRoutes() {
       />
 
       <Route
+        path="/pulse"
+        element={
+          <ProtectedRoute allowedRoles={['customer']}>
+            <PulseFeedPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/pulse/leaderboard"
+        element={
+          <ProtectedRoute allowedRoles={['customer']}>
+            <PulseLeaderboardPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/pulse/referral"
+        element={
+          <ProtectedRoute allowedRoles={['customer']}>
+            <PulseReferralPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
         path="/merchant/dashboard"
         element={
           <ProtectedRoute allowedRoles={['merchant']}>
@@ -496,6 +528,15 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={['merchant']}>
             <RedemptionPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/merchant/pulse"
+        element={
+          <ProtectedRoute allowedRoles={['merchant']}>
+            <MerchantPulseDashboard />
           </ProtectedRoute>
         }
       />
@@ -1477,6 +1518,8 @@ function AppRoutes() {
       <Route path="/admin/login" element={<AdminLogin />} />
 
       <Route path="/admin/dashboard" element={<EnhancedAdminDashboard />} />
+
+      <Route path="/admin/pulse" element={<AdminPulseDashboard />} />
 
       <Route path="/admin/badges" element={<AdminBadgesManager />} />
 

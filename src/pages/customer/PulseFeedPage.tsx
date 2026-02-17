@@ -192,11 +192,14 @@ export default function PulseFeedPage() {
             <div className="flex items-center gap-4">
               {/* Points Display */}
               {user && (
-                <div className="flex items-center gap-2 bg-amber-50 px-4 py-2 rounded-lg border border-amber-200">
+                <button
+                  onClick={() => navigate('/pulse/leaderboard')}
+                  className="flex items-center gap-2 bg-amber-50 px-4 py-2 rounded-lg border border-amber-200 hover:bg-amber-100 transition-colors"
+                >
                   <Award className="w-5 h-5 text-amber-600" />
                   <span className="font-bold text-amber-900">{points}</span>
                   <span className="text-sm text-amber-700">points</span>
-                </div>
+                </button>
               )}
 
               {/* City Selector */}
@@ -207,6 +210,18 @@ export default function PulseFeedPage() {
                   <ChevronDown className="w-4 h-4 text-slate-600" />
                 </button>
               </div>
+
+              {/* Share Button */}
+              {user && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate('/pulse/referral')}
+                >
+                  <Users className="w-4 h-4 mr-2" />
+                  Share & Earn
+                </Button>
+              )}
             </div>
           </div>
         </div>
