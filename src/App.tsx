@@ -145,6 +145,7 @@ const MarketingCampaignsPage = lazy(() => import('./pages/internal/MarketingCamp
 const PartnerApplications = lazy(() => import('./pages/admin/PartnerApplications'));
 const PartnerApplication = lazy(() => import('./pages/PartnerApplication'));
 const PartnerAnalytics = lazy(() => import('./pages/admin/PartnerAnalytics'));
+const AdminPartnerManager = lazy(() => import('./pages/admin/AdminPartnerManager'));
 const TerritoryManagement = lazy(() => import('./pages/admin/TerritoryManagement'));
 const TerritoryCreationPage = lazy(() => import('./pages/admin/TerritoryCreationPage'));
 const InactivityScannerPage = lazy(() => import('./pages/admin/InactivityScannerPage'));
@@ -1475,6 +1476,7 @@ function AppRoutes() {
       <Route path="/admin/system-events" element={<AdminSystemEventsPage />} />
 
       <Route path="/admin/partner-applications" element={<PartnerApplications />} />
+      <Route path="/admin/partner-manager" element={<AdminPartnerManager />} />
 
       <Route path="/admin/analytics" element={<PartnerAnalytics />} />
 
