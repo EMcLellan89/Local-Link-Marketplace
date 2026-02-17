@@ -284,6 +284,7 @@ const BusinessDealsHub = lazy(() => import('./pages/marketplace/BusinessDealsHub
 
 // Executive Solutions
 const ExecutiveSolutions = lazy(() => import('./pages/merchant/ExecutiveSolutions'));
+const NetworkNavigatorsPage = lazy(() => import('./pages/merchant/NetworkNavigatorsPage'));
 const PartnerExecutiveSolutions = lazy(() => import('./pages/partner/PartnerExecutiveSolutions'));
 
 const LoadingFallback = () => (
@@ -1099,6 +1100,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={['merchant']}>
             <ExecutiveSolutions />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/merchant/network-navigators"
+        element={
+          <ProtectedRoute allowedRoles={['merchant']}>
+            <NetworkNavigatorsPage />
           </ProtectedRoute>
         }
       />

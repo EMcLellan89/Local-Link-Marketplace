@@ -836,6 +836,29 @@ export default function MerchantDashboard() {
                 Scan QR Code
               </Button>
             </div>
+
+            <div className="mt-6 p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border-2 border-blue-200">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    Network Navigators: Turn Customers Into Recurring Revenue
+                  </h3>
+                  <p className="text-gray-700 mb-4">
+                    Build a private Facebook Group membership program. Transform one-time customers into $2K-$10K monthly recurring income.
+                  </p>
+                  <Button
+                    variant="primary"
+                    onClick={() => navigate('/merchant/network-navigators')}
+                  >
+                    <TrendingUp className="w-4 h-4 mr-2" />
+                    Explore Network Navigators
+                  </Button>
+                </div>
+              </div>
+            </div>
           </CardBody>
         </Card>
       </div>
