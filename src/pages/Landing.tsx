@@ -339,7 +339,7 @@ export default function Landing() {
           </h2>
 
           <p className="text-xl md:text-2xl text-emerald-900 mb-12 leading-relaxed max-w-2xl mx-auto font-semibold">
-            Join thousands of businesses, partners, and shoppers building a thriving local economy together
+            Join thousands of shoppers, businesses and partners building a thriving local economy together
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
