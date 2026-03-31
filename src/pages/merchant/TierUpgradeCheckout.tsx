@@ -7,7 +7,6 @@ import Card from '../../components/ui/Card';
 import BackButton from '../components/ui/BackButton';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { initiatePayBrightPayment } from '../../lib/paybright';
 
 interface SubscriptionTier {
   id: string;

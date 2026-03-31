@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { getPayBrightTransaction } from '../../lib/paybright';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Card, { CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';

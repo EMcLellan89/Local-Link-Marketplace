@@ -8,7 +8,6 @@ import Input from '../../components/ui/Input';
 import BackButton from '../components/ui/BackButton';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
-import { initiateSimplePayment } from '../../lib/paybright';
 
 export default function JobTemplatesCheckoutPage() {
   const navigate = useNavigate();
