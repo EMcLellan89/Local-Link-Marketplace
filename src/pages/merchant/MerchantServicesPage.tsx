@@ -1,21 +1,70 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CreditCard, Gift, TrendingUp, DollarSign, Check, Heart, Repeat, Sparkles, Users, Award, Target, Star, BarChart3, Zap, ShoppingBag, Info, Shield, TrendingDown, Clock, FileText } from 'lucide-react';
+import { CreditCard, Gift, TrendingUp, DollarSign, Check, Heart, Repeat, Sparkles, Users, Award, Target, Star, BarChart3, Zap, ShoppingBag, Info, Shield, TrendingDown, Clock, FileText, Calculator, ArrowRight } from 'lucide-react';
 import BusinessHubLayout from '../../components/layout/BusinessHubLayout';
 import Card, { CardBody, CardHeader } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import BackButton from '../../components/ui/BackButton';
+import Input from '../../components/ui/Input';
 
-type Tab = 'processing' | 'loyalty' | 'giftcards';
+type Tab = 'processing' | 'loyalty' | 'giftcards' | 'capital';
 
 export default function MerchantServicesPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('processing');
 
+  // Savings Calculator State
+  const [monthlyVolume, setMonthlyVolume] = useState<string>('');
+  const [currentRate, setCurrentRate] = useState<string>('');
+  const [monthlyFees, setMonthlyFees] = useState<string>('');
+  const [showResults, setShowResults] = useState(false);
+
+  const calculateSavings = () => {
+    if (!monthlyVolume || !currentRate) return null;
+
+    const volume = parseFloat(monthlyVolume);
+    const rate = parseFloat(currentRate);
+    const fees = parseFloat(monthlyFees || '0');
+
+    // Current costs
+    const currentProcessingCost = (volume * rate) / 100;
+    const currentTotalCost = currentProcessingCost + fees;
+
+    // Our rate (average competitive rate)
+    const ourRate = 2.29; // Competitive rate
+    const ourProcessingCost = (volume * ourRate) / 100;
+    const ourTotalCost = ourProcessingCost; // No monthly fees
+
+    // Savings
+    const monthlySavings = currentTotalCost - ourTotalCost;
+    const annualSavings = monthlySavings * 12;
+    const savingsPercentage = ((monthlySavings / currentTotalCost) * 100).toFixed(1);
+
+    return {
+      currentProcessingCost: currentProcessingCost.toFixed(2),
+      currentTotalCost: currentTotalCost.toFixed(2),
+      ourProcessingCost: ourProcessingCost.toFixed(2),
+      ourTotalCost: ourTotalCost.toFixed(2),
+      monthlySavings: monthlySavings.toFixed(2),
+      annualSavings: annualSavings.toFixed(2),
+      savingsPercentage,
+      ourRate: ourRate.toFixed(2)
+    };
+  };
+
+  const handleCalculate = () => {
+    if (monthlyVolume && currentRate) {
+      setShowResults(true);
+    }
+  };
+
+  const savings = calculateSavings();
+
   const tabs = [
     { id: 'processing' as Tab, label: 'Credit Card Processing', icon: CreditCard },
     { id: 'loyalty' as Tab, label: 'Loyalty Program', icon: Heart },
     { id: 'giftcards' as Tab, label: 'Gift Cards', icon: Gift },
+    { id: 'capital' as Tab, label: 'Business Capital', icon: TrendingUp },
   ];
 
   return (
@@ -204,6 +253,210 @@ export default function MerchantServicesPage() {
                       </div>
                     </div>
                   </div>
+                </div>
+              </CardBody>
+            </Card>
+
+            {/* Savings Calculator */}
+            <Card variant="bordered" className="bg-gradient-to-br from-emerald-50 to-green-50 border-2 border-emerald-200">
+              <CardHeader>
+                <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                  <Calculator className="w-6 h-6 text-emerald-600" />
+                  Savings Calculator
+                </h3>
+                <p className="text-sm text-slate-600 mt-2">
+                  Compare your current processing costs with our competitive rates and see how much you could save
+                </p>
+              </CardHeader>
+              <CardBody>
+                <div className="bg-white rounded-lg p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-900 mb-2">
+                        Monthly Card Volume
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                        <Input
+                          type="number"
+                          value={monthlyVolume}
+                          onChange={(e) => {
+                            setMonthlyVolume(e.target.value);
+                            setShowResults(false);
+                          }}
+                          placeholder="10,000"
+                          className="pl-7"
+                        />
+                      </div>
+                      <p className="text-xs text-slate-500 mt-1">Total card sales per month</p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-900 mb-2">
+                        Current Processing Rate
+                      </label>
+                      <div className="relative">
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={currentRate}
+                          onChange={(e) => {
+                            setCurrentRate(e.target.value);
+                            setShowResults(false);
+                          }}
+                          placeholder="2.9"
+                          className="pr-7"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500">%</span>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-1">Your current processing rate</p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-900 mb-2">
+                        Monthly Fees (Optional)
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                        <Input
+                          type="number"
+                          value={monthlyFees}
+                          onChange={(e) => {
+                            setMonthlyFees(e.target.value);
+                            setShowResults(false);
+                          }}
+                          placeholder="0"
+                          className="pl-7"
+                        />
+                      </div>
+                      <p className="text-xs text-slate-500 mt-1">Statement fees, minimums, etc.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-center mb-6">
+                    <Button
+                      onClick={handleCalculate}
+                      disabled={!monthlyVolume || !currentRate}
+                      size="lg"
+                    >
+                      <Calculator className="w-5 h-5 mr-2" />
+                      Calculate My Savings
+                    </Button>
+                  </div>
+
+                  {showResults && savings && parseFloat(savings.monthlySavings) > 0 && (
+                    <div className="space-y-4 animate-in fade-in duration-300">
+                      <div className="bg-gradient-to-r from-emerald-500 to-green-600 rounded-lg p-6 text-white">
+                        <div className="text-center">
+                          <p className="text-emerald-100 text-sm font-medium mb-2">Your Estimated Annual Savings</p>
+                          <p className="text-5xl font-bold mb-2">${Number(savings.annualSavings).toLocaleString()}</p>
+                          <p className="text-emerald-100 text-lg">
+                            That's ${Number(savings.monthlySavings).toLocaleString()}/month
+                          </p>
+                          <div className="mt-4 inline-flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full">
+                            <TrendingDown className="w-5 h-5" />
+                            <span className="font-semibold">{savings.savingsPercentage}% savings</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+                          <h4 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                            <Info className="w-5 h-5 text-slate-600" />
+                            Your Current Costs
+                          </h4>
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-slate-600">Processing ({currentRate}%)</span>
+                              <span className="font-medium text-slate-900">${Number(savings.currentProcessingCost).toLocaleString()}</span>
+                            </div>
+                            {parseFloat(monthlyFees || '0') > 0 && (
+                              <div className="flex justify-between text-sm">
+                                <span className="text-slate-600">Monthly Fees</span>
+                                <span className="font-medium text-slate-900">${Number(monthlyFees).toLocaleString()}</span>
+                              </div>
+                            )}
+                            <div className="border-t border-slate-300 pt-2 flex justify-between font-semibold">
+                              <span className="text-slate-900">Total/Month</span>
+                              <span className="text-slate-900">${Number(savings.currentTotalCost).toLocaleString()}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-emerald-50 border-2 border-emerald-200 rounded-lg p-4">
+                          <h4 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                            <Star className="w-5 h-5 text-emerald-600" />
+                            Our Competitive Pricing
+                          </h4>
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-slate-600">Processing ({savings.ourRate}%)</span>
+                              <span className="font-medium text-slate-900">${Number(savings.ourProcessingCost).toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-slate-600">Monthly Fees</span>
+                              <span className="font-medium text-emerald-600">$0</span>
+                            </div>
+                            <div className="border-t border-emerald-300 pt-2 flex justify-between font-semibold">
+                              <span className="text-slate-900">Total/Month</span>
+                              <span className="text-emerald-600">${Number(savings.ourTotalCost).toLocaleString()}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div className="flex items-start gap-3">
+                          <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                          <div className="text-sm text-slate-700">
+                            <p className="font-semibold text-slate-900 mb-1">This is an estimate based on the information provided</p>
+                            <p>Actual rates may vary based on your business type, processing volume, and card mix. We'll provide a personalized quote after reviewing your processing statements.</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="text-center pt-4">
+                        <Button
+                          size="lg"
+                          onClick={() => navigate('/merchant/merchant-services/application')}
+                        >
+                          Get My Custom Quote
+                          <ArrowRight className="w-5 h-5 ml-2" />
+                        </Button>
+                        <p className="text-sm text-slate-600 mt-2">
+                          No obligation. Free rate review of your current statement.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {showResults && savings && parseFloat(savings.monthlySavings) <= 0 && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+                      <Info className="w-12 h-12 text-blue-600 mx-auto mb-3" />
+                      <h4 className="font-semibold text-slate-900 mb-2">You Already Have Great Rates!</h4>
+                      <p className="text-slate-700 mb-4">
+                        Based on your current rate of {currentRate}%, you're already getting competitive pricing. However, we might still be able to help with:
+                      </p>
+                      <div className="text-left max-w-md mx-auto space-y-2 mb-4">
+                        <div className="flex items-center gap-2">
+                          <Check className="w-5 h-5 text-blue-600" />
+                          <span className="text-sm text-slate-700">Eliminating monthly fees</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Check className="w-5 h-5 text-blue-600" />
+                          <span className="text-sm text-slate-700">Better equipment and technology</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Check className="w-5 h-5 text-blue-600" />
+                          <span className="text-sm text-slate-700">Superior customer service</span>
+                        </div>
+                      </div>
+                      <Button onClick={() => navigate('/merchant/merchant-services/application')}>
+                        Get a Free Rate Review
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </CardBody>
             </Card>
@@ -882,6 +1135,268 @@ export default function MerchantServicesPage() {
                 <Gift className="w-5 h-5 mr-2" />
                 Get Started with Gift Cards
               </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Business Capital Tab */}
+        {activeTab === 'capital' && (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            <Card variant="bordered" className="bg-gradient-to-br from-emerald-50 to-green-50">
+              <CardBody>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-start flex-1">
+                    <div className="flex-shrink-0">
+                      <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl flex items-center justify-center">
+                        <TrendingUp className="w-8 h-8 text-white" />
+                      </div>
+                    </div>
+                    <div className="ml-4">
+                      <h2 className="text-2xl font-bold text-slate-900 mb-2">Business Capital & Funding by PayBright</h2>
+                      <p className="text-slate-700 mb-4">
+                        Fast, flexible funding solutions for small and medium-sized businesses. Same-day or next-day funding available.
+                      </p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="flex items-center text-sm text-slate-600">
+                          <Check className="w-5 h-5 text-green-600 mr-2" />
+                          <span>Same/next-day funding</span>
+                        </div>
+                        <div className="flex items-center text-sm text-slate-600">
+                          <Check className="w-5 h-5 text-green-600 mr-2" />
+                          <span>Flexible repayment</span>
+                        </div>
+                        <div className="flex items-center text-sm text-slate-600">
+                          <Check className="w-5 h-5 text-green-600 mr-2" />
+                          <span>Based on sales, not credit</span>
+                        </div>
+                        <div className="flex items-center text-sm text-slate-600">
+                          <Check className="w-5 h-5 text-green-600 mr-2" />
+                          <span>Expert support</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Funding Types */}
+              <Card variant="bordered">
+                <CardHeader>
+                  <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                    <DollarSign className="w-5 h-5 text-green-600" />
+                    Funding Options
+                  </h3>
+                </CardHeader>
+                <CardBody>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-amber-500" />
+                        Merchant Cash Advances (MCA)
+                      </h4>
+                      <ul className="space-y-2 ml-6">
+                        <li className="text-sm text-slate-600">• Advance based on future sales</li>
+                        <li className="text-sm text-slate-600">• Paid back via daily card sales percentage</li>
+                        <li className="text-sm text-slate-600">• No fixed monthly payment</li>
+                        <li className="text-sm text-slate-600">• Perfect for seasonal businesses</li>
+                      </ul>
+                    </div>
+
+                    <div className="border-t border-slate-200 pt-4">
+                      <h4 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                        <CreditCard className="w-4 h-4 text-blue-500" />
+                        Small Business Loans
+                      </h4>
+                      <ul className="space-y-2 ml-6">
+                        <li className="text-sm text-slate-600">• Fixed repayment structure</li>
+                        <li className="text-sm text-slate-600">• Larger funding amounts possible</li>
+                        <li className="text-sm text-slate-600">• Predictable payments</li>
+                        <li className="text-sm text-slate-600">• Traditional loan structure</li>
+                      </ul>
+                    </div>
+
+                    <div className="border-t border-slate-200 pt-4">
+                      <h4 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                        <TrendingUp className="w-4 h-4 text-emerald-500" />
+                        Revenue-Based Financing
+                      </h4>
+                      <ul className="space-y-2 ml-6">
+                        <li className="text-sm text-slate-600">• Payments scale with your income</li>
+                        <li className="text-sm text-slate-600">• Lower payments during slow periods</li>
+                        <li className="text-sm text-slate-600">• Higher payments during busy seasons</li>
+                        <li className="text-sm text-slate-600">• Matches your cash flow</li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
+
+              {/* Key Features */}
+              <Card variant="bordered">
+                <CardHeader>
+                  <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-amber-600" />
+                    Key Features
+                  </h3>
+                </CardHeader>
+                <CardBody>
+                  <div className="space-y-4">
+                    <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Zap className="w-5 h-5 text-amber-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-slate-900 mb-1">Fast Funding</h4>
+                          <p className="text-sm text-slate-600">Same-day and next-day approvals available. Get cash when you need it most.</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-blue-50 to-sky-50 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <BarChart3 className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-slate-900 mb-1">Based on Sales</h4>
+                          <p className="text-sm text-slate-600">Easier approval vs banks. We look at your sales, not just credit score.</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Repeat className="w-5 h-5 text-green-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-slate-900 mb-1">Flexible Repayment</h4>
+                          <p className="text-sm text-slate-600">Payments adjust with revenue. Slow month? Lower payment. Busy season? Pay faster.</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-slate-50 to-gray-50 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Award className="w-5 h-5 text-slate-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-slate-900 mb-1">Expert Support</h4>
+                          <p className="text-sm text-slate-600">Led by fintech experts. Recognized on the Inc. 5000 list.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
+            </div>
+
+            {/* Common Use Cases */}
+            <Card variant="bordered" className="bg-gradient-to-br from-slate-50 to-gray-50">
+              <CardHeader>
+                <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                  <Target className="w-5 h-5 text-blue-600" />
+                  Common Use Cases
+                </h3>
+              </CardHeader>
+              <CardBody>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="bg-white rounded-lg p-4 border border-slate-200">
+                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+                      <Sparkles className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <h4 className="font-semibold text-slate-900 mb-2">Marketing Campaigns</h4>
+                    <p className="text-sm text-slate-600">Fund new customer acquisition and advertising initiatives</p>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-4 border border-slate-200">
+                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+                      <Users className="w-6 h-6 text-green-600" />
+                    </div>
+                    <h4 className="font-semibold text-slate-900 mb-2">Hiring Staff</h4>
+                    <p className="text-sm text-slate-600">Bring on new team members to handle growth</p>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-4 border border-slate-200">
+                    <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center mb-3">
+                      <ShoppingBag className="w-6 h-6 text-amber-600" />
+                    </div>
+                    <h4 className="font-semibold text-slate-900 mb-2">Buying Equipment</h4>
+                    <p className="text-sm text-slate-600">Invest in tools and machinery to scale operations</p>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-4 border border-slate-200">
+                    <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
+                      <Star className="w-6 h-6 text-orange-600" />
+                    </div>
+                    <h4 className="font-semibold text-slate-900 mb-2">Expanding Locations</h4>
+                    <p className="text-sm text-slate-600">Open new stores or service areas</p>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-4 border border-slate-200">
+                    <div className="w-12 h-12 bg-rose-100 rounded-lg flex items-center justify-center mb-3">
+                      <TrendingUp className="w-6 h-6 text-rose-600" />
+                    </div>
+                    <h4 className="font-semibold text-slate-900 mb-2">Covering Slow Seasons</h4>
+                    <p className="text-sm text-slate-600">Bridge cash flow gaps during off-peak times</p>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-4 border border-slate-200">
+                    <div className="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center mb-3">
+                      <Award className="w-6 h-6 text-cyan-600" />
+                    </div>
+                    <h4 className="font-semibold text-slate-900 mb-2">Inventory Purchases</h4>
+                    <p className="text-sm text-slate-600">Stock up for busy seasons or take advantage of bulk discounts</p>
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+
+            {/* Ideal For */}
+            <Card variant="bordered" className="bg-blue-50 border-blue-200">
+              <CardHeader>
+                <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                  <Check className="w-5 h-5 text-blue-600" />
+                  Ideal For Businesses That
+                </h3>
+              </CardHeader>
+              <CardBody>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-blue-600 flex-shrink-0 mt-1" />
+                    <p className="text-slate-700">Need quick capital to seize opportunities</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-blue-600 flex-shrink-0 mt-1" />
+                    <p className="text-slate-700">Don't qualify for traditional bank loans</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-blue-600 flex-shrink-0 mt-1" />
+                    <p className="text-slate-700">Have steady card sales and revenue</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-blue-600 flex-shrink-0 mt-1" />
+                    <p className="text-slate-700">Want flexible, revenue-matched payments</p>
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+
+            <div className="text-center">
+              <Button
+                size="lg"
+                onClick={() => navigate('/merchant/business-capital')}
+              >
+                <TrendingUp className="w-5 h-5 mr-2" />
+                Apply for Business Capital
+              </Button>
+              <p className="text-sm text-slate-600 mt-2">
+                Fast approval. Funds as soon as next business day.
+              </p>
             </div>
           </div>
         )}
