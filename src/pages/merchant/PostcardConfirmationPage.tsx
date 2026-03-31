@@ -281,7 +281,7 @@ export default function PostcardConfirmationPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate('/merchant/loyalty')}
+                    onClick={() => navigate('/merchant/merchant-services')}
                   >
                     Setup Follow-Up Campaigns
                   </Button>

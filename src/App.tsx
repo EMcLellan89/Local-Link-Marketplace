@@ -92,7 +92,6 @@ const CRMTasks = lazy(() => import('./pages/merchant/CRMTasks'));
 const CRMReports = lazy(() => import('./pages/merchant/CRMReports'));
 const InvoicingPage = lazy(() => import('./pages/merchant/InvoicingPage'));
 const CreateInvoicePage = lazy(() => import('./pages/merchant/CreateInvoicePage'));
-const LoyaltyPage = lazy(() => import('./pages/merchant/LoyaltyPage'));
 const PostcardsPage = lazy(() => import('./pages/merchant/PostcardsPage'));
 const CustomerReferralSettings = lazy(() => import('./pages/merchant/CustomerReferralSettings'));
 const CustomerReferralDashboard = lazy(() => import('./pages/merchant/CustomerReferralDashboard'));
@@ -1036,14 +1035,6 @@ function AppRoutes() {
         }
       />
 
-      <Route
-        path="/merchant/loyalty"
-        element={
-          <ProtectedRoute allowedRoles={['merchant']}>
-            <LoyaltyPage />
-          </ProtectedRoute>
-        }
-      />
 
       <Route
         path="/merchant/postcards"

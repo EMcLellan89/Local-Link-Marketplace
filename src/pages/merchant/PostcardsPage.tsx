@@ -283,9 +283,9 @@ export default function PostcardsPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate('/merchant/loyalty')}
+                    onClick={() => navigate('/merchant/merchant-services')}
                   >
-                    View Drive Repeat Business
+                    View Loyalty Programs
                   </Button>
                   <Button
                     variant="outline"
