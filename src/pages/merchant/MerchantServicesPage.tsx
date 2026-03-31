@@ -1,626 +1,766 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CreditCard, Check, DollarSign, Zap, ShoppingBag, Shield, Gift, Info } from 'lucide-react';
+import { CreditCard, Gift, TrendingUp, DollarSign, Check, Heart, Repeat, Sparkles, Users, Award, Target, Star, BarChart3, Zap, ShoppingBag, Info } from 'lucide-react';
 import BusinessHubLayout from '../../components/layout/BusinessHubLayout';
 import Card, { CardBody, CardHeader } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
-import BackButton from '../components/ui/BackButton';
+import BackButton from '../../components/ui/BackButton';
+
+type Tab = 'loyalty' | 'giftcards' | 'capital';
 
 export default function MerchantServicesPage() {
   const navigate = useNavigate();
-  const [monthlyVolume, setMonthlyVolume] = useState<number>(10000);
-  const [processingRate, setProcessingRate] = useState<number>(2.9);
-  const [processor, setProcessor] = useState<string>('Square');
-  const [monthlySavings, setMonthlySavings] = useState<number>(0);
-  const [annualSavings, setAnnualSavings] = useState<number>(0);
+  const [activeTab, setActiveTab] = useState<Tab>('loyalty');
 
-  useEffect(() => {
-    calculateSavings();
-  }, [monthlyVolume, processingRate]);
-
-  const calculateSavings = () => {
-    if (monthlyVolume && processingRate) {
-      const currentFees = (monthlyVolume * processingRate) / 100;
-      const monthly = currentFees;
-      const annual = monthly * 12;
-
-      setMonthlySavings(monthly);
-      setAnnualSavings(annual);
-    } else {
-      setMonthlySavings(0);
-      setAnnualSavings(0);
-    }
-  };
+  const tabs = [
+    { id: 'loyalty' as Tab, label: 'Loyalty Program', icon: Heart },
+    { id: 'giftcards' as Tab, label: 'Gift Cards', icon: Gift },
+    { id: 'capital' as Tab, label: 'Business Capital', icon: TrendingUp },
+  ];
 
   return (
     <BusinessHubLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">0% Processing Fees</h1>
+          <BackButton />
+          <h1 className="text-3xl font-bold text-slate-900 mt-4">GoPayBright Merchant Services</h1>
           <p className="text-slate-600 mt-2">
-            Save thousands per month on credit card processing
+            Grow your business with loyalty programs, gift cards, and fast business funding
           </p>
         </div>
 
-        <Card variant="bordered" className="bg-gradient-to-br from-green-50 to-emerald-50">
-          <CardBody>
-            <div className="flex items-center justify-between">
-              <div className="flex items-start flex-1">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                    <CreditCard className="w-6 h-6 text-green-600" />
+        {/* Tab Navigation */}
+        <div className="flex gap-2 border-b border-slate-200">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`
+                  flex items-center gap-2 px-6 py-3 font-medium transition-all border-b-2
+                  ${activeTab === tab.id
+                    ? 'border-[#2BB673] text-[#2BB673]'
+                    : 'border-transparent text-slate-600 hover:text-slate-900'
+                  }
+                `}
+              >
+                <Icon className="w-5 h-5" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Loyalty Program Tab */}
+        {activeTab === 'loyalty' && (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            <Card variant="bordered" className="bg-gradient-to-br from-pink-50 to-rose-50">
+              <CardBody>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-start flex-1">
+                    <div className="flex-shrink-0">
+                      <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl flex items-center justify-center">
+                        <Heart className="w-8 h-8 text-white" />
+                      </div>
+                    </div>
+                    <div className="ml-4">
+                      <h2 className="text-2xl font-bold text-slate-900 mb-2">Go Loyalty System</h2>
+                      <p className="text-slate-700 mb-4">
+                        Fully integrated loyalty and rewards system built directly into your POS. Turn one-time buyers into lifelong customers.
+                      </p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="flex items-center text-sm text-slate-600">
+                          <Check className="w-5 h-5 text-rose-600 mr-2" />
+                          <span>Points-based rewards</span>
+                        </div>
+                        <div className="flex items-center text-sm text-slate-600">
+                          <Check className="w-5 h-5 text-rose-600 mr-2" />
+                          <span>Custom program setup</span>
+                        </div>
+                        <div className="flex items-center text-sm text-slate-600">
+                          <Check className="w-5 h-5 text-rose-600 mr-2" />
+                          <span>POS integration</span>
+                        </div>
+                        <div className="flex items-center text-sm text-slate-600">
+                          <Check className="w-5 h-5 text-rose-600 mr-2" />
+                          <span>Automated marketing</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-bold text-slate-900 mb-1">Save Thousands Every Year</h3>
-                  <p className="text-slate-600 mb-2">
-                    Switch to 0% processing and save $500-$1,500 every month
-                  </p>
-                  <ul className="space-y-1">
-                    <li className="flex items-center text-sm text-slate-600">
-                      <Check className="w-4 h-4 text-green-600 mr-2" />
-                      No monthly fees
-                    </li>
-                    <li className="flex items-center text-sm text-slate-600">
-                      <Check className="w-4 h-4 text-green-600 mr-2" />
-                      Free terminal included
-                    </li>
-                    <li className="flex items-center text-sm text-slate-600">
-                      <Check className="w-4 h-4 text-green-600 mr-2" />
-                      Next-day funding once approved
-                    </li>
-                  </ul>
-                </div>
-              </div>
+              </CardBody>
+            </Card>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Core Features */}
+              <Card variant="bordered">
+                <CardHeader>
+                  <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-rose-600" />
+                    Core Features
+                  </h3>
+                </CardHeader>
+                <CardBody>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                        <Star className="w-4 h-4 text-amber-500" />
+                        Points-Based Rewards
+                      </h4>
+                      <ul className="space-y-2 ml-6">
+                        <li className="text-sm text-slate-600">• Customers earn points per purchase</li>
+                        <li className="text-sm text-slate-600">• Redeem for discounts, free items, or perks</li>
+                        <li className="text-sm text-slate-600">• Works for restaurants, retail, and service businesses</li>
+                      </ul>
+                    </div>
+
+                    <div className="border-t border-slate-200 pt-4">
+                      <h4 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                        <Target className="w-4 h-4 text-blue-500" />
+                        Custom Program Setup
+                      </h4>
+                      <ul className="space-y-2 ml-6">
+                        <li className="text-sm text-slate-600">• Visit-based rewards (e.g., "Buy 5 get 1 free")</li>
+                        <li className="text-sm text-slate-600">• Spend-based rewards ($1 = 1 point)</li>
+                        <li className="text-sm text-slate-600">• Tier/VIP systems for top customers</li>
+                      </ul>
+                    </div>
+
+                    <div className="border-t border-slate-200 pt-4">
+                      <h4 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                        <CreditCard className="w-4 h-4 text-green-500" />
+                        POS Integration
+                      </h4>
+                      <ul className="space-y-2 ml-6">
+                        <li className="text-sm text-slate-600">• Works inside SmartPOS and Verifone</li>
+                        <li className="text-sm text-slate-600">• No extra apps needed for staff</li>
+                        <li className="text-sm text-slate-600">• Seamless checkout experience</li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
+
+              {/* Customer Insights & Marketing */}
+              <Card variant="bordered">
+                <CardHeader>
+                  <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5 text-blue-600" />
+                    Customer Insights & Marketing
+                  </h3>
+                </CardHeader>
+                <CardBody>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                        <Users className="w-4 h-4 text-purple-500" />
+                        Customer Tracking
+                      </h4>
+                      <ul className="space-y-2 ml-6">
+                        <li className="text-sm text-slate-600">• Track purchase history</li>
+                        <li className="text-sm text-slate-600">• Monitor visit frequency</li>
+                        <li className="text-sm text-slate-600">• Analyze spending habits</li>
+                        <li className="text-sm text-slate-600">• Identify high-value customers</li>
+                        <li className="text-sm text-slate-600">• Spot at-risk customers</li>
+                      </ul>
+                    </div>
+
+                    <div className="border-t border-slate-200 pt-4">
+                      <h4 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-amber-500" />
+                        Automated Marketing Tools
+                      </h4>
+                      <ul className="space-y-2 ml-6">
+                        <li className="text-sm text-slate-600">• Send promotions automatically</li>
+                        <li className="text-sm text-slate-600">• Trigger win-back campaigns</li>
+                        <li className="text-sm text-slate-600">• Example: "Haven't visited in 14 days → send offer"</li>
+                        <li className="text-sm text-slate-600">• Birthday rewards</li>
+                        <li className="text-sm text-slate-600">• Loyalty reminders</li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
             </div>
-          </CardBody>
-        </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card variant="bordered">
-            <CardHeader>
-              <h2 className="text-xl font-bold text-slate-900">Calculate Your Savings</h2>
-            </CardHeader>
-            <CardBody>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Current Monthly Processing Volume
-                  </label>
-                  <Input
-                    type="number"
-                    value={monthlyVolume}
-                    onChange={(e) => setMonthlyVolume(Number(e.target.value))}
-                    placeholder="10000"
-                    min="0"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Current Processing Rate (%)
-                  </label>
-                  <Input
-                    type="number"
-                    value={processingRate}
-                    onChange={(e) => setProcessingRate(Number(e.target.value))}
-                    placeholder="2.9"
-                    step="0.1"
-                    min="0"
-                    max="100"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Current Processor
-                  </label>
-                  <select
-                    value={processor}
-                    onChange={(e) => setProcessor(e.target.value)}
-                    className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2BB673] focus:border-transparent"
-                  >
-                    <option>Square</option>
-                    <option>Stripe</option>
-                    <option>PayPal</option>
-                    <option>Clover</option>
-                    <option>Other</option>
-                  </select>
-                </div>
-
-                <div className="bg-green-50 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-slate-600">Monthly Savings</span>
-                    <span className="text-2xl font-bold text-green-600">
-                      ${monthlySavings.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-600">Annual Savings</span>
-                    <span className="text-xl font-bold text-green-600">
-                      ${annualSavings.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                    </span>
-                  </div>
-                </div>
-
-                <Button
-                  fullWidth
-                  size="lg"
-                  onClick={() => navigate('/merchant/merchant-services/application')}
-                >
-                  <DollarSign className="w-5 h-5 mr-2" />
-                  Apply Now
-                </Button>
-              </div>
-            </CardBody>
-          </Card>
-
-          <div className="space-y-6">
-            <Card variant="bordered">
+            {/* Business Impact */}
+            <Card variant="bordered" className="bg-gradient-to-br from-green-50 to-emerald-50">
               <CardHeader>
-                <h2 className="text-xl font-bold text-slate-900">How It Works</h2>
+                <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-green-600" />
+                  Business Impact
+                </h3>
               </CardHeader>
               <CardBody>
-                <ul className="space-y-4">
-                  <li className="flex items-start">
-                    <div className="w-8 h-8 bg-[#2BB673] text-white rounded-full flex items-center justify-center flex-shrink-0 mr-3 font-bold">
-                      1
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-start gap-3 bg-white rounded-lg p-4">
+                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Repeat className="w-5 h-5 text-green-600" />
                     </div>
                     <div>
-                      <h4 className="font-medium text-slate-900">Apply in 5 Minutes</h4>
-                      <p className="text-sm text-slate-600">
-                        Quick and easy application process
-                      </p>
+                      <h4 className="font-semibold text-slate-900 mb-1">Increase Repeat Visits</h4>
+                      <p className="text-sm text-slate-600">Customers come back more frequently to earn and redeem rewards</p>
                     </div>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="w-8 h-8 bg-[#2BB673] text-white rounded-full flex items-center justify-center flex-shrink-0 mr-3 font-bold">
-                      2
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-slate-900">Underwriting Review</h4>
-                      <p className="text-sm text-slate-600">
-                        Approval typically takes about one week
-                      </p>
-                    </div>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="w-8 h-8 bg-[#2BB673] text-white rounded-full flex items-center justify-center flex-shrink-0 mr-3 font-bold">
-                      3
+                  </div>
+
+                  <div className="flex items-start gap-3 bg-white rounded-lg p-4">
+                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <DollarSign className="w-5 h-5 text-green-600" />
                     </div>
                     <div>
-                      <h4 className="font-medium text-slate-900">Get Your Terminal</h4>
-                      <p className="text-sm text-slate-600">
-                        Free card reader ships in 2-3 business days after approval
-                      </p>
+                      <h4 className="font-semibold text-slate-900 mb-1">Raise Average Ticket Size</h4>
+                      <p className="text-sm text-slate-600">Customers spend more to reach reward thresholds</p>
                     </div>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="w-8 h-8 bg-[#2BB673] text-white rounded-full flex items-center justify-center flex-shrink-0 mr-3 font-bold">
-                      4
+                  </div>
+
+                  <div className="flex items-start gap-3 bg-white rounded-lg p-4">
+                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Users className="w-5 h-5 text-green-600" />
                     </div>
                     <div>
-                      <h4 className="font-medium text-slate-900">Start Saving</h4>
-                      <p className="text-sm text-slate-600">
-                        Process payments with 0% fees and next-day funding
-                      </p>
+                      <h4 className="font-semibold text-slate-900 mb-1">Build Customer Database</h4>
+                      <p className="text-sm text-slate-600">Collect valuable data on your best customers</p>
                     </div>
-                  </li>
-                </ul>
+                  </div>
+
+                  <div className="flex items-start gap-3 bg-white rounded-lg p-4">
+                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Heart className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-slate-900 mb-1">Long-Term Relationships</h4>
+                      <p className="text-sm text-slate-600">Transform one-time buyers into loyal clients</p>
+                    </div>
+                  </div>
+                </div>
               </CardBody>
             </Card>
 
-            <Card variant="bordered" className="bg-blue-50">
+            {/* Best Use Cases */}
+            <Card variant="bordered">
+              <CardHeader>
+                <h3 className="text-xl font-bold text-slate-900">Perfect For</h3>
+              </CardHeader>
               <CardBody>
-                <h3 className="font-bold text-slate-900 mb-3">Perks of Gift Cards</h3>
-                <div className="bg-white rounded-lg p-4 mb-4">
-                  <p className="text-sm text-slate-600 mb-3">
-                    <strong className="text-slate-900">18% of gift cards remain unredeemed</strong>, leading to more profits for your business.
-                  </p>
-                  <p className="text-sm text-slate-600">
-                    Gift certificates are old and outdated, upgrade to free customized gift cards. Plus, gift cards serve as free ad space in your customers wallets — let's take advantage of it.
-                  </p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <ShoppingBag className="w-8 h-8 text-orange-600" />
+                    </div>
+                    <p className="font-medium text-slate-900">Restaurants</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Sparkles className="w-8 h-8 text-pink-600" />
+                    </div>
+                    <p className="font-medium text-slate-900">Salons & Spas</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Star className="w-8 h-8 text-blue-600" />
+                    </div>
+                    <p className="font-medium text-slate-900">Retail Shops</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Award className="w-8 h-8 text-purple-600" />
+                    </div>
+                    <p className="font-medium text-slate-900">Service Businesses</p>
+                  </div>
                 </div>
-                <h3 className="font-bold text-slate-900 mb-2">Included Benefits</h3>
-                <ul className="space-y-2">
-                  <li className="flex items-center text-sm text-slate-600">
-                    <Check className="w-4 h-4 text-blue-600 mr-2" />
-                    No monthly fees or hidden charges
-                  </li>
-                  <li className="flex items-center text-sm text-slate-600">
-                    <Check className="w-4 h-4 text-blue-600 mr-2" />
-                    Accept all major credit cards
-                  </li>
-                  <li className="flex items-center text-sm text-slate-600">
-                    <Check className="w-4 h-4 text-blue-600 mr-2" />
-                    Next-day funding to your bank
-                  </li>
-                  <li className="flex items-center text-sm text-slate-600">
-                    <Check className="w-4 h-4 text-blue-600 mr-2" />
-                    Free POS terminal included
-                  </li>
-                  <li className="flex items-center text-sm text-slate-600">
-                    <Check className="w-4 h-4 text-blue-600 mr-2" />
-                    24/7 customer support
-                  </li>
-                </ul>
               </CardBody>
             </Card>
+
+            <div className="text-center">
+              <Button
+                size="lg"
+                onClick={() => navigate('/merchant/merchant-services/application')}
+              >
+                <Heart className="w-5 h-5 mr-2" />
+                Get Started with Loyalty Program
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
 
-        <Card variant="bordered" className="bg-gradient-to-br from-slate-50 to-gray-50">
-          <CardHeader>
-            <h2 className="text-2xl font-bold text-slate-900 text-center">Payment Processing Options</h2>
-            <p className="text-slate-600 text-center mt-2">
-              Choose the pricing structure that works best for your business
-            </p>
-          </CardHeader>
-          <CardBody>
-            <div className="space-y-6">
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-500 rounded-lg p-6">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
-                      <CreditCard className="w-6 h-6 text-white" />
+        {/* Gift Cards Tab */}
+        {activeTab === 'giftcards' && (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            <Card variant="bordered" className="bg-gradient-to-br from-blue-50 to-sky-50">
+              <CardBody>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-start flex-1">
+                    <div className="flex-shrink-0">
+                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-sky-500 rounded-xl flex items-center justify-center">
+                        <Gift className="w-8 h-8 text-white" />
+                      </div>
+                    </div>
+                    <div className="ml-4">
+                      <h2 className="text-2xl font-bold text-slate-900 mb-2">Gift Card Program</h2>
+                      <p className="text-slate-700 mb-4">
+                        Fully customizable gift card program (physical + digital) tied into your POS. Immediate cash flow and customer acquisition tool.
+                      </p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="flex items-center text-sm text-slate-600">
+                          <Check className="w-5 h-5 text-blue-600 mr-2" />
+                          <span>Physical & digital cards</span>
+                        </div>
+                        <div className="flex items-center text-sm text-slate-600">
+                          <Check className="w-5 h-5 text-blue-600 mr-2" />
+                          <span>Branded design</span>
+                        </div>
+                        <div className="flex items-center text-sm text-slate-600">
+                          <Check className="w-5 h-5 text-blue-600 mr-2" />
+                          <span>Balance tracking</span>
+                        </div>
+                        <div className="flex items-center text-sm text-slate-600">
+                          <Check className="w-5 h-5 text-blue-600 mr-2" />
+                          <span>No-cost setup</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="ml-4 flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-xl font-bold text-slate-900">Cash Discount / Dual Pricing</h3>
-                      <span className="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">RECOMMENDED - 0% PROCESSING</span>
+                </div>
+              </CardBody>
+            </Card>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Key Features */}
+              <Card variant="bordered">
+                <CardHeader>
+                  <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-blue-600" />
+                    Key Features
+                  </h3>
+                </CardHeader>
+                <CardBody>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                        <Gift className="w-4 h-4 text-blue-500" />
+                        Physical + Digital Gift Cards
+                      </h4>
+                      <ul className="space-y-2 ml-6">
+                        <li className="text-sm text-slate-600">• Sell in-store OR online</li>
+                        <li className="text-sm text-slate-600">• Digital cards can be texted or emailed</li>
+                        <li className="text-sm text-slate-600">• Scanned via phone at checkout</li>
+                        <li className="text-sm text-slate-600">• Instant delivery options</li>
+                      </ul>
                     </div>
-                    <p className="text-slate-700 mb-3">
-                      <strong className="text-green-700">This is our most popular option and what we advertise!</strong> With cash discount/dual pricing, you pass credit card processing fees to your customers who choose to pay with a card, while offering a discount to cash-paying customers. This allows you to eliminate processing fees entirely and keep 100% of your revenue.
-                    </p>
+
+                    <div className="border-t border-slate-200 pt-4">
+                      <h4 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                        <Award className="w-4 h-4 text-amber-500" />
+                        Branded Cards
+                      </h4>
+                      <ul className="space-y-2 ml-6">
+                        <li className="text-sm text-slate-600">• Custom design with your logo</li>
+                        <li className="text-sm text-slate-600">• Perfect for holidays and promotions</li>
+                        <li className="text-sm text-slate-600">• Great for local marketing</li>
+                        <li className="text-sm text-slate-600">• Professional appearance</li>
+                      </ul>
+                    </div>
+
+                    <div className="border-t border-slate-200 pt-4">
+                      <h4 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                        <BarChart3 className="w-4 h-4 text-green-500" />
+                        Balance Tracking & Redemption
+                      </h4>
+                      <ul className="space-y-2 ml-6">
+                        <li className="text-sm text-slate-600">• Track remaining balances</li>
+                        <li className="text-sm text-slate-600">• View usage history</li>
+                        <li className="text-sm text-slate-600">• Seamless checkout integration</li>
+                        <li className="text-sm text-slate-600">• Real-time updates</li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
+
+              {/* Revenue Benefits */}
+              <Card variant="bordered" className="bg-gradient-to-br from-green-50 to-emerald-50">
+                <CardHeader>
+                  <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                    <DollarSign className="w-5 h-5 text-green-600" />
+                    Revenue Benefits
+                  </h3>
+                </CardHeader>
+                <CardBody>
+                  <div className="space-y-4">
                     <div className="bg-white rounded-lg p-4">
-                      <h4 className="font-semibold text-slate-900 mb-2">Perfect For:</h4>
-                      <ul className="space-y-1 text-sm text-slate-600">
-                        <li className="flex items-start">
-                          <Check className="w-4 h-4 text-green-600 mr-2 mt-0.5 flex-shrink-0" />
-                          Businesses that want to eliminate processing fees completely
-                        </li>
-                        <li className="flex items-start">
-                          <Check className="w-4 h-4 text-green-600 mr-2 mt-0.5 flex-shrink-0" />
-                          High-volume merchants looking to maximize profits
-                        </li>
-                        <li className="flex items-start">
-                          <Check className="w-4 h-4 text-green-600 mr-2 mt-0.5 flex-shrink-0" />
-                          Businesses in competitive markets where every dollar counts
-                        </li>
-                        <li className="flex items-start">
-                          <Check className="w-4 h-4 text-green-600 mr-2 mt-0.5 flex-shrink-0" />
-                          Merchants who want transparent, straightforward pricing
-                        </li>
-                      </ul>
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Zap className="w-5 h-5 text-green-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-slate-900 mb-1">Immediate Cash Flow</h4>
+                          <p className="text-sm text-slate-600">You get paid BEFORE service is delivered. Money in your account today for services you'll provide later.</p>
+                        </div>
+                      </div>
                     </div>
+
+                    <div className="bg-white rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Award className="w-5 h-5 text-amber-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-slate-900 mb-1">Breakage Revenue</h4>
+                          <p className="text-sm text-slate-600"><strong>18% of gift cards are never fully used</strong> — that's extra profit on prepaid revenue.</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Users className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-slate-900 mb-1">Customer Acquisition</h4>
+                          <p className="text-sm text-slate-600">Someone new walks in using a gifted card — instant new customer opportunity.</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <TrendingUp className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-slate-900 mb-1">Average Overspend</h4>
+                          <p className="text-sm text-slate-600">Customers typically spend 20-30% more than the card value when redeeming.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
+            </div>
+
+            {/* Best Use Cases */}
+            <Card variant="bordered">
+              <CardHeader>
+                <h3 className="text-xl font-bold text-slate-900">Perfect For</h3>
+              </CardHeader>
+              <CardBody>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <ShoppingBag className="w-8 h-8 text-orange-600" />
+                    </div>
+                    <p className="font-medium text-slate-900">Restaurants</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Sparkles className="w-8 h-8 text-pink-600" />
+                    </div>
+                    <p className="font-medium text-slate-900">Salons</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Award className="w-8 h-8 text-green-600" />
+                    </div>
+                    <p className="font-medium text-slate-900">Home Services</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Star className="w-8 h-8 text-blue-600" />
+                    </div>
+                    <p className="font-medium text-slate-900">Retail Shops</p>
                   </div>
                 </div>
-              </div>
+              </CardBody>
+            </Card>
 
-              <div className="border border-slate-200 rounded-lg p-6">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <DollarSign className="w-6 h-6 text-blue-600" />
-                    </div>
-                  </div>
-                  <div className="ml-4 flex-1">
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">Flat Rate / Fee</h3>
-                    <p className="text-slate-700 mb-3">
-                      A simple, predictable pricing model where you pay the same percentage rate on every transaction, regardless of card type. This option provides consistency and easy budgeting, though rates are typically higher than other models to account for the processor's risk across all card types.
-                    </p>
-                    <div className="bg-slate-50 rounded-lg p-4">
-                      <h4 className="font-semibold text-slate-900 mb-2">Perfect For:</h4>
-                      <ul className="space-y-1 text-sm text-slate-600">
-                        <li className="flex items-start">
-                          <Check className="w-4 h-4 text-blue-600 mr-2 mt-0.5 flex-shrink-0" />
-                          Small businesses with simple payment needs
-                        </li>
-                        <li className="flex items-start">
-                          <Check className="w-4 h-4 text-blue-600 mr-2 mt-0.5 flex-shrink-0" />
-                          Merchants who value pricing simplicity and predictability
-                        </li>
-                        <li className="flex items-start">
-                          <Check className="w-4 h-4 text-blue-600 mr-2 mt-0.5 flex-shrink-0" />
-                          Businesses with lower monthly processing volumes
-                        </li>
-                        <li className="flex items-start">
-                          <Check className="w-4 h-4 text-blue-600 mr-2 mt-0.5 flex-shrink-0" />
-                          Merchants who don't want to analyze complex fee structures
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border border-slate-200 rounded-lg p-6">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <Info className="w-6 h-6 text-purple-600" />
-                    </div>
-                  </div>
-                  <div className="ml-4 flex-1">
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">Interchange Plus</h3>
-                    <p className="text-slate-700 mb-3">
-                      The most transparent pricing model where you pay the actual interchange fee (set by Visa/Mastercard) plus a small markup to your processor. This gives you the clearest view of your costs and typically results in lower overall fees for higher-volume businesses. However, rates can vary slightly by card type.
-                    </p>
-                    <div className="bg-slate-50 rounded-lg p-4">
-                      <h4 className="font-semibold text-slate-900 mb-2">Perfect For:</h4>
-                      <ul className="space-y-1 text-sm text-slate-600">
-                        <li className="flex items-start">
-                          <Check className="w-4 h-4 text-purple-600 mr-2 mt-0.5 flex-shrink-0" />
-                          Medium to high-volume businesses ($10k+ monthly)
-                        </li>
-                        <li className="flex items-start">
-                          <Check className="w-4 h-4 text-purple-600 mr-2 mt-0.5 flex-shrink-0" />
-                          Merchants who want complete pricing transparency
-                        </li>
-                        <li className="flex items-start">
-                          <Check className="w-4 h-4 text-purple-600 mr-2 mt-0.5 flex-shrink-0" />
-                          Businesses that understand credit card processing
-                        </li>
-                        <li className="flex items-start">
-                          <Check className="w-4 h-4 text-purple-600 mr-2 mt-0.5 flex-shrink-0" />
-                          Merchants looking for the lowest possible effective rate
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border border-slate-200 rounded-lg p-6">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                      <Shield className="w-6 h-6 text-orange-600" />
-                    </div>
-                  </div>
-                  <div className="ml-4 flex-1">
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">True Surcharging</h3>
-                    <p className="text-slate-700 mb-3">
-                      A pricing model where you add a surcharge (typically 3-4%) to credit card transactions only, while debit cards are processed at standard rates. Unlike cash discount programs, surcharging must comply with card brand rules and state regulations, including proper disclosure to customers and registration with card networks.
-                    </p>
-                    <div className="bg-slate-50 rounded-lg p-4">
-                      <h4 className="font-semibold text-slate-900 mb-2">Perfect For:</h4>
-                      <ul className="space-y-1 text-sm text-slate-600">
-                        <li className="flex items-start">
-                          <Check className="w-4 h-4 text-orange-600 mr-2 mt-0.5 flex-shrink-0" />
-                          Businesses in states where surcharging is legal
-                        </li>
-                        <li className="flex items-start">
-                          <Check className="w-4 h-4 text-orange-600 mr-2 mt-0.5 flex-shrink-0" />
-                          Merchants who process mostly credit (not debit) cards
-                        </li>
-                        <li className="flex items-start">
-                          <Check className="w-4 h-4 text-orange-600 mr-2 mt-0.5 flex-shrink-0" />
-                          Businesses willing to manage compliance requirements
-                        </li>
-                        <li className="flex items-start">
-                          <Check className="w-4 h-4 text-orange-600 mr-2 mt-0.5 flex-shrink-0" />
-                          Merchants who want to offset credit card fees specifically
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                <div className="flex items-start">
-                  <Info className="w-6 h-6 text-blue-600 mr-3 flex-shrink-0 mt-1" />
+            {/* Important Note */}
+            <Card variant="bordered" className="bg-blue-50 border-blue-200">
+              <CardBody>
+                <div className="flex items-start gap-3">
+                  <Info className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
                   <div>
-                    <h4 className="font-semibold text-slate-900 mb-2">Not Sure Which Option Is Right For You?</h4>
-                    <p className="text-sm text-slate-600 mb-2">
-                      Our team can help you choose the best pricing structure for your business during the application review process. Most merchants benefit from our <strong>Cash Discount/Dual Pricing (0% processing)</strong> program, but we'll analyze your specific situation to find the perfect fit.
-                    </p>
+                    <h4 className="font-semibold text-slate-900 mb-2">Gift Cards = Free Ad Space in Customer Wallets</h4>
                     <p className="text-sm text-slate-600">
-                      You'll be able to indicate your preference on the application, and our underwriting team will work with you to ensure you get the most cost-effective solution.
+                      Gift certificates are old and outdated. Upgrade to free customized gift cards that serve as constant brand reminders. Every time someone opens their wallet, they see your business — that's powerful, ongoing marketing at zero cost.
                     </p>
                   </div>
                 </div>
-              </div>
+              </CardBody>
+            </Card>
+
+            <div className="text-center">
+              <Button
+                size="lg"
+                onClick={() => navigate('/merchant/merchant-services/application')}
+              >
+                <Gift className="w-5 h-5 mr-2" />
+                Get Started with Gift Cards
+              </Button>
             </div>
-          </CardBody>
-        </Card>
+          </div>
+        )}
 
-        <Card variant="bordered">
-          <CardHeader>
-            <h2 className="text-2xl font-bold text-slate-900 text-center">No Hidden Fees</h2>
-            <p className="text-slate-600 text-center mt-2">
-              Clear pricing with no junk charges buried in fine print
-            </p>
-          </CardHeader>
-          <CardBody>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="flex items-start">
-                <div className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center flex-shrink-0 mr-4 font-bold">
-                  2
+        {/* Business Capital Tab */}
+        {activeTab === 'capital' && (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            <Card variant="bordered" className="bg-gradient-to-br from-emerald-50 to-green-50">
+              <CardBody>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-start flex-1">
+                    <div className="flex-shrink-0">
+                      <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl flex items-center justify-center">
+                        <TrendingUp className="w-8 h-8 text-white" />
+                      </div>
+                    </div>
+                    <div className="ml-4">
+                      <h2 className="text-2xl font-bold text-slate-900 mb-2">Business Capital & Funding</h2>
+                      <p className="text-slate-700 mb-4">
+                        Fast, flexible funding solutions for small and medium-sized businesses. Same-day or next-day funding available.
+                      </p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="flex items-center text-sm text-slate-600">
+                          <Check className="w-5 h-5 text-green-600 mr-2" />
+                          <span>Same/next-day funding</span>
+                        </div>
+                        <div className="flex items-center text-sm text-slate-600">
+                          <Check className="w-5 h-5 text-green-600 mr-2" />
+                          <span>Flexible repayment</span>
+                        </div>
+                        <div className="flex items-center text-sm text-slate-600">
+                          <Check className="w-5 h-5 text-green-600 mr-2" />
+                          <span>Based on sales, not credit</span>
+                        </div>
+                        <div className="flex items-center text-sm text-slate-600">
+                          <Check className="w-5 h-5 text-green-600 mr-2" />
+                          <span>Expert support</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold text-slate-900 mb-1">No Rate Increases</h4>
-                  <p className="text-sm text-slate-600">
-                    We guarantee your processing rates will never be increased by PayBright
-                  </p>
-                </div>
-              </div>
+              </CardBody>
+            </Card>
 
-              <div className="flex items-start">
-                <div className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center flex-shrink-0 mr-4 font-bold">
-                  3
-                </div>
-                <div>
-                  <h4 className="font-semibold text-slate-900 mb-1">Month-to-Month Flexibility</h4>
-                  <p className="text-sm text-slate-600">
-                    We earn your business every month; no long-term lock-ins
-                  </p>
-                </div>
-              </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Funding Types */}
+              <Card variant="bordered">
+                <CardHeader>
+                  <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                    <DollarSign className="w-5 h-5 text-green-600" />
+                    Funding Options
+                  </h3>
+                </CardHeader>
+                <CardBody>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-amber-500" />
+                        Merchant Cash Advances (MCA)
+                      </h4>
+                      <ul className="space-y-2 ml-6">
+                        <li className="text-sm text-slate-600">• Advance based on future sales</li>
+                        <li className="text-sm text-slate-600">• Paid back via daily card sales percentage</li>
+                        <li className="text-sm text-slate-600">• No fixed monthly payment</li>
+                        <li className="text-sm text-slate-600">• Perfect for seasonal businesses</li>
+                      </ul>
+                    </div>
 
-              <div className="flex items-start">
-                <div className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center flex-shrink-0 mr-4 font-bold">
-                  4
-                </div>
-                <div>
-                  <h4 className="font-semibold text-slate-900 mb-1">Free Equipment Options</h4>
-                  <p className="text-sm text-slate-600">
-                    Access to terminals and POS systems without surprise costs
-                  </p>
-                </div>
-              </div>
+                    <div className="border-t border-slate-200 pt-4">
+                      <h4 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                        <CreditCard className="w-4 h-4 text-blue-500" />
+                        Small Business Loans
+                      </h4>
+                      <ul className="space-y-2 ml-6">
+                        <li className="text-sm text-slate-600">• Fixed repayment structure</li>
+                        <li className="text-sm text-slate-600">• Larger funding amounts possible</li>
+                        <li className="text-sm text-slate-600">• Predictable payments</li>
+                        <li className="text-sm text-slate-600">• Traditional loan structure</li>
+                      </ul>
+                    </div>
 
-              <div className="flex items-start">
-                <div className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center flex-shrink-0 mr-4 font-bold">
-                  5
-                </div>
-                <div>
-                  <h4 className="font-semibold text-slate-900 mb-1">Rapid Human Support</h4>
-                  <p className="text-sm text-slate-600">
-                    Real people, quick responses, and a partner who cares
-                  </p>
-                </div>
-              </div>
+                    <div className="border-t border-slate-200 pt-4">
+                      <h4 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                        <TrendingUp className="w-4 h-4 text-purple-500" />
+                        Revenue-Based Financing
+                      </h4>
+                      <ul className="space-y-2 ml-6">
+                        <li className="text-sm text-slate-600">• Payments scale with your income</li>
+                        <li className="text-sm text-slate-600">• Lower payments during slow periods</li>
+                        <li className="text-sm text-slate-600">• Higher payments during busy seasons</li>
+                        <li className="text-sm text-slate-600">• Matches your cash flow</li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
 
-              <div className="flex items-start">
-                <div className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center flex-shrink-0 mr-4 font-bold">
-                  6
-                </div>
-                <div>
-                  <h4 className="font-semibold text-slate-900 mb-1">Technology that Works</h4>
-                  <p className="text-sm text-slate-600">
-                    Solutions that grow with your business, not hold you back
-                  </p>
-                </div>
-              </div>
+              {/* Key Features */}
+              <Card variant="bordered">
+                <CardHeader>
+                  <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-amber-600" />
+                    Key Features
+                  </h3>
+                </CardHeader>
+                <CardBody>
+                  <div className="space-y-4">
+                    <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Zap className="w-5 h-5 text-amber-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-slate-900 mb-1">Fast Funding</h4>
+                          <p className="text-sm text-slate-600">Same-day and next-day approvals available. Get cash when you need it most.</p>
+                        </div>
+                      </div>
+                    </div>
 
-              <div className="flex items-start">
-                <div className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center flex-shrink-0 mr-4 font-bold">
-                  7
-                </div>
-                <div>
-                  <h4 className="font-semibold text-slate-900 mb-1">Full Transparency</h4>
-                  <p className="text-sm text-slate-600">
-                    Honest communication, clear reporting, and straightforward agreements
-                  </p>
-                </div>
-              </div>
+                    <div className="bg-gradient-to-br from-blue-50 to-sky-50 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <BarChart3 className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-slate-900 mb-1">Based on Sales</h4>
+                          <p className="text-sm text-slate-600">Easier approval vs banks. We look at your sales, not just credit score.</p>
+                        </div>
+                      </div>
+                    </div>
 
-              <div className="flex items-start">
-                <div className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center flex-shrink-0 mr-4 font-bold">
-                  8
-                </div>
-                <div>
-                  <h4 className="font-semibold text-slate-900 mb-1">Protection from Predatory Practices</h4>
-                  <p className="text-sm text-slate-600">
-                    No bait-and-switch teaser rates or hidden increases
-                  </p>
-                </div>
-              </div>
+                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Repeat className="w-5 h-5 text-green-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-slate-900 mb-1">Flexible Repayment</h4>
+                          <p className="text-sm text-slate-600">Payments adjust with revenue. Slow month? Lower payment. Busy season? Pay faster.</p>
+                        </div>
+                      </div>
+                    </div>
 
-              <div className="flex items-start">
-                <div className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center flex-shrink-0 mr-4 font-bold">
-                  9
-                </div>
-                <div>
-                  <h4 className="font-semibold text-slate-900 mb-1">Leadership That's On Your Side</h4>
-                  <p className="text-sm text-slate-600">
-                    Access to a leadership team that stands behind you — every single day
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start">
-                <div className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center flex-shrink-0 mr-4 font-bold">
-                  10
-                </div>
-                <div>
-                  <h4 className="font-semibold text-slate-900 mb-1">Shared Success</h4>
-                  <p className="text-sm text-slate-600">
-                    Your growth is our growth; we win only when you win
-                  </p>
-                </div>
-              </div>
+                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Award className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-slate-900 mb-1">Expert Support</h4>
+                          <p className="text-sm text-slate-600">Led by fintech experts. Recognized on the Inc. 5000 list.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
             </div>
-          </CardBody>
-        </Card>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card variant="bordered" className="bg-gradient-to-br from-amber-50 to-orange-50">
-            <CardBody>
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-                    <Zap className="w-6 h-6 text-amber-600" />
+            {/* Common Use Cases */}
+            <Card variant="bordered" className="bg-gradient-to-br from-slate-50 to-gray-50">
+              <CardHeader>
+                <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                  <Target className="w-5 h-5 text-blue-600" />
+                  Common Use Cases
+                </h3>
+              </CardHeader>
+              <CardBody>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="bg-white rounded-lg p-4 border border-slate-200">
+                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+                      <Sparkles className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <h4 className="font-semibold text-slate-900 mb-2">Marketing Campaigns</h4>
+                    <p className="text-sm text-slate-600">Fund new customer acquisition and advertising initiatives</p>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-4 border border-slate-200">
+                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+                      <Users className="w-6 h-6 text-green-600" />
+                    </div>
+                    <h4 className="font-semibold text-slate-900 mb-2">Hiring Staff</h4>
+                    <p className="text-sm text-slate-600">Bring on new team members to handle growth</p>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-4 border border-slate-200">
+                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
+                      <ShoppingBag className="w-6 h-6 text-purple-600" />
+                    </div>
+                    <h4 className="font-semibold text-slate-900 mb-2">Buying Equipment</h4>
+                    <p className="text-sm text-slate-600">Invest in tools and machinery to scale operations</p>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-4 border border-slate-200">
+                    <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center mb-3">
+                      <Star className="w-6 h-6 text-amber-600" />
+                    </div>
+                    <h4 className="font-semibold text-slate-900 mb-2">Expanding Locations</h4>
+                    <p className="text-sm text-slate-600">Open new stores or service areas</p>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-4 border border-slate-200">
+                    <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
+                      <TrendingUp className="w-6 h-6 text-orange-600" />
+                    </div>
+                    <h4 className="font-semibold text-slate-900 mb-2">Covering Slow Seasons</h4>
+                    <p className="text-sm text-slate-600">Bridge cash flow gaps during off-peak times</p>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-4 border border-slate-200">
+                    <div className="w-12 h-12 bg-rose-100 rounded-lg flex items-center justify-center mb-3">
+                      <Award className="w-6 h-6 text-rose-600" />
+                    </div>
+                    <h4 className="font-semibold text-slate-900 mb-2">Inventory Purchases</h4>
+                    <p className="text-sm text-slate-600">Stock up for busy seasons or take advantage of bulk discounts</p>
                   </div>
                 </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-bold text-slate-900 mb-2">GET YOUR MONEY ASAP</h3>
-                  <p className="text-slate-600">
-                    We offer Next Day and Same Day funding options to help qualified merchants access their money faster and keep cash flow moving.
-                  </p>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
+              </CardBody>
+            </Card>
 
-          <Card variant="bordered" className="bg-gradient-to-br from-blue-50 to-sky-50">
-            <CardBody>
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <ShoppingBag className="w-6 h-6 text-blue-600" />
+            {/* Ideal For */}
+            <Card variant="bordered" className="bg-blue-50 border-blue-200">
+              <CardHeader>
+                <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                  <Check className="w-5 h-5 text-blue-600" />
+                  Ideal For Businesses That
+                </h3>
+              </CardHeader>
+              <CardBody>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-blue-600 flex-shrink-0 mt-1" />
+                    <p className="text-slate-700">Need quick capital to seize opportunities</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-blue-600 flex-shrink-0 mt-1" />
+                    <p className="text-slate-700">Don't qualify for traditional bank loans</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-blue-600 flex-shrink-0 mt-1" />
+                    <p className="text-slate-700">Have steady card sales and revenue</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-blue-600 flex-shrink-0 mt-1" />
+                    <p className="text-slate-700">Want flexible, revenue-matched payments</p>
                   </div>
                 </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-bold text-slate-900 mb-2">POINT OF SALE</h3>
-                  <p className="text-slate-600">
-                    Need the right system for your business? PayBright provides fully customized POS solutions tailored to fit every business type and size.
-                  </p>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
+              </CardBody>
+            </Card>
 
-          <Card variant="bordered" className="bg-gradient-to-br from-emerald-50 to-teal-50">
-            <CardBody>
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
-                    <Shield className="w-6 h-6 text-emerald-600" />
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-bold text-slate-900 mb-2">NO 'GOTCHAS' PRICING</h3>
-                  <p className="text-slate-600">
-                    Our merchants benefit from ultra-competitive pricing and no surprise rate hikes—just transparent, consistent costs that help your business thrive.
-                  </p>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card variant="bordered" className="bg-gradient-to-br from-rose-50 to-pink-50">
-            <CardBody>
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-rose-100 rounded-lg flex items-center justify-center">
-                    <Gift className="w-6 h-6 text-rose-600" />
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-bold text-slate-900 mb-2">VALUE ADDED SERVICES</h3>
-                  <p className="text-slate-600">
-                    From ACH, business loans, MCAs, gift cards, loyalty programs, and more — we give your business the tools to grow, retain customers, and operate smarter.
-                  </p>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-        </div>
+            <div className="text-center">
+              <Button
+                size="lg"
+                onClick={() => navigate('/merchant/merchant-services/application')}
+              >
+                <TrendingUp className="w-5 h-5 mr-2" />
+                Apply for Business Capital
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </BusinessHubLayout>
   );
