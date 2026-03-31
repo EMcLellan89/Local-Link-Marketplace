@@ -55,7 +55,6 @@ export default function BusinessHubLayout({ children }: BusinessHubLayoutProps) 
     { to: '/merchant/appointment-setting', icon: Bot, label: 'AI Appointment Booking' },
     { to: '/merchant/hire', icon: Briefcase, label: 'Hire Remote Workers', badge: 'NEW' },
     { to: '/merchant/merchant-services', icon: CreditCard, label: 'Merchant Services' },
-    { to: '/merchant/capital', icon: Briefcase, label: 'Business Capital' },
     { to: '/merchant/recruiting', icon: UserPlus, label: 'Recruiting Tools' },
     { to: '/merchant/postcards', icon: Megaphone, label: 'Postcard Advertising' },
     { to: '/merchant/payment-settings', icon: CreditCard, label: 'Payment Settings', badge: 'NEW' },

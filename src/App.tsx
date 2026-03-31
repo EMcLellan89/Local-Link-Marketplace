@@ -69,7 +69,6 @@ const AppointmentSettingCheckoutPage = lazy(() => import('./pages/merchant/Appoi
 const AppointmentSettingConfirmationPage = lazy(() => import('./pages/merchant/AppointmentSettingConfirmationPage'));
 const HireJobsPage = lazy(() => import('./pages/merchant/HireJobsPage'));
 const MerchantServicesPage = lazy(() => import('./pages/merchant/MerchantServicesPage'));
-const BusinessCapitalPage = lazy(() => import('./pages/merchant/BusinessCapitalPage'));
 const RecruitingPage = lazy(() => import('./pages/merchant/RecruitingPage'));
 const JobTemplatesCheckoutPage = lazy(() => import('./pages/merchant/JobTemplatesCheckoutPage'));
 const JobTemplatesConfirmationPage = lazy(() => import('./pages/merchant/JobTemplatesConfirmationPage'));
@@ -855,14 +854,6 @@ function AppRoutes() {
         }
       />
 
-      <Route
-        path="/merchant/capital"
-        element={
-          <ProtectedRoute allowedRoles={['merchant']}>
-            <BusinessCapitalPage />
-          </ProtectedRoute>
-        }
-      />
 
       <Route
         path="/merchant/recruiting"
