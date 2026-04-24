@@ -20,6 +20,8 @@ const Register = lazy(() => import('./pages/Register'));
 const DealsPage = lazy(() => import('./pages/customer/DealsPage'));
 const OffersPage = lazy(() => import('./pages/customer/OffersPage'));
 const CommunityPage = lazy(() => import('./pages/customer/CommunityPage'));
+const FoodDiningPage = lazy(() => import('./pages/customer/FoodDiningPage'));
+const KidsFamilyPage = lazy(() => import('./pages/customer/KidsFamilyPage'));
 const PartnerCommunityPage = lazy(() => import('./pages/partner/PartnerCommunityPage'));
 const DealDetailPage = lazy(() => import('./pages/customer/DealDetailPage'));
 const PurchaseConfirmationPage = lazy(() => import('./pages/customer/PurchaseConfirmationPage'));
@@ -399,6 +401,8 @@ function AppRoutes() {
       <Route path="/deals" element={user ? <DealsPage /> : <Navigate to="/login" replace />} />
       <Route path="/offers" element={user ? <OffersPage /> : <Navigate to="/login" replace />} />
       <Route path="/community" element={<CommunityPage />} />
+      <Route path="/food" element={<FoodDiningPage />} />
+      <Route path="/kids-family" element={<KidsFamilyPage />} />
 
       <Route
         path="/deal/:id"
