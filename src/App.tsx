@@ -304,6 +304,12 @@ const PartnerCompliancePage = lazy(() => import('./pages/partner/PartnerComplian
 const PartnerLeadPipelinePage = lazy(() => import('./pages/partner/PartnerLeadPipelinePage'));
 const PartnerTaxCenterPage = lazy(() => import('./pages/partner/PartnerTaxCenterPage'));
 
+// Internal Sales Team / Fulfillment
+const SalesDashboard = lazy(() => import('./pages/internal/SalesDashboard'));
+const WorkQueuePage = lazy(() => import('./pages/internal/WorkQueuePage'));
+const AdminSalesTeamPage = lazy(() => import('./pages/admin/AdminSalesTeamPage'));
+const AdminFulfillmentPage = lazy(() => import('./pages/admin/AdminFulfillmentPage'));
+
 // Admin Course Management
 const AdminCoursesList = lazy(() => import('./pages/admin/AdminCoursesList'));
 const AdminCourseEditor = lazy(() => import('./pages/admin/AdminCourseEditor'));
@@ -1831,6 +1837,27 @@ function AppRoutes() {
           </InternalTeamRoute>
         }
       />
+
+      <Route
+        path="/internal/sales-dashboard"
+        element={
+          <InternalTeamRoute>
+            <SalesDashboard />
+          </InternalTeamRoute>
+        }
+      />
+
+      <Route
+        path="/internal/work-queue"
+        element={
+          <InternalTeamRoute>
+            <WorkQueuePage />
+          </InternalTeamRoute>
+        }
+      />
+
+      <Route path="/admin/sales-team" element={<AdminSalesTeamPage />} />
+      <Route path="/admin/fulfillment" element={<AdminFulfillmentPage />} />
 
       <Route path="/partner/expansion" element={<ExpansionRequestPage />} />
 
