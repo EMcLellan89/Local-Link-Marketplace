@@ -292,6 +292,18 @@ const AdminBadgesManager = lazy(() => import('./pages/admin/AdminBadgesManager')
 const AdminPartnerBadgesPage = lazy(() => import('./pages/admin/AdminPartnerBadgesPage'));
 const AdminSystemEventsPage = lazy(() => import('./pages/admin/AdminSystemEventsPage'));
 
+// Admin Partner Quality / Payouts / Commission Rules / Disputes / Ad Engine
+const AdminPartnerQualityPage = lazy(() => import('./pages/admin/AdminPartnerQualityPage'));
+const AdminPayoutApprovalPage = lazy(() => import('./pages/admin/AdminPayoutApprovalPage'));
+const AdminCommissionRulesPage = lazy(() => import('./pages/admin/AdminCommissionRulesPage'));
+const AdminAttributionDisputePage = lazy(() => import('./pages/admin/AdminAttributionDisputePage'));
+const AdminAdEnginePage = lazy(() => import('./pages/admin/AdminAdEnginePage'));
+
+// Partner Compliance / Leads / Tax
+const PartnerCompliancePage = lazy(() => import('./pages/partner/PartnerCompliancePage'));
+const PartnerLeadPipelinePage = lazy(() => import('./pages/partner/PartnerLeadPipelinePage'));
+const PartnerTaxCenterPage = lazy(() => import('./pages/partner/PartnerTaxCenterPage'));
+
 // Admin Course Management
 const AdminCoursesList = lazy(() => import('./pages/admin/AdminCoursesList'));
 const AdminCourseEditor = lazy(() => import('./pages/admin/AdminCourseEditor'));
@@ -1681,6 +1693,11 @@ function AppRoutes() {
       <Route path="/admin/dfy/orders" element={<AdminDFYOrdersPage />} />
       <Route path="/admin/dfy/orders/:orderId" element={<AdminDFYOrderDetailPage />} />
       <Route path="/admin/commissions" element={<AdminCommissionsPage />} />
+      <Route path="/admin/partner-quality" element={<AdminPartnerQualityPage />} />
+      <Route path="/admin/payout-approval" element={<AdminPayoutApprovalPage />} />
+      <Route path="/admin/commission-rules" element={<AdminCommissionRulesPage />} />
+      <Route path="/admin/attribution-disputes" element={<AdminAttributionDisputePage />} />
+      <Route path="/admin/ads" element={<AdminAdEnginePage />} />
       <Route path="/admin/academy/modules" element={<AcademyModulesPage />} />
       <Route path="/admin/academy/lessons" element={<AcademyLessonsPage />} />
       <Route path="/admin/academy/exam-questions" element={<AcademyExamQuestionsPage />} />
@@ -1860,6 +1877,24 @@ function AppRoutes() {
       <Route path="/partner/certifications" element={
         <ProtectedRoute>
           <PartnerCertificationsPage />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/partner/compliance" element={
+        <ProtectedRoute>
+          <PartnerCompliancePage />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/partner/leads" element={
+        <ProtectedRoute>
+          <PartnerLeadPipelinePage />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/partner/tax" element={
+        <ProtectedRoute>
+          <PartnerTaxCenterPage />
         </ProtectedRoute>
       } />
 
