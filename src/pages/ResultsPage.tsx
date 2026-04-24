@@ -1,12 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Star, ArrowRight, TrendingUp, Users, Target, DollarSign,
-  CheckCircle, Zap, Store, Award, MessageSquare, BarChart2,
-  ChevronRight, Quote, Activity, Briefcase, Clock, RefreshCw
+  ArrowRight, TrendingUp, Users, Target, DollarSign,
+  CheckCircle, Zap, Store, Award, BarChart2,
+  ChevronRight, Activity, Briefcase, RefreshCw,
+  MessageSquare, Star, Tag, Filter, Clock, Quote
 } from 'lucide-react';
 import { SEO } from '../components/SEO';
 import { supabase } from '../lib/supabase';
+
+// ── Types ──────────────────────────────────────────────────────────────────
 
 interface Testimonial {
   id: string;
@@ -15,6 +18,9 @@ interface Testimonial {
   business_type: string;
   content: string;
   result_badge: string;
+  result_tags: string[];
+  filter_category: string;
+  created_at: string;
 }
 
 interface CaseStudy {
@@ -26,12 +32,15 @@ interface CaseStudy {
   tools_used: string[];
   result_summary: string;
   quote: string;
+  published_at: string | null;
 }
 
-interface ActivityItem {
+interface FeedItem {
   id: string;
-  type: string;
-  message: string;
+  activity_type: string;
+  display_message: string;
+  city: string | null;
+  state: string | null;
   created_at: string;
 }
 
@@ -39,110 +48,128 @@ interface ProofStat {
   stat_key: string;
   stat_value: number;
   display_label: string;
-  display_suffix: string;
 }
 
-const TYPE_ICONS: Record<string, React.ReactNode> = {
-  merchant_signup: <Store className="w-4 h-4 text-blue-500" />,
-  offer_created: <Tag className="w-4 h-4 text-green-500" />,
-  lead_received: <Target className="w-4 h-4 text-orange-500" />,
-  booking_created: <CheckCircle className="w-4 h-4 text-teal-500" />,
-  partner_signup: <Users className="w-4 h-4 text-sky-500" />,
-  commission_earned: <DollarSign className="w-4 h-4 text-emerald-500" />,
+type FilterKey = 'all' | 'businesses' | 'partners' | 'ai' | 'crm';
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+const FEED_ICONS: Record<string, React.ReactNode> = {
+  merchant_joined:          <Store className="w-3.5 h-3.5 text-blue-400" />,
+  offer_posted:             <Tag className="w-3.5 h-3.5 text-green-400" />,
+  event_posted:             <Activity className="w-3.5 h-3.5 text-purple-400" />,
+  lead_captured:            <Target className="w-3.5 h-3.5 text-orange-400" />,
+  booking_created:          <CheckCircle className="w-3.5 h-3.5 text-teal-400" />,
+  partner_commission_earned:<DollarSign className="w-3.5 h-3.5 text-emerald-400" />,
+  testimonial_submitted:    <MessageSquare className="w-3.5 h-3.5 text-sky-400" />,
+  business_featured:        <Star className="w-3.5 h-3.5 text-yellow-400" />,
 };
 
-const Tag = ({ children, color = 'blue' }: { children: React.ReactNode; color?: string }) => {
-  const colors: Record<string, string> = {
-    blue: 'bg-blue-100 text-blue-700',
-    green: 'bg-green-100 text-green-700',
-    orange: 'bg-orange-100 text-orange-700',
-    teal: 'bg-teal-100 text-teal-700',
-  };
-  return (
-    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${colors[color] || colors.blue}`}>
-      {children}
-    </span>
-  );
+const TAG_COLORS: Record<string, string> = {
+  'Got First Customer':   'bg-green-100 text-green-700',
+  'Increased Leads':      'bg-orange-100 text-orange-700',
+  'Time Saved':           'bg-blue-100 text-blue-700',
+  'AI Automation':        'bg-violet-100 text-violet-700',
+  'CRM Included':         'bg-teal-100 text-teal-700',
+  'Lead Follow-Up':       'bg-yellow-100 text-yellow-700',
+  'Partner Earnings':     'bg-emerald-100 text-emerald-700',
+  'Community Visibility': 'bg-sky-100 text-sky-700',
+  'Automated Follow-Up':  'bg-indigo-100 text-indigo-700',
 };
 
-function timeAgo(isoDate: string): string {
-  const diff = Date.now() - new Date(isoDate).getTime();
+function timeAgo(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diff / 60000);
   if (mins < 2) return 'Just now';
   if (mins < 60) return `${mins}m ago`;
   const hrs = Math.floor(mins / 60);
   if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
+  if (hrs < 48) return 'Yesterday';
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days} days ago`;
+  return 'This week';
 }
+
+function formatStatValue(key: string, value: number): string {
+  if (key === 'partner_commissions_paid_cents') {
+    return value === 0 ? '—' : '$' + (value / 100).toLocaleString();
+  }
+  return value === 0 ? '—' : value.toLocaleString();
+}
+
+const FILTERS: { key: FilterKey; label: string }[] = [
+  { key: 'all',        label: 'All' },
+  { key: 'businesses', label: 'Businesses' },
+  { key: 'partners',   label: 'Partners' },
+  { key: 'ai',         label: 'AI / Automation' },
+  { key: 'crm',        label: 'CRM / 1Hub' },
+];
+
+// ── Component ──────────────────────────────────────────────────────────────
 
 export default function ResultsPage() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [caseStudies, setCaseStudies] = useState<CaseStudy[]>([]);
-  const [feed, setFeed] = useState<ActivityItem[]>([]);
+  const [feed, setFeed] = useState<FeedItem[]>([]);
   const [stats, setStats] = useState<ProofStat[]>([]);
   const [loading, setLoading] = useState(true);
-  const feedRef = useRef<HTMLDivElement>(null);
-  const [animating, setAnimating] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<FilterKey>('all');
+  const [feedAnimating, setFeedAnimating] = useState(false);
+  const feedRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
-  // Auto-scroll activity feed every 4s
+  // Auto-rotate feed every 5s
   useEffect(() => {
     if (feed.length === 0) return;
-    const interval = setInterval(() => {
-      setAnimating(true);
+    feedRef.current = setInterval(() => {
+      setFeedAnimating(true);
       setTimeout(() => {
-        setFeed(prev => {
-          const [first, ...rest] = prev;
-          return [...rest, first];
-        });
-        setAnimating(false);
-      }, 300);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [feed]);
+        setFeed(prev => { const [f, ...rest] = prev; return [...rest, f]; });
+        setFeedAnimating(false);
+      }, 350);
+    }, 5000);
+    return () => { if (feedRef.current) clearInterval(feedRef.current); };
+  }, [feed.length]);
 
   async function loadData() {
     try {
-      const [testimonialsRes, caseStudiesRes, feedRes, statsRes] = await Promise.all([
-        supabase.from('testimonials').select('*').eq('approved', true).order('featured', { ascending: false }).limit(6),
-        supabase.from('case_studies').select('*').eq('published', true).limit(3),
-        supabase.rpc('get_public_activity_feed', { p_limit: 12 }),
+      const [tRes, csRes, feedRes, statsRes] = await Promise.all([
+        supabase.from('testimonials').select('*').eq('approved', true)
+          .order('featured', { ascending: false }).order('created_at', { ascending: false }).limit(12),
+        supabase.from('case_studies').select('*').eq('published', true).limit(6),
+        supabase.rpc('get_homepage_activity_feed', { p_limit: 12 }),
         supabase.from('platform_proof_stats').select('*'),
       ]);
-      if (testimonialsRes.data) setTestimonials(testimonialsRes.data);
-      if (caseStudiesRes.data) setCaseStudies(caseStudiesRes.data);
+      if (tRes.data) setTestimonials(tRes.data);
+      if (csRes.data) setCaseStudies(csRes.data);
       if (feedRes.data) setFeed(feedRes.data);
       if (statsRes.data) setStats(statsRes.data);
     } catch (err) {
-      console.error('Error loading results data:', err);
+      console.error('Results data error:', err);
     } finally {
       setLoading(false);
     }
   }
 
-  const merchantStats = [
-    { key: 'businesses_launched', icon: <Store className="w-7 h-7 text-blue-600" />, fallback: 'Early Access', bg: 'bg-blue-50' },
-    { key: 'leads_captured', icon: <Target className="w-7 h-7 text-orange-600" />, fallback: 'Live Tracking', bg: 'bg-orange-50' },
-    { key: 'bookings_created', icon: <CheckCircle className="w-7 h-7 text-teal-600" />, fallback: 'Growing Daily', bg: 'bg-teal-50' },
-    { key: 'partner_commissions_paid_cents', icon: <DollarSign className="w-7 h-7 text-emerald-600" />, fallback: 'Active Partners', bg: 'bg-emerald-50' },
-  ];
+  const filteredTestimonials = activeFilter === 'all'
+    ? testimonials
+    : testimonials.filter(t => t.filter_category === activeFilter);
 
-  function formatStatValue(key: string, value: number): string {
-    if (key === 'partner_commissions_paid_cents') {
-      if (value === 0) return '—';
-      return '$' + (value / 100).toLocaleString();
-    }
-    if (value === 0) return '—';
-    return value.toLocaleString();
-  }
+  const displayedTestimonials = filteredTestimonials.slice(0, 9);
 
   const getStatData = (key: string) => stats.find(s => s.stat_key === key);
 
-  const partnerTestimonials = testimonials.filter(t => t.role === 'partner');
-  const merchantTestimonials = testimonials.filter(t => t.role !== 'partner');
+  const STAT_CONFIG = [
+    { key: 'businesses_launched',            icon: <Store className="w-7 h-7 text-blue-600" />,    bg: 'bg-blue-50',    fallback: 'Early Access' },
+    { key: 'leads_captured',                 icon: <Target className="w-7 h-7 text-orange-600" />, bg: 'bg-orange-50',  fallback: 'Live Tracking' },
+    { key: 'bookings_created',               icon: <CheckCircle className="w-7 h-7 text-teal-600" />, bg: 'bg-teal-50', fallback: 'Growing Daily' },
+    { key: 'partner_commissions_paid_cents', icon: <DollarSign className="w-7 h-7 text-emerald-600" />, bg: 'bg-emerald-50', fallback: 'Active Partners' },
+  ];
+
+  // Separate "started with nothing" stories (Starter plan, beginner journey)
+  const beginnerCases = caseStudies.filter(c => c.plan_used?.toLowerCase() === 'starter');
+  const otherCases = caseStudies.filter(c => c.plan_used?.toLowerCase() !== 'starter');
 
   return (
     <>
@@ -150,9 +177,9 @@ export default function ResultsPage() {
         title="Real Results | Local-Link Marketplace"
         description="See how real businesses and partners are using Local-Link to get customers, grow, and automate — all in one connected system."
       />
-
       <div className="min-h-screen bg-white">
-        {/* ── NAV ─────────────────────────────────────────── */}
+
+        {/* ── NAV ──────────────────────────────────────────── */}
         <nav className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2">
@@ -164,7 +191,7 @@ export default function ResultsPage() {
             <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
               <Link to="/community" className="hover:text-blue-600 transition-colors">Community</Link>
               <Link to="/offers" className="hover:text-blue-600 transition-colors">Find Services</Link>
-              <Link to="/results" className="text-blue-600 font-semibold">Results</Link>
+              <Link to="/results" className="text-blue-600 font-semibold border-b-2 border-blue-600 pb-0.5">Results</Link>
               <Link to="/earn" className="hover:text-blue-600 transition-colors">Make Money</Link>
               <Link to="/business" className="hover:text-blue-600 transition-colors">Start a Business</Link>
             </div>
@@ -180,12 +207,11 @@ export default function ResultsPage() {
         {/* ── HERO ─────────────────────────────────────────── */}
         <section className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-20 lg:py-28">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              {/* Left */}
+            <div className="grid lg:grid-cols-2 gap-14 items-center">
               <div>
                 <div className="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-400/30 rounded-full px-4 py-1.5 mb-6">
                   <Activity className="w-4 h-4 text-blue-400" />
-                  <span className="text-sm font-semibold text-blue-300">Real Results</span>
+                  <span className="text-sm font-semibold text-blue-300">Real Results — Updated Daily</span>
                 </div>
                 <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-6">
                   Real People.<br />
@@ -204,26 +230,21 @@ export default function ResultsPage() {
                   </Link>
                 </div>
               </div>
-
-              {/* Right — proof cards */}
+              {/* Proof stack */}
               <div className="space-y-3">
                 {[
-                  { icon: <Target className="w-5 h-5 text-orange-400" />, label: 'Leads Captured', value: 'Businesses getting new leads', color: 'from-orange-500/10 to-transparent border-orange-500/20' },
-                  { icon: <CheckCircle className="w-5 h-5 text-teal-400" />, label: 'Bookings Created', value: 'Calendars filling automatically', color: 'from-teal-500/10 to-transparent border-teal-500/20' },
-                  { icon: <BarChart2 className="w-5 h-5 text-blue-400" />, label: 'Revenue Tracked', value: 'All in one dashboard', color: 'from-blue-500/10 to-transparent border-blue-500/20' },
-                  { icon: <DollarSign className="w-5 h-5 text-emerald-400" />, label: 'Partner Commissions', value: 'Partners earning every month', color: 'from-emerald-500/10 to-transparent border-emerald-500/20' },
-                ].map((card) => (
-                  <div key={card.label} className={`flex items-center gap-4 bg-gradient-to-r ${card.color} border rounded-xl p-4`}>
-                    <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
-                      {card.icon}
+                  { icon: <Target className="w-5 h-5 text-orange-400" />, label: 'Leads Captured', sub: 'Businesses getting new leads', color: 'border-orange-500/20 from-orange-500/10' },
+                  { icon: <CheckCircle className="w-5 h-5 text-teal-400" />, label: 'Bookings Created', sub: 'Calendars filling automatically', color: 'border-teal-500/20 from-teal-500/10' },
+                  { icon: <BarChart2 className="w-5 h-5 text-blue-400" />, label: 'Revenue Tracked', sub: 'All in one dashboard', color: 'border-blue-500/20 from-blue-500/10' },
+                  { icon: <DollarSign className="w-5 h-5 text-emerald-400" />, label: 'Partner Commissions', sub: 'Partners earning every month', color: 'border-emerald-500/20 from-emerald-500/10' },
+                ].map((c) => (
+                  <div key={c.label} className={`flex items-center gap-4 bg-gradient-to-r ${c.color} to-transparent border rounded-xl p-4`}>
+                    <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">{c.icon}</div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-white text-sm">{c.label}</p>
+                      <p className="text-slate-400 text-xs">{c.sub}</p>
                     </div>
-                    <div>
-                      <p className="font-semibold text-white text-sm">{card.label}</p>
-                      <p className="text-slate-400 text-xs">{card.value}</p>
-                    </div>
-                    <div className="ml-auto">
-                      <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                    </div>
+                    <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
                   </div>
                 ))}
               </div>
@@ -235,26 +256,20 @@ export default function ResultsPage() {
         <section className="py-16 bg-gray-50 border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-10">
-              <h2 className="text-2xl font-bold text-gray-900">Platform Activity</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Built to Help Real Businesses Grow</h2>
               <p className="text-gray-500 mt-1">Live results from the Local-Link ecosystem</p>
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-              {merchantStats.map(({ key, icon, fallback, bg }) => {
-                const stat = getStatData(key);
-                const value = formatStatValue(key, stat?.stat_value || 0);
-                const isEmpty = !stat || stat.stat_value === 0;
+              {STAT_CONFIG.map(({ key, icon, bg, fallback }) => {
+                const s = getStatData(key);
+                const val = formatStatValue(key, s?.stat_value ?? 0);
+                const empty = !s || s.stat_value === 0;
                 return (
                   <div key={key} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center">
-                    <div className={`w-14 h-14 ${bg} rounded-xl flex items-center justify-center mx-auto mb-4`}>
-                      {icon}
-                    </div>
-                    <div className="text-2xl font-bold text-gray-900 mb-1">
-                      {isEmpty ? fallback : value}
-                    </div>
-                    {isEmpty && (
-                      <div className="text-xs text-blue-600 font-medium mb-1">Starting Soon</div>
-                    )}
-                    <div className="text-sm text-gray-500">{stat?.display_label || key.replace(/_/g, ' ')}</div>
+                    <div className={`w-14 h-14 ${bg} rounded-xl flex items-center justify-center mx-auto mb-4`}>{icon}</div>
+                    <div className="text-2xl font-bold text-gray-900 mb-1">{empty ? fallback : val}</div>
+                    {empty && <div className="text-xs text-blue-600 font-medium mb-1">Early Access Tracking</div>}
+                    <div className="text-sm text-gray-500">{s?.display_label ?? key.replace(/_/g, ' ')}</div>
                   </div>
                 );
               })}
@@ -262,37 +277,76 @@ export default function ResultsPage() {
           </div>
         </section>
 
-        {/* ── TESTIMONIALS ──────────────────────────────────── */}
+        {/* ── TESTIMONIALS WITH FILTERS ─────────────────────── */}
         <section className="py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-12">
-              <span className="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full mb-3 uppercase tracking-wide">What People Are Saying</span>
-              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">Local Businesses Love Local-Link</h2>
-              <p className="text-gray-500 mt-3 max-w-xl mx-auto">Real feedback from merchants and partners using the platform every day.</p>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+              <div>
+                <span className="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full mb-3 uppercase tracking-wide">What People Are Saying</span>
+                <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">Real Feedback from Real Users</h2>
+              </div>
+              {/* Filter pills */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <Filter className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                {FILTERS.map(({ key, label }) => (
+                  <button
+                    key={key}
+                    onClick={() => setActiveFilter(key)}
+                    className={`px-3.5 py-1.5 rounded-full text-sm font-medium transition-all ${
+                      activeFilter === key
+                        ? 'bg-blue-600 text-white shadow-sm'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {loading ? (
               <div className="grid md:grid-cols-3 gap-6">
-                {[1,2,3].map(i => (
-                  <div key={i} className="bg-gray-100 rounded-2xl h-48 animate-pulse" />
-                ))}
+                {[1,2,3].map(i => <div key={i} className="bg-gray-100 rounded-2xl h-52 animate-pulse" />)}
+              </div>
+            ) : displayedTestimonials.length === 0 ? (
+              <div className="text-center py-16 text-gray-400">
+                <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                <p>No results in this category yet — check back soon.</p>
               </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {(testimonials.length > 0 ? testimonials : []).map((t) => (
-                  <div key={t.id} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col">
-                    <Quote className="w-8 h-8 text-blue-100 mb-3 flex-shrink-0" />
-                    <p className="text-gray-700 leading-relaxed flex-1 mb-4 italic">&ldquo;{t.content}&rdquo;</p>
+                {displayedTestimonials.map((t) => (
+                  <div key={t.id} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col">
+                    <Quote className="w-7 h-7 text-blue-100 mb-3 flex-shrink-0" />
+                    <p className="text-gray-700 leading-relaxed flex-1 mb-4 italic text-[15px]">&ldquo;{t.content}&rdquo;</p>
+
+                    {/* Result tags */}
+                    {t.result_tags && t.result_tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-4">
+                        {t.result_tags.map((tag) => (
+                          <span key={tag} className={`text-xs font-semibold px-2 py-0.5 rounded-full ${TAG_COLORS[tag] || 'bg-gray-100 text-gray-600'}`}>
+                            ✔ {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-semibold text-gray-900 text-sm">{t.display_name}</p>
                         <p className="text-gray-500 text-xs">{t.business_type || (t.role === 'partner' ? 'Local Partner' : 'Business Owner')}</p>
                       </div>
-                      {t.result_badge && (
-                        <span className="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap">
-                          {t.result_badge}
-                        </span>
-                      )}
+                      <div className="text-right">
+                        {t.result_badge && (
+                          <span className="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full block mb-1">
+                            {t.result_badge}
+                          </span>
+                        )}
+                        <p className="text-gray-400 text-xs flex items-center gap-1 justify-end">
+                          <Clock className="w-3 h-3" />
+                          {timeAgo(t.created_at)}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -301,130 +355,177 @@ export default function ResultsPage() {
           </div>
         </section>
 
-        {/* ── CASE STUDIES ──────────────────────────────────── */}
-        <section className="py-20 bg-slate-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-12">
-              <span className="inline-block bg-teal-100 text-teal-700 text-xs font-semibold px-3 py-1 rounded-full mb-3 uppercase tracking-wide">How It Works</span>
-              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">Local-Link in the Real World</h2>
-              <p className="text-gray-500 mt-3 max-w-xl mx-auto">Step-by-step stories of businesses and partners seeing real results.</p>
-            </div>
-
-            {loading ? (
-              <div className="grid md:grid-cols-3 gap-6">
-                {[1,2,3].map(i => <div key={i} className="bg-white rounded-2xl h-64 animate-pulse" />)}
+        {/* ── STARTED WITH NOTHING STORIES ──────────────────── */}
+        {(beginnerCases.length > 0 || !loading) && (
+          <section className="py-16 bg-gradient-to-r from-green-50 to-teal-50 border-y">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6">
+              <div className="text-center mb-10">
+                <span className="inline-block bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full mb-3 uppercase tracking-wide">Beginner Wins</span>
+                <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">Started with Nothing — Got Their First Result</h2>
+                <p className="text-gray-500 mt-2 max-w-xl mx-auto">You don't need a big business or years of experience. These people started from zero.</p>
               </div>
-            ) : (
-              <div className="grid md:grid-cols-3 gap-6">
-                {(caseStudies.length > 0 ? caseStudies : FALLBACK_CASES).map((cs, idx) => (
-                  <div key={cs.id || idx} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
-                    {/* Header */}
-                    <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-5 py-4">
-                      <div className="flex items-center gap-2">
-                        <Briefcase className="w-4 h-4 text-blue-200" />
-                        <span className="text-white font-semibold text-sm">{cs.business_type}</span>
-                        {cs.plan_used && (
-                          <span className="ml-auto text-xs text-blue-200 font-medium">{cs.plan_used} Plan</span>
-                        )}
+              <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                {(beginnerCases.length > 0 ? beginnerCases : FALLBACK_BEGINNER).map((cs, i) => (
+                  <div key={cs.id || i} className="bg-white rounded-2xl border border-green-200 shadow-sm p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                        <Store className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-gray-900">{cs.business_type}</p>
+                        <p className="text-xs text-gray-500">Starter — First time using a platform like this</p>
                       </div>
                     </div>
-                    <div className="p-5 flex-1 space-y-4">
-                      {/* Before */}
-                      <div>
-                        <div className="flex items-center gap-1.5 mb-1.5">
-                          <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                            <span className="text-red-600 text-xs font-bold">!</span>
-                          </div>
-                          <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">Before</span>
-                        </div>
+                    <div className="space-y-3">
+                      <div className="flex gap-3">
+                        <span className="text-xs font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded mt-0.5 flex-shrink-0">BEFORE</span>
                         <p className="text-sm text-gray-600">{cs.before_situation}</p>
                       </div>
-                      {/* Tools */}
-                      {cs.tools_used && cs.tools_used.length > 0 && (
-                        <div>
-                          <div className="flex items-center gap-1.5 mb-2">
-                            <Zap className="w-3.5 h-3.5 text-blue-500" />
-                            <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">What They Used</span>
-                          </div>
-                          <div className="flex flex-wrap gap-1.5">
-                            {cs.tools_used.map((tool, i) => (
-                              <span key={i} className="bg-blue-50 text-blue-700 text-xs font-medium px-2 py-0.5 rounded-md">{tool}</span>
+                      {cs.tools_used?.length > 0 && (
+                        <div className="flex gap-3 items-start">
+                          <span className="text-xs font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded mt-0.5 flex-shrink-0">USED</span>
+                          <div className="flex flex-wrap gap-1">
+                            {cs.tools_used.map((t, j) => (
+                              <span key={j} className="text-xs bg-blue-50 text-blue-700 font-medium px-2 py-0.5 rounded-md">{t}</span>
                             ))}
                           </div>
                         </div>
                       )}
-                      {/* Result */}
                       <div className="bg-green-50 rounded-xl p-3">
-                        <div className="flex items-center gap-1.5 mb-1.5">
-                          <CheckCircle className="w-4 h-4 text-green-600" />
-                          <span className="text-xs font-bold text-green-700 uppercase tracking-wide">Result</span>
+                        <div className="flex gap-2">
+                          <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded mt-0.5 flex-shrink-0">RESULT</span>
+                          <p className="text-sm font-semibold text-green-800">{cs.result_summary}</p>
                         </div>
-                        <p className="text-sm text-green-800 font-medium">{cs.result_summary}</p>
                       </div>
-                      {/* Quote */}
                       {cs.quote && (
-                        <p className="text-sm text-gray-500 italic border-l-2 border-gray-200 pl-3">&ldquo;{cs.quote}&rdquo;</p>
+                        <p className="text-sm text-gray-500 italic border-l-2 border-green-200 pl-3">&ldquo;{cs.quote}&rdquo;</p>
                       )}
                     </div>
                   </div>
                 ))}
               </div>
-            )}
+            </div>
+          </section>
+        )}
+
+        {/* ── FULL CASE STUDIES ─────────────────────────────── */}
+        <section className="py-20 bg-slate-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="text-center mb-12">
+              <span className="inline-block bg-teal-100 text-teal-700 text-xs font-semibold px-3 py-1 rounded-full mb-3 uppercase tracking-wide">How It Works in the Real World</span>
+              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">Before → What They Used → Result</h2>
+              <p className="text-gray-500 mt-3 max-w-xl mx-auto">Step-by-step success stories from businesses and partners.</p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-6">
+              {(loading ? [] : (otherCases.length > 0 ? otherCases : FALLBACK_CASES)).slice(0, 3).map((cs, idx) => (
+                <div key={cs.id || idx} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+                  <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-5 py-4">
+                    <div className="flex items-center gap-2">
+                      <Briefcase className="w-4 h-4 text-blue-200" />
+                      <span className="text-white font-semibold text-sm">{cs.business_type}</span>
+                      {cs.plan_used && <span className="ml-auto text-xs text-blue-200 font-medium">{cs.plan_used} Plan</span>}
+                    </div>
+                  </div>
+                  <div className="p-5 flex-1 space-y-4">
+                    <div>
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                          <span className="text-red-600 text-xs font-bold">!</span>
+                        </div>
+                        <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">Before</span>
+                      </div>
+                      <p className="text-sm text-gray-600">{cs.before_situation}</p>
+                    </div>
+                    {cs.tools_used?.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <Zap className="w-3.5 h-3.5 text-blue-500" />
+                          <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">What They Used</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {cs.tools_used.map((tool, i) => (
+                            <span key={i} className="bg-blue-50 text-blue-700 text-xs font-medium px-2 py-0.5 rounded-md">✔ {tool}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <div className="bg-green-50 rounded-xl p-3">
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <CheckCircle className="w-4 h-4 text-green-600" />
+                        <span className="text-xs font-bold text-green-700 uppercase tracking-wide">Result</span>
+                      </div>
+                      <p className="text-sm text-green-800 font-medium">{cs.result_summary}</p>
+                    </div>
+                    {cs.quote && (
+                      <p className="text-sm text-gray-500 italic border-l-2 border-gray-200 pl-3">&ldquo;{cs.quote}&rdquo;</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
         {/* ── LIVE ACTIVITY FEED ────────────────────────────── */}
         <section className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="grid lg:grid-cols-2 gap-14 items-center">
               <div>
                 <span className="inline-block bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full mb-4 uppercase tracking-wide">Live Activity</span>
                 <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Happening Inside Local-Link</h2>
                 <p className="text-gray-500 mb-6 leading-relaxed">
-                  Businesses are joining, offers are going live, and leads are coming in. This is your community growing in real time.
+                  Businesses are joining, offers are going live, and leads are coming in. This is your community growing right now.
                 </p>
-                <div className="space-y-3">
+                <div className="space-y-3 mb-6">
                   {[
-                    { icon: <Store className="w-4 h-4 text-blue-600" />, text: 'Businesses list their services and get discovered' },
+                    { icon: <Store className="w-4 h-4 text-blue-600" />, text: 'Businesses list services and get discovered locally' },
                     { icon: <Target className="w-4 h-4 text-orange-600" />, text: 'Leads flow in and get captured automatically' },
                     { icon: <Zap className="w-4 h-4 text-teal-600" />, text: 'AI follow-up handles outreach on autopilot' },
                     { icon: <DollarSign className="w-4 h-4 text-emerald-600" />, text: 'Partners earn commissions for every referral' },
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center flex-shrink-0">
-                        {item.icon}
-                      </div>
+                      <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center flex-shrink-0">{item.icon}</div>
                       <p className="text-gray-700 text-sm">{item.text}</p>
                     </div>
                   ))}
                 </div>
+                <Link to="/register" className="inline-flex items-center gap-2 bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors text-sm">
+                  Join Local-Link <ArrowRight className="w-4 h-4" />
+                </Link>
               </div>
 
-              {/* Feed */}
+              {/* Dark feed panel */}
               <div className="bg-slate-900 rounded-2xl overflow-hidden shadow-2xl">
                 <div className="flex items-center justify-between px-5 py-3 bg-slate-800 border-b border-slate-700">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                    <span className="text-white text-sm font-semibold">Live Activity</span>
+                    <span className="text-white text-sm font-semibold">Happening Now</span>
                   </div>
-                  <RefreshCw className="w-3.5 h-3.5 text-slate-400 animate-spin" style={{ animationDuration: '3s' }} />
+                  <RefreshCw className="w-3.5 h-3.5 text-slate-400 animate-spin" style={{ animationDuration: '4s' }} />
                 </div>
-                <div className="p-4 space-y-2 min-h-[320px]">
+                <div className="p-4 space-y-2 min-h-[360px]">
                   {loading ? (
                     Array.from({ length: 7 }).map((_, i) => (
-                      <div key={i} className="h-10 bg-slate-800 rounded-lg animate-pulse" />
+                      <div key={i} className="h-12 bg-slate-800 rounded-lg animate-pulse" />
                     ))
                   ) : (
                     feed.slice(0, 8).map((item, i) => (
                       <div
                         key={item.id}
-                        className={`flex items-center gap-3 bg-slate-800/60 rounded-lg px-3 py-2.5 transition-all duration-300 ${i === 0 && animating ? 'opacity-0 -translate-y-1' : 'opacity-100 translate-y-0'}`}
+                        className={`flex items-center gap-3 bg-slate-800/60 rounded-lg px-3 py-2.5 transition-all duration-350 ${
+                          i === 0 && feedAnimating ? 'opacity-0 -translate-y-2' : 'opacity-100 translate-y-0'
+                        }`}
                       >
                         <div className="w-7 h-7 rounded-md bg-slate-700 flex items-center justify-center flex-shrink-0">
-                          {TYPE_ICONS[item.type] || <Activity className="w-4 h-4 text-slate-400" />}
+                          {FEED_ICONS[item.activity_type] || <Activity className="w-3.5 h-3.5 text-slate-400" />}
                         </div>
-                        <p className="text-slate-300 text-sm flex-1">{item.message}</p>
-                        <span className="text-slate-500 text-xs flex-shrink-0">{timeAgo(item.created_at)}</span>
+                        <p className="text-slate-300 text-sm flex-1 leading-snug">{item.display_message}</p>
+                        <div className="flex-shrink-0 text-right">
+                          <p className="text-slate-500 text-xs flex items-center gap-1">
+                            <Clock className="w-2.5 h-2.5" />
+                            {timeAgo(item.created_at)}
+                          </p>
+                        </div>
                       </div>
                     ))
                   )}
@@ -439,38 +540,43 @@ export default function ResultsPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-12">
               <span className="inline-block bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-semibold px-3 py-1 rounded-full mb-3 uppercase tracking-wide">Partner Wins</span>
-              <h2 className="text-3xl lg:text-4xl font-bold text-white mb-3">Partners Are Building Income with Local-Link</h2>
+              <h2 className="text-3xl lg:text-4xl font-bold text-white mb-3">Partners Are Building Income With Local-Link</h2>
               <p className="text-slate-400 max-w-xl mx-auto">Everyday people helping local businesses grow — and earning real income doing it.</p>
             </div>
-
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
               {[
                 { icon: <DollarSign className="w-6 h-6 text-emerald-400" />, title: 'First Sale', desc: 'Partners earning their first commission within days of starting', bg: 'bg-emerald-500/10 border-emerald-500/20' },
                 { icon: <RefreshCw className="w-6 h-6 text-blue-400" />, title: 'Recurring Income', desc: 'Monthly commissions that grow as merchants stay subscribed', bg: 'bg-blue-500/10 border-blue-500/20' },
                 { icon: <Users className="w-6 h-6 text-sky-400" />, title: 'Merchant Referrals', desc: 'Building a book of merchants and earning on every renewal', bg: 'bg-sky-500/10 border-sky-500/20' },
                 { icon: <Award className="w-6 h-6 text-yellow-400" />, title: 'Academy Certified', desc: 'Trained, certified, and ready to close with confidence', bg: 'bg-yellow-500/10 border-yellow-500/20' },
-              ].map((card) => (
-                <div key={card.title} className={`border ${card.bg} rounded-2xl p-5`}>
-                  <div className="w-11 h-11 bg-white/10 rounded-xl flex items-center justify-center mb-4">
-                    {card.icon}
-                  </div>
-                  <h3 className="font-bold text-white mb-1">{card.title}</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">{card.desc}</p>
+              ].map((c) => (
+                <div key={c.title} className={`border ${c.bg} rounded-2xl p-5`}>
+                  <div className="w-11 h-11 bg-white/10 rounded-xl flex items-center justify-center mb-4">{c.icon}</div>
+                  <h3 className="font-bold text-white mb-1">{c.title}</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">{c.desc}</p>
                 </div>
               ))}
             </div>
-
             {/* Partner testimonials */}
-            {partnerTestimonials.length > 0 && (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
-                {partnerTestimonials.slice(0, 3).map((t) => (
+            {!loading && testimonials.filter(t => t.role === 'partner').length > 0 && (
+              <div className="grid md:grid-cols-3 gap-5 mb-10">
+                {testimonials.filter(t => t.role === 'partner').slice(0, 3).map((t) => (
                   <div key={t.id} className="bg-white/5 border border-white/10 rounded-2xl p-5">
-                    <Quote className="w-7 h-7 text-blue-400/50 mb-3" />
+                    <Quote className="w-7 h-7 text-blue-400/40 mb-3" />
                     <p className="text-slate-300 italic text-sm leading-relaxed mb-4">&ldquo;{t.content}&rdquo;</p>
+                    {t.result_tags?.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-3">
+                        {t.result_tags.map(tag => (
+                          <span key={tag} className="bg-white/10 text-slate-300 text-xs px-2 py-0.5 rounded-full">✔ {tag}</span>
+                        ))}
+                      </div>
+                    )}
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-semibold text-white text-sm">{t.display_name}</p>
-                        <p className="text-slate-500 text-xs">Local Partner</p>
+                        <p className="text-slate-500 text-xs flex items-center gap-1">
+                          <Clock className="w-2.5 h-2.5" />{timeAgo(t.created_at)}
+                        </p>
                       </div>
                       {t.result_badge && (
                         <span className="bg-emerald-500/20 text-emerald-400 text-xs font-semibold px-2.5 py-1 rounded-full">
@@ -482,7 +588,6 @@ export default function ResultsPage() {
                 ))}
               </div>
             )}
-
             <div className="text-center">
               <Link to="/earn" className="inline-flex items-center gap-2 bg-white text-blue-900 font-bold px-8 py-4 rounded-xl hover:bg-blue-50 transition-colors">
                 Become a Partner <ArrowRight className="w-4 h-4" />
@@ -511,11 +616,15 @@ export default function ResultsPage() {
                 <DollarSign className="w-5 h-5" />
                 Become a Partner
               </Link>
+              <Link to="/results" className="border-2 border-gray-200 text-gray-600 hover:bg-gray-50 font-bold px-8 py-4 rounded-xl transition-colors inline-flex items-center justify-center gap-2">
+                <Activity className="w-5 h-5" />
+                View Results
+              </Link>
             </div>
           </div>
         </section>
 
-        {/* ── FOOTER ───────────────────────────────────────── */}
+        {/* Footer */}
         <footer className="bg-slate-900 text-slate-400 py-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
             <div className="flex items-center gap-2">
@@ -523,7 +632,7 @@ export default function ResultsPage() {
                 <Zap className="w-3 h-3 text-white" />
               </div>
               <span className="text-white font-semibold">Local-Link</span>
-              <span className="text-slate-500">— The All-in-One System to Start, Grow, and Automate a Business</span>
+              <span className="text-slate-500">— Start, Grow, and Automate Your Business</span>
             </div>
             <div className="flex items-center gap-4">
               <Link to="/" className="hover:text-white transition-colors">Home</Link>
@@ -537,36 +646,14 @@ export default function ResultsPage() {
   );
 }
 
-// ── Fallback case studies shown before DB loads ──────────────────────────────
+// ── Fallback data ───────────────────────────────────────────────────────────
+const FALLBACK_BEGINNER = [
+  { id: 'b1', business_type: 'Lawn Care Service', plan_used: 'Starter', before_situation: 'Started with zero customers and no online presence. Never had a digital listing before.', tools_used: ['Marketplace Profile', 'First Offer', 'Lead Capture'], result_summary: 'Got first lead within the first week. Booked first paying job before the end of the month.', quote: 'I started with literally nothing and had my first customer inside a week.' },
+  { id: 'b2', business_type: 'House Cleaning', plan_used: 'Starter', before_situation: 'Just getting started — no reviews, no customer list, no way to follow up with people who inquired.', tools_used: ['Marketplace Profile', 'Offer', 'AI Follow-up'], result_summary: 'First lead came in 3 days after posting the profile. Follow-up automation sent messages automatically.', quote: 'I did not even know what a CRM was before this. It just handled everything.' },
+];
+
 const FALLBACK_CASES = [
-  {
-    id: 'f1',
-    study_type: 'merchant',
-    business_type: 'Salon',
-    plan_used: 'Starter',
-    before_situation: 'Slow weekdays and missed messages from potential customers with no follow-up system.',
-    tools_used: ['Marketplace Profile', 'Offer', 'AI Follow-up'],
-    result_summary: 'More inquiries, easier follow-up, and slow weekdays filling up within the first month.',
-    quote: 'I wish I had this two years ago. It just works.',
-  },
-  {
-    id: 'f2',
-    study_type: 'merchant',
-    business_type: 'Cleaning Service',
-    plan_used: 'Growth',
-    before_situation: 'No consistent leads and spending money on ads that never converted into real customers.',
-    tools_used: ['Marketplace Profile', 'Offer', 'CRM', 'AI Follow-up'],
-    result_summary: 'Booked 5 customers in the first week using the marketplace and follow-up automation.',
-    quote: 'I stopped paying for ads that didn\'t work and started getting real customers.',
-  },
-  {
-    id: 'f3',
-    study_type: 'partner',
-    business_type: 'Local Partner',
-    plan_used: 'Standard',
-    before_situation: 'Looking for a flexible way to earn income while helping local businesses grow.',
-    tools_used: ['Marketing Kit', 'Academy Training', 'Partner Dashboard'],
-    result_summary: 'Closed first merchant in the first week. Building toward recurring monthly commission.',
-    quote: 'The system does the heavy lifting. I just show people what\'s possible.',
-  },
+  { id: 'f1', business_type: 'Salon', plan_used: 'Growth', before_situation: 'Slow weekdays and missed messages from potential customers with no follow-up system.', tools_used: ['Marketplace Profile', 'Offer', 'AI Follow-up'], result_summary: 'More inquiries, easier follow-up, and slow weekdays filling up within the first month.', quote: 'I wish I had this two years ago. It just works.' },
+  { id: 'f2', business_type: 'Cleaning Service', plan_used: 'Growth', before_situation: 'No consistent leads and spending money on ads that never converted into real customers.', tools_used: ['Marketplace Profile', 'Offer', 'CRM', 'AI Follow-up'], result_summary: 'Booked 5 customers in the first week using the marketplace and follow-up automation.', quote: 'I stopped paying for ads that didn\'t work and started getting real customers.' },
+  { id: 'f3', business_type: 'Local Partner', plan_used: 'Standard', before_situation: 'Looking for a flexible way to earn income while helping local businesses grow.', tools_used: ['Marketing Kit', 'Academy Training', 'Partner Dashboard'], result_summary: 'Closed first merchant in the first week. Building toward recurring monthly commission.', quote: 'The system does the heavy lifting. I just show people what\'s possible.' },
 ];

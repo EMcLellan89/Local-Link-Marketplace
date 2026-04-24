@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   DollarSign, ShoppingBag, Users, TrendingUp, ArrowRight, Bot,
-  FileText, Target, Phone, CreditCard, Briefcase, Mail, Sparkles, BookOpen, Gift, Zap, Calculator, Package, MessageSquare
+  FileText, Target, Phone, CreditCard, Briefcase, Mail, Sparkles, BookOpen, Gift, Zap, Calculator, Package, MessageSquare,
+  CheckCircle, Star
 } from 'lucide-react';
 import TestimonialSubmitModal from '../../components/TestimonialSubmitModal';
 import { supabase } from '../../lib/supabase';
@@ -367,6 +368,50 @@ export default function MerchantDashboard() {
           <h1 className="text-3xl font-bold text-slate-900">Business Command Center</h1>
           <p className="text-slate-600 mt-2">Your all-in-one business growth dashboard</p>
         </div>
+
+        {/* Inline proof banner */}
+        <div className="bg-gradient-to-r from-[#2BB673]/8 to-emerald-50 border border-[#2BB673]/20 rounded-2xl px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="flex -space-x-2">
+              {['MR', 'JT', 'SP'].map(i => (
+                <div key={i} className="w-8 h-8 rounded-full bg-[#2BB673]/20 border-2 border-white flex items-center justify-center text-[10px] font-bold text-[#2BB673]">{i}</div>
+              ))}
+            </div>
+            <p className="text-sm text-slate-700">
+              <span className="font-semibold text-slate-900">Businesses like yours</span> are getting customers within days on Local-Link.
+            </p>
+          </div>
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="flex items-center gap-1">
+              {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 text-[#F5B82E] fill-[#F5B82E]" />)}
+              <span className="text-xs text-slate-500 ml-1">4.9/5</span>
+            </div>
+            <Link to="/results" className="text-xs font-semibold text-[#2BB673] hover:underline flex items-center gap-1">
+              See proof <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+
+        {/* First-result nudge — shown when stats are low */}
+        {stats.totalDeals === 0 && !loading && (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <CheckCircle className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-900 text-sm">Got your first lead? Share it.</p>
+                <p className="text-xs text-slate-500">Help other businesses see what's possible — your story matters.</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowTestimonialModal(true)}
+              className="flex-shrink-0 text-xs font-bold bg-amber-500 text-white px-4 py-2 rounded-xl hover:bg-amber-600 transition-colors"
+            >
+              Share My Result
+            </button>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Card variant="bordered">
