@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { LogOut, Store, ShoppingBag, Shield, User, Heart, Menu, X } from 'lucide-react';
+import { LogOut, Store, ShoppingBag, Shield, User, Heart, Menu, X, Calendar, Tag } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import Button from '../ui/Button';
 import BackButton from '../ui/BackButton';
@@ -26,7 +26,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     switch (profile.role) {
       case 'customer':
         return [
-          { to: '/dashboard', icon: ShoppingBag, label: 'Browse Deals' },
+          { to: '/community', icon: Calendar, label: 'Community' },
+          { to: '/offers', icon: Tag, label: 'Special Offers' },
           { to: '/favorites', icon: Heart, label: 'Favorites' },
           { to: '/purchases', icon: ShoppingBag, label: 'My Purchases' },
           { to: '/profile', icon: User, label: 'Profile' },
