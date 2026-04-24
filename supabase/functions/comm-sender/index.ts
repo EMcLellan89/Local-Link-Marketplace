@@ -64,7 +64,7 @@ Deno.serve(async (req: Request) => {
     for (const msg of messages) {
       try {
         let success = false;
-        let provider = "sendgrid";
+        let provider = "brevo";
         let providerId = null;
         let error = null;
 
@@ -100,7 +100,7 @@ Deno.serve(async (req: Request) => {
         } else if (msg.channel === "sms") {
           try {
             const response = await fetch(
-              `${Deno.env.get("SUPABASE_URL")}/functions/v1/twilio-send-sms`,
+              `${Deno.env.get("SUPABASE_URL")}/functions/v1/sms-send`,
               {
                 method: "POST",
                 headers: {
@@ -116,9 +116,9 @@ Deno.serve(async (req: Request) => {
 
             if (response.ok) {
               const result = await response.json();
-              providerId = result.sid;
+              providerId = result.messageId;
               success = true;
-              provider = "twilio";
+              provider = "brevo";
             } else {
               error = await response.text();
             }
