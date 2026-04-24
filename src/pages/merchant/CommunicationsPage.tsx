@@ -4,7 +4,6 @@ import { Phone, MessageSquare, Mail, History, Settings, User, Clock, CheckCircle
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Button from '../../components/ui/Button';
 import Card, { CardBody, CardHeader } from '../../components/ui/Card';
-import BackButton from '../components/ui/BackButton';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -102,10 +101,10 @@ export default function CommunicationsPage() {
         setSubscription(subscriptionData);
 
         const { data: config } = await supabase
-          .from('twilio_configurations')
+          .from('comm_configurations')
           .select('*')
           .eq('merchant_id', merchantData.id)
-          .single();
+          .maybeSingle();
 
         setPhoneConfig(config);
 
@@ -129,21 +128,21 @@ export default function CommunicationsPage() {
 
   async function loadHistory(merchantId: string) {
     const { data: calls } = await supabase
-      .from('twilio_call_logs')
+      .from('comm_call_logs')
       .select('*')
       .eq('merchant_id', merchantId)
       .order('created_at', { ascending: false })
       .limit(50);
 
     const { data: sms } = await supabase
-      .from('twilio_sms_logs')
+      .from('comm_sms_logs')
       .select('*')
       .eq('merchant_id', merchantId)
       .order('created_at', { ascending: false })
       .limit(50);
 
     const { data: emails } = await supabase
-      .from('twilio_email_logs')
+      .from('comm_email_logs')
       .select('*')
       .eq('merchant_id', merchantId)
       .order('created_at', { ascending: false })
@@ -360,9 +359,9 @@ export default function CommunicationsPage() {
                 <div>
                   <p className="font-semibold text-blue-900">Prepaid Balance</p>
                   <p className="text-2xl font-bold text-blue-900">
-                    ${((phoneConfig.prepaid_balance_cents || 0) / 100).toFixed(2)}
+                    ${((phoneConfig.balance_cents || 0) / 100).toFixed(2)}
                   </p>
-                  {(phoneConfig.prepaid_balance_cents || 0) < (phoneConfig.low_balance_threshold_cents || 1000) && (
+                  {(phoneConfig.balance_cents || 0) < 1000 && (
                     <p className="text-sm text-orange-700 mt-1">
                       Low balance - Add funds to continue using services
                     </p>

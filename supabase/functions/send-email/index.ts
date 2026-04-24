@@ -3,7 +3,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, X-Internal-Api-Key",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey, X-Internal-Api-Key",
 };
 
 Deno.serve(async (req: Request) => {
@@ -19,11 +19,12 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const SENDGRID_API_KEY = Deno.env.get("SENDGRID_API_KEY");
+    const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
     const EMAIL_FROM = Deno.env.get("EMAIL_FROM") || "partners@locallinkmarketplace.com";
+    const FROM_NAME = Deno.env.get("BREVO_FROM_NAME") || "Local-Link";
     const INTERNAL_API_KEY = Deno.env.get("INTERNAL_API_KEY");
 
-    if (!SENDGRID_API_KEY || !INTERNAL_API_KEY) {
+    if (!BREVO_API_KEY || !INTERNAL_API_KEY) {
       return new Response(JSON.stringify({ error: "Missing env vars" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -43,6 +44,7 @@ Deno.serve(async (req: Request) => {
     const subject = String(body.subject || "");
     const html = String(body.html || "");
     const text = body.text ? String(body.text) : undefined;
+    const toName = body.toName ? String(body.toName) : undefined;
 
     if (!to || !subject || !html) {
       return new Response(JSON.stringify({ error: "to, subject, html required" }), {
@@ -51,39 +53,35 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    const payload: any = {
-      personalizations: [{ to: [{ email: to }] }],
-      from: { email: EMAIL_FROM },
+    const payload: Record<string, unknown> = {
+      sender: { email: EMAIL_FROM, name: FROM_NAME },
+      to: [{ email: to, ...(toName ? { name: toName } : {}) }],
       subject,
-      content: [{ type: "text/html", value: html }],
+      htmlContent: html,
     };
 
-    if (text) {
-      payload.content.unshift({ type: "text/plain", value: text });
-    }
+    if (text) payload.textContent = text;
 
-    const resp = await fetch("https://api.sendgrid.com/v3/mail/send", {
+    const resp = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${SENDGRID_API_KEY}`,
+        "api-key": BREVO_API_KEY,
         "Content-Type": "application/json",
+        Accept: "application/json",
       },
       body: JSON.stringify(payload),
     });
 
+    const json = await resp.json().catch(() => ({}));
     if (!resp.ok) {
-      const errorText = await resp.text();
-      console.error("SendGrid send failed:", errorText);
+      console.error("Brevo send failed:", json);
       return new Response(
-        JSON.stringify({ error: "SendGrid send failed", details: errorText }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        JSON.stringify({ error: "Brevo send failed", details: json }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    return new Response(JSON.stringify({ ok: true }), {
+    return new Response(JSON.stringify({ ok: true, messageId: json.messageId }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
@@ -91,10 +89,7 @@ Deno.serve(async (req: Request) => {
     console.error("Error:", error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : "Internal error" }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });

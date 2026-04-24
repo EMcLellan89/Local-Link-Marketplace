@@ -1,3 +1,7 @@
+/**
+ * Renamed context: Previously tracked Twilio call/SMS status callbacks.
+ * Now handles Retell AI call status updates and Brevo SMS delivery receipts.
+ */
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const corsHeaders = {
@@ -8,63 +12,45 @@ const corsHeaders = {
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 200,
-      headers: corsHeaders,
-    });
+    return new Response(null, { status: 200, headers: corsHeaders });
   }
 
   try {
-    const formData = await req.formData();
-    const callSid = formData.get('CallSid')?.toString();
-    const messageSid = formData.get('MessageSid')?.toString();
-    const status = formData.get('CallStatus')?.toString() || formData.get('MessageStatus')?.toString();
-    const duration = formData.get('CallDuration')?.toString();
-    const recordingUrl = formData.get('RecordingUrl')?.toString();
+    const body = await req.json();
 
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    if (callSid) {
-      const updateData: any = { status };
-      if (duration) updateData.duration_seconds = parseInt(duration);
-      if (recordingUrl) updateData.recording_url = recordingUrl;
+    // Retell call status update
+    if (body.call_id) {
+      const update: Record<string, unknown> = { status: body.call_status };
+      if (body.duration_ms) update.duration_seconds = Math.round(body.duration_ms / 1000);
+      if (body.transcript) update.transcript = body.transcript;
 
       await supabaseClient
-        .from('twilio_call_logs')
-        .update(updateData)
-        .eq('call_sid', callSid);
+        .from('comm_call_logs')
+        .update(update)
+        .eq('call_id', body.call_id);
     }
 
-    if (messageSid) {
+    // Brevo SMS delivery receipt
+    if (body.messageId && body.status) {
       await supabaseClient
-        .from('twilio_sms_logs')
-        .update({ status })
-        .eq('message_sid', messageSid);
+        .from('comm_sms_logs')
+        .update({ status: body.status })
+        .eq('message_id', String(body.messageId));
     }
 
-    return new Response(
-      JSON.stringify({ success: true }),
-      {
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   } catch (error: any) {
     console.error('Error processing status webhook:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
-      {
-        status: 200,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
-      }
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

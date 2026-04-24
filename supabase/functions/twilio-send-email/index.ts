@@ -1,3 +1,7 @@
+/**
+ * Renamed context: Previously used SendGrid via Twilio config. Now uses Brevo SMTP API.
+ * Function slug kept for backward compatibility with existing callers.
+ */
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const corsHeaders = {
@@ -8,30 +12,20 @@ const corsHeaders = {
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 200,
-      headers: corsHeaders,
-    });
+    return new Response(null, { status: 200, headers: corsHeaders });
   }
 
   try {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
-        },
-      }
+      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
     );
 
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-    if (userError || !user) {
-      throw new Error('Unauthorized');
-    }
+    if (userError || !user) throw new Error('Unauthorized');
 
     const { merchantId, toEmail, subject, bodyHtml, bodyText, leadId } = await req.json();
-
     if (!merchantId || !toEmail || !subject || (!bodyHtml && !bodyText)) {
       throw new Error('merchantId, toEmail, subject, and body are required');
     }
@@ -41,95 +35,67 @@ Deno.serve(async (req: Request) => {
       .select('user_id')
       .eq('id', merchantId)
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
 
-    if (!merchant) {
-      throw new Error('Merchant not found or unauthorized');
-    }
+    if (!merchant) throw new Error('Merchant not found or unauthorized');
 
     const { data: config } = await supabaseClient
-      .from('twilio_configurations')
+      .from('comm_configurations')
       .select('*')
       .eq('merchant_id', merchantId)
       .eq('is_active', true)
       .eq('email_enabled', true)
-      .single();
+      .maybeSingle();
 
-    if (!config || !config.sendgrid_api_key_encrypted || !config.email_from_address) {
-      throw new Error('SendGrid not configured for this merchant');
-    }
+    const BREVO_API_KEY = config?.brevo_api_key || Deno.env.get('BREVO_API_KEY');
+    const fromEmail = config?.email_from_address || Deno.env.get('BREVO_FROM_EMAIL') || 'crm@locallinkmarketplace.com';
+    const fromName = config?.email_from_name || 'Local-Link CRM';
 
-    const sendGridApiKey = config.sendgrid_api_key_encrypted;
-    const fromEmail = config.email_from_address;
-    const fromName = config.email_from_name || 'Local-Link CRM';
+    if (!BREVO_API_KEY) throw new Error('Brevo email not configured');
 
-    const emailData = {
-      personalizations: [{
-        to: [{ email: toEmail }],
-        subject: subject,
-      }],
-      from: {
-        email: fromEmail,
-        name: fromName,
-      },
-      content: [
-        ...(bodyText ? [{ type: 'text/plain', value: bodyText }] : []),
-        ...(bodyHtml ? [{ type: 'text/html', value: bodyHtml }] : []),
-      ],
-      tracking_settings: {
-        click_tracking: { enable: true },
-        open_tracking: { enable: true },
-      },
+    const payload: Record<string, unknown> = {
+      sender: { email: fromEmail, name: fromName },
+      to: [{ email: toEmail }],
+      subject,
+      htmlContent: bodyHtml || '',
     };
+    if (bodyText) payload.textContent = bodyText;
 
-    const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+    const resp = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: {
+        'api-key': BREVO_API_KEY,
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${sendGridApiKey}`,
+        Accept: 'application/json',
       },
-      body: JSON.stringify(emailData),
+      body: JSON.stringify(payload),
     });
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      throw new Error(`SendGrid API error: ${errorData}`);
-    }
+    const json = await resp.json().catch(() => ({}));
+    if (!resp.ok) throw new Error(json?.message || `Brevo email failed (${resp.status})`);
 
-    const messageId = response.headers.get('x-message-id') || `msg_${Date.now()}`;
+    const messageId = String(json.messageId || Date.now());
 
-    await supabaseClient.from('twilio_email_logs').insert({
+    await supabaseClient.from('comm_email_logs').insert({
       merchant_id: merchantId,
       lead_id: leadId || null,
       message_id: messageId,
       from_email: fromEmail,
       to_email: toEmail,
-      subject: subject,
+      subject,
       body_html: bodyHtml || '',
       body_text: bodyText || '',
       status: 'sent',
-      cost_cents: 0,
     });
 
     return new Response(
-      JSON.stringify({ success: true, messageId: messageId }),
-      {
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
-      }
+      JSON.stringify({ success: true, messageId }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error: any) {
     return new Response(
       JSON.stringify({ error: error.message }),
-      {
-        status: 400,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
-      }
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

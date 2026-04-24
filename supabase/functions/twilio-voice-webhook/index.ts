@@ -1,3 +1,7 @@
+/**
+ * Renamed context: Previously a Twilio TwiML voice webhook.
+ * Now handles Retell AI call status/event webhooks.
+ */
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const corsHeaders = {
@@ -8,81 +12,43 @@ const corsHeaders = {
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 200,
-      headers: corsHeaders,
-    });
+    return new Response(null, { status: 200, headers: corsHeaders });
   }
 
   try {
-    const formData = await req.formData();
-    const callSid = formData.get('CallSid')?.toString() || '';
-    const from = formData.get('From')?.toString() || '';
-    const to = formData.get('To')?.toString() || '';
-    const callStatus = formData.get('CallStatus')?.toString() || '';
+    const body = await req.json();
+    const { event, call } = body;
 
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { data: phoneConfig } = await supabaseClient
-      .from('twilio_phone_numbers')
-      .select('merchant_id')
-      .eq('phone_number', to)
-      .eq('status', 'active')
-      .single();
-
-    if (phoneConfig) {
-      const { data: existingCall } = await supabaseClient
-        .from('twilio_call_logs')
-        .select('id')
-        .eq('call_sid', callSid)
-        .single();
-
-      if (!existingCall) {
-        await supabaseClient.from('twilio_call_logs').insert({
-          merchant_id: phoneConfig.merchant_id,
-          call_sid: callSid,
-          direction: 'inbound',
-          from_number: from,
-          to_number: to,
-          status: callStatus,
-        });
+    if (call?.call_id) {
+      const updateData: Record<string, unknown> = { status: call.call_status };
+      if (call.end_timestamp && call.start_timestamp) {
+        updateData.duration_seconds = Math.round(
+          (call.end_timestamp - call.start_timestamp) / 1000
+        );
       }
+      if (call.transcript) updateData.transcript = call.transcript;
+
+      await supabaseClient
+        .from('comm_call_logs')
+        .update(updateData)
+        .eq('call_id', call.call_id);
     }
 
-    const twiml = `<?xml version="1.0" encoding="UTF-8"?>
-<Response>
-  <Say voice="alice">Thank you for calling. Please hold while we connect you.</Say>
-  <Dial timeout="30" record="record-from-answer">
-    <Number>+11234567890</Number>
-  </Dial>
-  <Say voice="alice">Sorry, no one is available to take your call. Please leave a message after the beep.</Say>
-  <Record maxLength="120" transcribe="true" transcribeCallback="${Deno.env.get('SUPABASE_URL')}/functions/v1/twilio-transcription-webhook"/>
-  <Say voice="alice">Thank you for your message. Goodbye.</Say>
-</Response>`;
+    console.log(`Retell webhook event: ${event}`, call?.call_id);
 
-    return new Response(twiml, {
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'text/xml',
-      },
+    return new Response(JSON.stringify({ ok: true }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error: any) {
-    console.error('Error processing voice webhook:', error);
-    
-    const errorTwiml = `<?xml version="1.0" encoding="UTF-8"?>
-<Response>
-  <Say voice="alice">We're sorry, but we're experiencing technical difficulties. Please try again later.</Say>
-  <Hangup/>
-</Response>`;
-
-    return new Response(errorTwiml, {
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'text/xml',
-      },
-    });
+    console.error('Error processing Retell webhook:', error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   }
 });

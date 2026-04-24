@@ -81,7 +81,7 @@ export default function CommunicationsActivationPage() {
 
         // Check for existing configuration
         const { data: configData } = await supabase
-          .from('twilio_configurations')
+          .from('comm_configurations')
           .select('*')
           .eq('merchant_id', merchantData.id)
           .maybeSingle();
@@ -93,28 +93,24 @@ export default function CommunicationsActivationPage() {
           // Pre-fill from existing config
           setFormData(prev => ({
             ...prev,
-            legalBusinessName: configData.legal_business_name || merchantData.business_name || '',
-            dbaName: configData.dba_name || merchantData.business_name || '',
-            taxId: configData.tax_id || merchantData.tax_id || '',
-            businessType: configData.business_type || merchantData.business_type || 'llc',
-            websiteUrl: configData.website_url || merchantData.website_url || '',
-            addressLine1: configData.address_line1 || merchantData.address_line1 || '',
-            addressLine2: configData.address_line2 || merchantData.address_line2 || '',
-            city: configData.city || merchantData.city || '',
-            state: configData.state || merchantData.state || '',
-            zipCode: configData.zip_code || merchantData.zip || '',
-            firstName: configData.contact_first_name || merchantData.owner_first_name || '',
-            lastName: configData.contact_last_name || merchantData.owner_last_name || '',
-            email: configData.contact_email || merchantData.business_email || user.email || '',
-            phoneNumber: configData.contact_phone || merchantData.business_phone || '',
-            smsUseCase: configData.sms_use_case || 'two_way_conversational',
-            useCaseDescription: configData.use_case_description || '',
-            sampleMessage: configData.sample_message || '',
-            optInMethod: configData.opt_in_method || 'website_form',
-            optInUrl: configData.opt_in_url || merchantData.website_url || '',
-            privacyPolicyUrl: configData.privacy_policy_url || (merchantData.website_url ? `${merchantData.website_url}/privacy` : ''),
-            termsUrl: configData.terms_url || (merchantData.website_url ? `${merchantData.website_url}/terms` : ''),
-            monthlySmsVolume: configData.monthly_sms_volume?.toString() || '10000',
+            legalBusinessName: merchantData.business_name || '',
+            dbaName: merchantData.business_name || '',
+            taxId: merchantData.tax_id || '',
+            businessType: merchantData.business_type || 'llc',
+            websiteUrl: merchantData.website_url || '',
+            addressLine1: merchantData.address_line1 || '',
+            addressLine2: merchantData.address_line2 || '',
+            city: merchantData.city || '',
+            state: merchantData.state || '',
+            zipCode: merchantData.zip || '',
+            firstName: merchantData.owner_first_name || '',
+            lastName: merchantData.owner_last_name || '',
+            email: merchantData.business_email || user.email || '',
+            phoneNumber: merchantData.business_phone || '',
+            smsUseCase: 'two_way_conversational',
+            optInUrl: merchantData.website_url || '',
+            privacyPolicyUrl: merchantData.website_url ? `${merchantData.website_url}/privacy` : '',
+            termsUrl: merchantData.website_url ? `${merchantData.website_url}/terms` : '',
           }));
         } else {
           // First time setup - pre-fill from merchant data
@@ -168,12 +164,12 @@ export default function CommunicationsActivationPage() {
     try {
       if (isAddingFunds && existingConfig) {
         // Just add funds to existing configuration
-        const newBalance = (existingConfig.prepaid_balance_cents || 0) + (formData.prepayAmount * 100);
+        const newBalance = (existingConfig.balance_cents || 0) + (formData.prepayAmount * 100);
 
         const { error: updateError } = await supabase
-          .from('twilio_configurations')
+          .from('comm_configurations')
           .update({
-            prepaid_balance_cents: newBalance,
+            balance_cents: newBalance,
             updated_at: new Date().toISOString(),
           })
           .eq('merchant_id', merchant.id);
@@ -197,36 +193,17 @@ export default function CommunicationsActivationPage() {
         // Create new configuration
         const configData = {
           merchant_id: merchant.id,
-          legal_business_name: formData.legalBusinessName,
-          dba_name: formData.dbaName,
-          tax_id: formData.taxId,
-          business_type: formData.businessType,
-          website_url: formData.websiteUrl,
-          address_line1: formData.addressLine1,
-          address_line2: formData.addressLine2,
-          city: formData.city,
-          state: formData.state,
-          zip_code: formData.zipCode,
-          country: formData.country,
-          contact_first_name: formData.firstName,
-          contact_last_name: formData.lastName,
-          contact_email: formData.email,
-          contact_phone: formData.phoneNumber,
-          sms_use_case: formData.smsUseCase,
-          use_case_description: formData.useCaseDescription,
-          sample_message: formData.sampleMessage,
-          opt_in_method: formData.optInMethod,
-          opt_in_url: formData.optInUrl,
-          privacy_policy_url: formData.privacyPolicyUrl,
-          terms_url: formData.termsUrl,
-          monthly_sms_volume: parseInt(formData.monthlySmsVolume),
-          prepaid_balance_cents: formData.prepayAmount * 100,
+          balance_cents: formData.prepayAmount * 100,
           is_active: true,
-          verified: true,
+          sms_enabled: true,
+          email_enabled: true,
+          voice_enabled: true,
+          email_from_address: formData.email,
+          email_from_name: formData.legalBusinessName,
         };
 
         const { error: configError } = await supabase
-          .from('twilio_configurations')
+          .from('comm_configurations')
           .upsert(configData, { onConflict: 'merchant_id' });
 
         if (configError) throw configError;
