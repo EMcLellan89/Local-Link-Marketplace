@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Users, DollarSign, Plus, Search, Filter, CreditCard as Edit2, Trash2, CheckCircle, Clock, Send, AlertCircle, Globe, FileText, Download, ChevronDown, ChevronUp, X, Save, Eye, Calendar, TrendingUp, Banknote } from 'lucide-react';
+import { Users, DollarSign, Plus, Search, CreditCard as Edit2, Trash2, CheckCircle, Clock, Send, AlertCircle, Globe, FileText, Download, ChevronDown, ChevronUp, X, Save, Calendar, Banknote, BookOpen, RefreshCw, Eye } from 'lucide-react';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -35,6 +35,7 @@ type PayPeriod = {
   notes: string | null;
   approved_at: string | null;
   paid_at: string | null;
+  expenses_synced_at: string | null;
   created_at: string;
 };
 
@@ -569,8 +570,21 @@ function PayPeriodsView({ payPeriods, onOpen, onRefresh }: {
             </div>
 
             {p.paid_at && (
-              <div className="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-400">
-                Paid on {new Date(p.paid_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+              <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
+                <span className="text-xs text-slate-400">
+                  Paid {new Date(p.paid_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                </span>
+                {p.expenses_synced_at ? (
+                  <span className="flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
+                    <BookOpen className="w-3.5 h-3.5" />
+                    Synced to Accounting
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1.5 text-xs text-amber-600 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5" />
+                    Not yet in Bookkeeping
+                  </span>
+                )}
               </div>
             )}
           </div>
@@ -590,6 +604,8 @@ function PayPeriodDetail({ period, payments, contractors, onRefresh, onPeriodUpd
   onPeriodUpdate: (p: PayPeriod) => void;
 }) {
   const [updating, setUpdating] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [syncMsg, setSyncMsg] = useState<string | null>(null);
 
   const totalUsd = payments.reduce((sum, p) => sum + p.amount_usd_cents, 0);
 
@@ -644,6 +660,77 @@ function PayPeriodDetail({ period, payments, contractors, onRefresh, onPeriodUpd
     onRefresh();
   };
 
+  const syncToBookkeeping = async () => {
+    if (!confirm('Post these payments to the expense ledger for bookkeeping? This makes them visible in Accounting and Tax reports.')) return;
+    setSyncing(true);
+    setSyncMsg(null);
+    const { data, error } = await supabase.rpc('sync_contractor_payments_to_expenses', {
+      p_pay_period_id: period.id
+    });
+    setSyncing(false);
+    if (error) {
+      setSyncMsg('Error: ' + error.message);
+    } else if (data?.error) {
+      setSyncMsg(data.error);
+    } else if (data?.already_synced) {
+      setSyncMsg('Already synced to bookkeeping.');
+    } else {
+      setSyncMsg(`Synced ${data?.synced ?? 0} payment(s) to expense ledger.`);
+      // Refresh period to get updated expenses_synced_at
+      const { data: updated } = await supabase
+        .from('intl_contractor_pay_periods')
+        .select('*')
+        .eq('id', period.id)
+        .maybeSingle();
+      if (updated) onPeriodUpdate(updated as PayPeriod);
+      onRefresh();
+    }
+  };
+
+  const exportCPA = () => {
+    const rows: string[] = [];
+    rows.push([
+      'Pay Period', 'Start Date', 'End Date', 'Contractor Name', 'Country',
+      'Role', 'Payment Method', 'Hours Worked', 'Amount USD', 'Local Amount',
+      'Local Currency', 'Exchange Rate', 'Transaction Ref', 'Payment Status',
+      'Tax Note'
+    ].join(','));
+
+    payments.forEach(p => {
+      const c = p.contractor;
+      rows.push([
+        `"${period.period_label}"`,
+        period.period_start,
+        period.period_end,
+        `"${c?.full_name ?? ''}"`,
+        c?.country ?? '',
+        `"${c?.role ?? ''}"`,
+        c?.payment_method ?? '',
+        p.hours_worked ?? '',
+        (p.amount_usd_cents / 100).toFixed(2),
+        p.local_currency_amount ?? '',
+        p.local_currency ?? '',
+        p.exchange_rate ?? '',
+        `"${p.payment_reference ?? ''}"`,
+        p.status,
+        '"International contractor — deductible business expense. Not subject to 1099 or payroll tax."'
+      ].join(','));
+    });
+
+    rows.push('');
+    rows.push(`"Total USD",${(totalUsd / 100).toFixed(2)}`);
+    rows.push(`"Contractors",${payments.length}`);
+    rows.push(`"Bookkeeping Synced",${period.expenses_synced_at ? new Date(period.expenses_synced_at).toLocaleDateString() : 'Not yet synced'}`);
+
+    const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `contractor_payroll_${period.period_label.replace(/\s+/g, '_')}_CPA.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6">
       {/* Period header */}
@@ -659,33 +746,74 @@ function PayPeriodDetail({ period, payments, contractors, onRefresh, onPeriodUpd
               </span>
             </p>
           </div>
-          <div className="flex gap-3 items-start">
-            <div className="text-right">
+          <div className="flex flex-col gap-3 items-end">
+            <div className="text-right mb-1">
               <div className="text-3xl font-bold text-slate-900">{fmt(totalUsd)}</div>
-              <div className="text-sm text-slate-400">{payments.length} contractors</div>
+              <div className="text-sm text-slate-400">{payments.length} contractor{payments.length !== 1 ? 's' : ''}</div>
             </div>
-            {period.status === 'draft' && payments.length > 0 && (
-              <button
-                onClick={approvePeriod}
-                disabled={updating}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium disabled:opacity-50"
-              >
-                <CheckCircle className="w-4 h-4" />
-                Approve Run
-              </button>
-            )}
-            {period.status === 'approved' && (
-              <button
-                onClick={markPaid}
-                disabled={updating}
-                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium disabled:opacity-50"
-              >
-                <Send className="w-4 h-4" />
-                Mark All Paid
-              </button>
-            )}
+            <div className="flex flex-wrap gap-2 justify-end">
+              {period.status === 'draft' && payments.length > 0 && (
+                <button
+                  onClick={approvePeriod}
+                  disabled={updating}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium disabled:opacity-50"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  Approve Run
+                </button>
+              )}
+              {period.status === 'approved' && (
+                <button
+                  onClick={markPaid}
+                  disabled={updating}
+                  className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium disabled:opacity-50"
+                >
+                  <Send className="w-4 h-4" />
+                  Mark All Paid
+                </button>
+              )}
+              {period.status === 'paid' && !period.expenses_synced_at && (
+                <button
+                  onClick={syncToBookkeeping}
+                  disabled={syncing}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#2BB673] text-white rounded-lg hover:bg-[#229a5e] transition-colors text-sm font-medium disabled:opacity-50"
+                >
+                  {syncing ? <RefreshCw className="w-4 h-4 animate-spin" /> : <BookOpen className="w-4 h-4" />}
+                  {syncing ? 'Syncing...' : 'Sync to Bookkeeping'}
+                </button>
+              )}
+              {payments.length > 0 && (
+                <button
+                  onClick={exportCPA}
+                  className="flex items-center gap-2 px-4 py-2 border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium"
+                >
+                  <Download className="w-4 h-4" />
+                  Export for CPA
+                </button>
+              )}
+            </div>
           </div>
         </div>
+
+        {/* Sync status */}
+        {(period.expenses_synced_at || syncMsg) && (
+          <div className="mt-3 pt-3 border-t border-slate-100">
+            {period.expenses_synced_at && (
+              <div className="flex items-center gap-2 text-sm text-emerald-700">
+                <BookOpen className="w-4 h-4" />
+                <span>
+                  Synced to bookkeeping on {new Date(period.expenses_synced_at).toLocaleDateString()} — included in Accounting Dashboard and Quarterly Tax Estimates.
+                </span>
+              </div>
+            )}
+            {syncMsg && !period.expenses_synced_at && (
+              <div className={`text-sm flex items-center gap-2 ${syncMsg.startsWith('Error') ? 'text-red-600' : 'text-slate-600'}`}>
+                <AlertCircle className="w-4 h-4" />
+                {syncMsg}
+              </div>
+            )}
+          </div>
+        )}
 
         {period.notes && (
           <div className="mt-4 pt-4 border-t border-slate-100 text-sm text-slate-600">{period.notes}</div>
