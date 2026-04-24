@@ -2,9 +2,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { CreditCard, AlertTriangle, CheckCircle, Loader } from 'lucide-react';
+import {
+  CreditCard, AlertTriangle, CheckCircle, Loader2,
+  DollarSign, BarChart2, Shield, Zap, Calendar
+} from 'lucide-react';
 import Button from '../../components/ui/Button';
-import BackButton from '../../components/ui/BackButton';
+import DashboardLayout from '../../components/layout/DashboardLayout';
 
 interface SubscriptionData {
   status: string;
@@ -12,6 +15,15 @@ interface SubscriptionData {
   current_period_end: string | null;
   stripe_customer_id: string | null;
 }
+
+const INCLUDED = [
+  { icon: BarChart2, text: 'Deal & pipeline tracking' },
+  { icon: Shield, text: 'Attribution links & partner codes' },
+  { icon: DollarSign, text: 'Commission dashboard & payout tracking' },
+  { icon: Zap, text: 'Swipe files & AI promo assets' },
+  { icon: CheckCircle, text: 'Training & onboarding course' },
+  { icon: BarChart2, text: 'Leaderboards & bonus alerts' },
+];
 
 export default function PartnerBillingPage() {
   const { user } = useAuth();
@@ -68,11 +80,6 @@ export default function PartnerBillingPage() {
   async function handleManageBilling() {
     setProcessing(true);
     try {
-      if (!subscription?.stripe_customer_id) {
-        alert('No customer ID found');
-        return;
-      }
-
       window.open('https://billing.stripe.com/p/login/test_00000000', '_blank');
     } catch (error) {
       console.error('Error opening billing portal:', error);
@@ -83,12 +90,11 @@ export default function PartnerBillingPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="mb-4">
-          <BackButton />
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="w-8 h-8 animate-spin text-[#2BB673]" />
         </div>
-        <Loader className="w-8 h-8 animate-spin text-blue-600" />
-      </div>
+      </DashboardLayout>
     );
   }
 
@@ -97,181 +103,183 @@ export default function PartnerBillingPage() {
   const isInactive = !subscription || subscription.status === 'inactive';
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Partner CRM Billing</h1>
-          <p className="text-gray-600 mt-2">
-            Manage your Partner CRM subscription and billing details
+    <DashboardLayout>
+      <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+
+        {/* Page title */}
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Partner CRM Billing</h1>
+          <p className="text-slate-500 mt-1">
+            Your Partner CRM subscription is required to track deals and release commission payouts.
           </p>
         </div>
 
+        {/* Alert banners */}
         {isPastDue && (
-          <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-semibold text-yellow-900">Payment Past Due</h3>
-              <p className="text-yellow-800 text-sm mt-1">
-                Your payment failed. Commission payouts are paused until payment is received.
+              <p className="font-semibold text-amber-900">Payment past due</p>
+              <p className="text-amber-800 text-sm mt-1">
+                Your payment failed. Commission payouts are paused until your payment method is updated.
               </p>
               <Button
-                variant="primary"
+                size="sm"
                 onClick={handleManageBilling}
                 className="mt-3"
               >
-                Update Payment Method
+                Update payment method
               </Button>
             </div>
           </div>
         )}
 
         {isInactive && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+          <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-semibold text-red-900">Partner CRM Inactive</h3>
-              <p className="text-red-800 text-sm mt-1">
-                Commissions are currently withheld. Activate Partner CRM to release payouts.
+              <p className="font-semibold text-rose-900">Partner CRM not active</p>
+              <p className="text-rose-800 text-sm mt-1">
+                Commission payouts are withheld until your Partner CRM subscription is active.
               </p>
             </div>
           </div>
         )}
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="flex items-center gap-3 mb-6">
-            <CreditCard className="w-6 h-6 text-gray-700" />
-            <h2 className="text-xl font-semibold text-gray-900">Current Status</h2>
-          </div>
-
-          {isActive ? (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-                <span className="font-semibold text-green-900">Active Subscription</span>
+        {/* Active subscription card */}
+        {isActive && (
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-[#2BB673] px-6 py-4">
+              <div className="flex items-center gap-2 text-white">
+                <CheckCircle className="w-5 h-5" />
+                <span className="font-semibold">Active Subscription</span>
               </div>
-              <div className="grid grid-cols-2 gap-4 text-sm">
+            </div>
+            <div className="p-6">
+              <div className="grid grid-cols-3 gap-4 mb-6">
                 <div>
-                  <p className="text-gray-600">Plan</p>
-                  <p className="font-semibold text-gray-900 capitalize">{subscription.tier}</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Plan</p>
+                  <p className="font-bold text-slate-900 capitalize">{subscription!.tier}</p>
                 </div>
-                {subscription.current_period_end && (
+                <div>
+                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Status</p>
+                  <span className="inline-flex items-center gap-1 text-sm font-semibold text-[#2BB673]">
+                    <span className="w-2 h-2 bg-[#2BB673] rounded-full"></span>
+                    Active
+                  </span>
+                </div>
+                {subscription!.current_period_end && (
                   <div>
-                    <p className="text-gray-600">Renews</p>
-                    <p className="font-semibold text-gray-900">
-                      {new Date(subscription.current_period_end).toLocaleDateString()}
+                    <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Renews</p>
+                    <p className="font-bold text-slate-900">
+                      {new Date(subscription!.current_period_end).toLocaleDateString('en-US', {
+                        month: 'short', day: 'numeric', year: 'numeric'
+                      })}
                     </p>
                   </div>
                 )}
               </div>
-              <div className="pt-4 border-t">
-                <Button
-                  variant="secondary"
-                  onClick={handleManageBilling}
-                  disabled={processing}
-                >
-                  Manage Billing
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <p className="text-gray-600">No active subscription</p>
-          )}
-        </div>
-
-        {isInactive && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Activate Partner CRM
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Partner CRM is required to track deals, manage leads, and release commission payouts.
-            </p>
-
-            <div className="flex gap-4 mb-6">
-              <button
-                onClick={() => setSelectedTier('monthly')}
-                className={`flex-1 p-4 border-2 rounded-lg transition-all ${
-                  selectedTier === 'monthly'
-                    ? 'border-blue-600 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
+              <Button
+                variant="outline"
+                onClick={handleManageBilling}
+                disabled={processing}
+                size="sm"
               >
-                <div className="text-left">
-                  <h3 className="font-semibold text-gray-900">Monthly</h3>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">$49</p>
-                  <p className="text-sm text-gray-600">per month</p>
-                </div>
-              </button>
-
-              <button
-                onClick={() => setSelectedTier('annual')}
-                className={`flex-1 p-4 border-2 rounded-lg transition-all ${
-                  selectedTier === 'annual'
-                    ? 'border-blue-600 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <div className="text-left">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-gray-900">Annual</h3>
-                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                      Save $98
-                    </span>
-                  </div>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">$490</p>
-                  <p className="text-sm text-gray-600">per year</p>
-                </div>
-              </button>
+                <CreditCard className="w-4 h-4 mr-2" />
+                Manage billing
+              </Button>
             </div>
+          </div>
+        )}
 
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <h4 className="font-semibold text-gray-900 mb-3">Includes:</h4>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  Deal & pipeline tracking
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  Attribution links & partner codes
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  Commission dashboard & payout tracking
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  Swipe files & promo assets
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  Training & onboarding
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  Leaderboards & bonuses
-                </li>
-              </ul>
-            </div>
-
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-              <p className="text-sm text-yellow-900">
-                <strong>Important:</strong> Commissions are only released while your Partner CRM subscription is active.
-                You keep attribution history, but payouts pause if the subscription is inactive.
+        {/* Activation panel (inactive/past_due) */}
+        {(isInactive || isPastDue) && (
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="px-6 pt-6 pb-4 border-b border-slate-100">
+              <h2 className="text-lg font-bold text-slate-900">Activate Partner CRM</h2>
+              <p className="text-sm text-slate-500 mt-1">
+                Choose a billing cycle to unlock commissions and your full partner toolkit.
               </p>
             </div>
 
-            <Button
-              variant="primary"
-              onClick={handleSubscribe}
-              disabled={processing}
-              className="w-full"
-            >
-              {processing ? 'Processing...' : `Activate ${selectedTier === 'annual' ? 'Annual' : 'Monthly'} Plan`}
-            </Button>
+            <div className="p-6 space-y-6">
+              {/* Plan toggle */}
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => setSelectedTier('monthly')}
+                  className={`p-4 rounded-xl border-2 text-left transition-all ${
+                    selectedTier === 'monthly'
+                      ? 'border-[#2BB673] bg-[#2BB673]/5'
+                      : 'border-slate-200 hover:border-slate-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <Calendar className="w-4 h-4 text-slate-500" />
+                    <span className="font-semibold text-slate-900">Monthly</span>
+                  </div>
+                  <p className="text-3xl font-bold text-slate-900">$49</p>
+                  <p className="text-sm text-slate-500">per month</p>
+                </button>
+
+                <button
+                  onClick={() => setSelectedTier('annual')}
+                  className={`p-4 rounded-xl border-2 text-left transition-all relative ${
+                    selectedTier === 'annual'
+                      ? 'border-[#2BB673] bg-[#2BB673]/5'
+                      : 'border-slate-200 hover:border-slate-300'
+                  }`}
+                >
+                  <div className="absolute top-3 right-3">
+                    <span className="bg-[#2BB673] text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                      Save $98
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Calendar className="w-4 h-4 text-slate-500" />
+                    <span className="font-semibold text-slate-900">Annual</span>
+                  </div>
+                  <p className="text-3xl font-bold text-slate-900">$490</p>
+                  <p className="text-sm text-slate-500">per year</p>
+                </button>
+              </div>
+
+              {/* What's included */}
+              <div className="bg-slate-50 rounded-xl p-5">
+                <p className="text-sm font-semibold text-slate-700 mb-3">Everything included:</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {INCLUDED.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <div key={item.text} className="flex items-center gap-2 text-sm text-slate-700">
+                        <Icon className="w-4 h-4 text-[#2BB673] flex-shrink-0" />
+                        {item.text}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Payout warning */}
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-900">
+                <strong>Important:</strong> Commission payouts are only released while your Partner CRM
+                subscription is active. You keep full attribution history, but payouts pause if the
+                subscription lapses.
+              </div>
+
+              <Button
+                onClick={handleSubscribe}
+                disabled={processing}
+                className="w-full"
+                size="lg"
+              >
+                {processing
+                  ? 'Processing...'
+                  : `Activate ${selectedTier === 'annual' ? 'Annual' : 'Monthly'} Plan`}
+              </Button>
+            </div>
           </div>
         )}
       </div>
-    </div>
+    </DashboardLayout>
   );
 }
