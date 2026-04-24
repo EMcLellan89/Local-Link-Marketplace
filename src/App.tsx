@@ -298,6 +298,7 @@ const AdminPayoutApprovalPage = lazy(() => import('./pages/admin/AdminPayoutAppr
 const AdminCommissionRulesPage = lazy(() => import('./pages/admin/AdminCommissionRulesPage'));
 const AdminAttributionDisputePage = lazy(() => import('./pages/admin/AdminAttributionDisputePage'));
 const AdminAdEnginePage = lazy(() => import('./pages/admin/AdminAdEnginePage'));
+const FinancialReconciliationPage = lazy(() => import('./pages/admin/FinancialReconciliationPage'));
 
 // Partner Compliance / Leads / Tax
 const PartnerCompliancePage = lazy(() => import('./pages/partner/PartnerCompliancePage'));
@@ -1704,6 +1705,7 @@ function AppRoutes() {
       <Route path="/admin/commission-rules" element={<AdminCommissionRulesPage />} />
       <Route path="/admin/attribution-disputes" element={<AdminAttributionDisputePage />} />
       <Route path="/admin/ads" element={<AdminAdEnginePage />} />
+      <Route path="/admin/reconciliation" element={<FinancialReconciliationPage />} />
       <Route path="/admin/academy/modules" element={<AcademyModulesPage />} />
       <Route path="/admin/academy/lessons" element={<AcademyLessonsPage />} />
       <Route path="/admin/academy/exam-questions" element={<AcademyExamQuestionsPage />} />

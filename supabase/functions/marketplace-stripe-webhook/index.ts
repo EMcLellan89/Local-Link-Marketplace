@@ -88,6 +88,19 @@ Deno.serve(async (req: Request) => {
     });
   }
 
+  // Idempotency: skip already-processed events
+  const { error: insertErr } = await supabaseAdmin
+    .from("stripe_webhook_events")
+    .insert({ stripe_event_id: event.id, event_type: event.type, processed_at: new Date().toISOString(), status: "processing" });
+
+  if (insertErr?.code === "23505") {
+    console.log("Duplicate webhook event, skipping:", event.id);
+    return new Response(JSON.stringify({ received: true, duplicate: true }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     switch (event.type) {
       case "checkout.session.completed": {
@@ -333,6 +346,10 @@ Deno.serve(async (req: Request) => {
     }
   } catch (err: any) {
     console.error("Webhook handler error:", err);
+    await supabaseAdmin
+      .from("stripe_webhook_events")
+      .update({ status: "failed", error_message: err.message })
+      .eq("stripe_event_id", event.id);
     return new Response(JSON.stringify({ error: err.message || "Webhook handler failed" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
