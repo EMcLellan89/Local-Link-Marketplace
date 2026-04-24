@@ -22,6 +22,8 @@ const OffersPage = lazy(() => import('./pages/customer/OffersPage'));
 const CommunityPage = lazy(() => import('./pages/customer/CommunityPage'));
 const FoodDiningPage = lazy(() => import('./pages/customer/FoodDiningPage'));
 const KidsFamilyPage = lazy(() => import('./pages/customer/KidsFamilyPage'));
+const MyFeedPage = lazy(() => import('./pages/customer/MyFeedPage'));
+const BusinessProfilePage = lazy(() => import('./pages/customer/BusinessProfilePage'));
 const PartnerCommunityPage = lazy(() => import('./pages/partner/PartnerCommunityPage'));
 const DealDetailPage = lazy(() => import('./pages/customer/DealDetailPage'));
 const PurchaseConfirmationPage = lazy(() => import('./pages/customer/PurchaseConfirmationPage'));
@@ -403,6 +405,8 @@ function AppRoutes() {
       <Route path="/community" element={<CommunityPage />} />
       <Route path="/food" element={<FoodDiningPage />} />
       <Route path="/kids-family" element={<KidsFamilyPage />} />
+      <Route path="/my-feed" element={<MyFeedPage />} />
+      <Route path="/businesses/:slug" element={<BusinessProfilePage />} />
 
       <Route
         path="/deal/:id"
