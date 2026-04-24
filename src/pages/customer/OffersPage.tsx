@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Tag, Clock, Heart, Star, Sparkles, Search, Filter } from 'lucide-react';
+import { MapPin, Tag, Heart, Star, Sparkles, Search, CalendarDays } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import DashboardLayout from '../../components/layout/DashboardLayout';
+import AppointmentBookingModal from '../../components/AppointmentBookingModal';
 
 interface Offer {
   id: string;
@@ -12,9 +13,15 @@ interface Offer {
   original_value_cents: number;
   price_cents: number;
   image_url: string | null;
+  bookable?: boolean;
+  booking_duration_minutes?: number | null;
   merchant: {
+    id?: string;
     business_name: string;
     city: string;
+    booking_enabled?: boolean;
+    booking_lead_time_hours?: number;
+    booking_advance_days?: number;
   };
 }
 
@@ -93,6 +100,7 @@ export default function OffersPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
+  const [bookingOffer, setBookingOffer] = useState<Offer | null>(null);
 
   useEffect(() => {
     fetchOffers();
@@ -104,20 +112,29 @@ export default function OffersPage() {
     try {
       const { data } = await supabase
         .from('deals')
-        .select(`id, title, short_description, original_value_cents, price_cents, image_url, merchant:merchants!inner(business_name, city)`)
+        .select(`id, title, short_description, original_value_cents, price_cents, image_url, bookable, booking_duration_minutes, merchant:merchants!inner(id, business_name, city, booking_enabled, booking_lead_time_hours, booking_advance_days)`)
         .eq('status', 'active')
         .gte('end_at', new Date().toISOString())
         .order('created_at', { ascending: false });
 
       if (data && data.length > 0) {
-        setOffers(data.map(d => ({
+        setOffers(data.map((d: any) => ({
           id: d.id,
           title: d.title,
           short_description: d.short_description,
           original_value_cents: d.original_value_cents,
           price_cents: d.price_cents,
           image_url: d.image_url,
-          merchant: { business_name: d.merchant.business_name, city: d.merchant.city }
+          bookable: d.bookable,
+          booking_duration_minutes: d.booking_duration_minutes,
+          merchant: {
+            id: d.merchant.id,
+            business_name: d.merchant.business_name,
+            city: d.merchant.city,
+            booking_enabled: d.merchant.booking_enabled,
+            booking_lead_time_hours: d.merchant.booking_lead_time_hours,
+            booking_advance_days: d.merchant.booking_advance_days,
+          }
         })));
       } else {
         setOffers(MOCK_OFFERS);
@@ -248,6 +265,7 @@ export default function OffersPage() {
                 isFavorited={favorites.has(offer.id)}
                 onFavorite={toggleFavorite}
                 onView={() => navigate(`/deal/${offer.id}`)}
+                onBook={offer.bookable && offer.merchant.booking_enabled ? (e) => { e.stopPropagation(); setBookingOffer(offer); } : undefined}
                 formatPrice={formatPrice}
                 savingsPercent={savingsPercent}
               />
@@ -277,6 +295,13 @@ export default function OffersPage() {
           </div>
         </div>
       </div>
+
+      {bookingOffer && (
+        <AppointmentBookingModal
+          deal={bookingOffer as any}
+          onClose={() => setBookingOffer(null)}
+        />
+      )}
     </DashboardLayout>
   );
 }
@@ -286,6 +311,7 @@ function OfferCard({
   isFavorited,
   onFavorite,
   onView,
+  onBook,
   formatPrice,
   savingsPercent,
 }: {
@@ -293,6 +319,7 @@ function OfferCard({
   isFavorited: boolean;
   onFavorite: (id: string, e: React.MouseEvent) => void;
   onView: () => void;
+  onBook?: (e: React.MouseEvent) => void;
   formatPrice: (cents: number) => string;
   savingsPercent: (orig: number, price: number) => number;
 }) {
@@ -353,6 +380,16 @@ function OfferCard({
             <span className="text-sm font-medium text-slate-600">4.8</span>
           </div>
         </div>
+
+        {onBook && (
+          <button
+            onClick={onBook}
+            className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-[#2BB673] text-[#2BB673] font-semibold text-sm hover:bg-[#2BB673] hover:text-white transition-all duration-200"
+          >
+            <CalendarDays className="w-4 h-4" />
+            Book Appointment
+          </button>
+        )}
       </div>
     </div>
   );
