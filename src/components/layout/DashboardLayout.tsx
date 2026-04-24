@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { LogOut, Store, ShoppingBag, Shield, User, Heart, Menu, X, Calendar, Tag, Sparkles } from 'lucide-react';
+import { LogOut, Store, ShoppingBag, Shield, User, Heart, Menu, X, Calendar, Tag, Sparkles, Database } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import Button from '../ui/Button';
 import BackButton from '../ui/BackButton';
@@ -37,6 +37,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         return [
           { to: '/merchant/dashboard', icon: Store, label: 'Dashboard' },
           { to: '/merchant/deals', icon: ShoppingBag, label: 'My Deals' },
+          { to: '/merchant/crm-hub', icon: Database, label: 'CRM Hub' },
         ];
       case 'admin':
         return [

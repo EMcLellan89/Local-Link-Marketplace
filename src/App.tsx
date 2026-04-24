@@ -263,6 +263,19 @@ const BlogGrowthCourseDashboard = lazy(() => import('./pages/course/BlogGrowthCo
 const AutoScaleMarketplace = lazy(() => import('./pages/merchant/AutoScaleMarketplace'));
 const AutoScaleSalesPage = lazy(() => import('./pages/partner/AutoScaleSalesPage'));
 
+// Universal CRM
+const CRMHubPage = lazy(() => import('./pages/merchant/CRMHubPage'));
+const CRMLeadsPage = lazy(() => import('./pages/merchant/CRMLeadsPage'));
+const CRMFinancialsPage = lazy(() => import('./pages/merchant/CRMFinancialsPage'));
+const CRMCustomersPage = lazy(() => import('./pages/merchant/CRMCustomersPage'));
+const CRMOpportunitiesPage = lazy(() => import('./pages/merchant/CRMOpportunitiesPage'));
+const CRMActivitiesPage = lazy(() => import('./pages/merchant/CRMActivitiesPage'));
+const CRMTasksPage = lazy(() => import('./pages/merchant/CRMTasksPage'));
+const CRMMessagesPage = lazy(() => import('./pages/merchant/CRMMessagesPage'));
+const CRMOffersPage = lazy(() => import('./pages/merchant/CRMOffersPage'));
+const CRMTransactionsPage = lazy(() => import('./pages/merchant/CRMTransactionsPage'));
+const CRMInvoicesPage = lazy(() => import('./pages/merchant/CRMInvoicesPage'));
+
 // StoryLab
 const StoryLabCheckoutSuccess = lazy(() => import('./pages/storylab/CheckoutSuccess'));
 const StoryLabCheckoutCancel = lazy(() => import('./pages/storylab/CheckoutCancel'));
@@ -557,6 +570,105 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={['merchant']}>
             <CRMMigrationPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/merchant/crm-hub"
+        element={
+          <ProtectedRoute allowedRoles={['merchant']}>
+            <CRMHubPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/merchant/crm/leads"
+        element={
+          <ProtectedRoute allowedRoles={['merchant']}>
+            <CRMLeadsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/merchant/crm/financials"
+        element={
+          <ProtectedRoute allowedRoles={['merchant']}>
+            <CRMFinancialsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/merchant/crm/customers"
+        element={
+          <ProtectedRoute allowedRoles={['merchant']}>
+            <CRMCustomersPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/merchant/crm/opportunities"
+        element={
+          <ProtectedRoute allowedRoles={['merchant']}>
+            <CRMOpportunitiesPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/merchant/crm/activities"
+        element={
+          <ProtectedRoute allowedRoles={['merchant']}>
+            <CRMActivitiesPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/merchant/crm/tasks"
+        element={
+          <ProtectedRoute allowedRoles={['merchant']}>
+            <CRMTasksPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/merchant/crm/messages"
+        element={
+          <ProtectedRoute allowedRoles={['merchant']}>
+            <CRMMessagesPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/merchant/crm/offers"
+        element={
+          <ProtectedRoute allowedRoles={['merchant']}>
+            <CRMOffersPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/merchant/crm/transactions"
+        element={
+          <ProtectedRoute allowedRoles={['merchant']}>
+            <CRMTransactionsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/merchant/crm/invoices"
+        element={
+          <ProtectedRoute allowedRoles={['merchant']}>
+            <CRMInvoicesPage />
           </ProtectedRoute>
         }
       />
