@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   DollarSign, ShoppingBag, Users, TrendingUp, ArrowRight, Bot,
-  FileText, Target, Phone, CreditCard, Briefcase, Mail, Sparkles, BookOpen, Gift, Zap, Calculator, Package
+  FileText, Target, Phone, CreditCard, Briefcase, Mail, Sparkles, BookOpen, Gift, Zap, Calculator, Package, MessageSquare
 } from 'lucide-react';
+import TestimonialSubmitModal from '../../components/TestimonialSubmitModal';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { checkBlogCourseAccess, CourseAccessInfo } from '../../lib/courseAccess';
@@ -47,6 +48,7 @@ export default function MerchantDashboard() {
   const [enrollingCourse, setEnrollingCourse] = useState(false);
   const [blogCourseAccess, setBlogCourseAccess] = useState<CourseAccessInfo | null>(null);
   const [totalCourses, setTotalCourses] = useState<number>(0);
+  const [showTestimonialModal, setShowTestimonialModal] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -358,6 +360,7 @@ export default function MerchantDashboard() {
   }
 
   return (
+    <>
     <BusinessHubLayout>
       <div className="space-y-6">
         <div>
@@ -806,7 +809,7 @@ export default function MerchantDashboard() {
             <h2 className="text-xl font-bold text-slate-900">Quick Actions</h2>
           </CardHeader>
           <CardBody>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
               <Button
                 fullWidth
                 onClick={() => navigate('/merchant/deals/new')}
@@ -834,6 +837,14 @@ export default function MerchantDashboard() {
                 onClick={() => navigate('/merchant/redemptions')}
               >
                 Scan QR Code
+              </Button>
+              <Button
+                variant="outline"
+                fullWidth
+                onClick={() => setShowTestimonialModal(true)}
+              >
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Share My Result
               </Button>
             </div>
 
@@ -863,5 +874,13 @@ export default function MerchantDashboard() {
         </Card>
       </div>
     </BusinessHubLayout>
+    {showTestimonialModal && user && (
+      <TestimonialSubmitModal
+        userId={user.id}
+        role="merchant"
+        onClose={() => setShowTestimonialModal(false)}
+      />
+    )}
+    </>
   );
 }

@@ -8,6 +8,7 @@ import { AttachReferralOnLogin } from './components/AttachReferralOnLogin';
 import DevModeRoleSwitcher from './components/DevModeRoleSwitcher';
 
 const Landing = lazy(() => import('./pages/Landing'));
+const ResultsPage = lazy(() => import('./pages/ResultsPage'));
 const UnifiedLogin = lazy(() => import('./pages/UnifiedLogin'));
 const ForBusinesses = lazy(() => import('./pages/ForBusinesses'));
 const BusinessPricing = lazy(() => import('./pages/BusinessPricing'));
@@ -319,6 +320,7 @@ const WorkQueuePage = lazy(() => import('./pages/internal/WorkQueuePage'));
 const AdminSalesTeamPage = lazy(() => import('./pages/admin/AdminSalesTeamPage'));
 const AdminFulfillmentPage = lazy(() => import('./pages/admin/AdminFulfillmentPage'));
 const InternationalPayrollPage = lazy(() => import('./pages/admin/InternationalPayrollPage'));
+const TestimonialsApprovalPage = lazy(() => import('./pages/admin/TestimonialsApprovalPage'));
 
 // Admin Course Management
 const AdminCoursesList = lazy(() => import('./pages/admin/AdminCoursesList'));
@@ -408,6 +410,7 @@ function AppRoutes() {
       <Route path="/faq" element={<FAQ />} />
       <Route path="/earn" element={<EarnHub />} />
       <Route path="/join" element={<JoinPage />} />
+      <Route path="/results" element={<ResultsPage />} />
       <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
       <Route path="/unified-login" element={user ? <Navigate to="/dashboard" replace /> : <UnifiedLogin />} />
       <Route path="/register" element={user ? <Navigate to="/dashboard" replace /> : <Register />} />
@@ -1870,6 +1873,7 @@ function AppRoutes() {
       <Route path="/admin/sales-team" element={<AdminSalesTeamPage />} />
       <Route path="/admin/fulfillment" element={<AdminFulfillmentPage />} />
       <Route path="/admin/international-payroll" element={<InternationalPayrollPage />} />
+      <Route path="/admin/testimonials" element={<TestimonialsApprovalPage />} />
 
       <Route path="/partner/expansion" element={<ExpansionRequestPage />} />
 

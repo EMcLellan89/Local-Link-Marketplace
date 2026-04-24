@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Users, Store, Tag, DollarSign, Mail, TrendingUp, CheckCircle, XCircle,
-  Calendar, BarChart3, Clock, Phone, Link as LinkIcon, LogOut, Building, Calculator
+  Calendar, BarChart3, Clock, Phone, Link as LinkIcon, LogOut, Building, Calculator, MessageSquare
 } from 'lucide-react';
 import { useAdminAuth } from '../../contexts/AdminAuthContext';
 import Card, { CardBody, CardHeader } from '../../components/ui/Card';
@@ -371,6 +371,14 @@ export default function EnhancedAdminDashboard() {
                     >
                       <Calculator className="w-5 h-5 mr-2" />
                       International Payroll
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      className="w-full justify-start"
+                      onClick={() => navigate('/admin/testimonials')}
+                    >
+                      <MessageSquare className="w-5 h-5 mr-2" />
+                      Testimonials Manager
                     </Button>
                   </div>
                 </CardBody>

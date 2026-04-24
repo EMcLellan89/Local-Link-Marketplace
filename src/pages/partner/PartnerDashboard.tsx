@@ -3,11 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   DollarSign, Users, TrendingUp, ArrowRight, BookOpen, MapPin,
   Copy, Check, QrCode, Zap, Award, BarChart2, ChevronRight,
-  Clock, CheckCircle2, AlertCircle, ExternalLink, Star,
+  Clock, CheckCircle2, AlertCircle, ExternalLink, Star, MessageSquare,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import PartnerHubLayout from '../../components/layout/PartnerHubLayout';
+import TestimonialSubmitModal from '../../components/TestimonialSubmitModal';
 import { DEV_MODE, MOCK_PARTNER } from '../../lib/devMode';
 
 // ── Types ────────────────────────────────────────────────────────────────
@@ -152,6 +153,7 @@ export default function PartnerDashboard() {
   const [activity, setActivity] = useState<ActivityRow[]>(MOCK_ACTIVITY);
   const [topProducts] = useState<TopProduct[]>(MOCK_TOP_PRODUCTS);
   const [payout, setPayout] = useState<PayoutStatus>(MOCK_PAYOUT);
+  const [showTestimonialModal, setShowTestimonialModal] = useState(false);
 
   useEffect(() => {
     if (user) loadDashboard();
@@ -275,6 +277,7 @@ export default function PartnerDashboard() {
   const tierLabel = (partner.tier || 'starter').charAt(0).toUpperCase() + (partner.tier || 'starter').slice(1);
 
   return (
+    <>
     <PartnerHubLayout>
       <div className="space-y-6 pb-10">
 
@@ -393,6 +396,7 @@ export default function PartnerDashboard() {
                 { label: 'Add Merchant', icon: <ArrowRight className="w-4 h-4" />, color: 'text-amber-700 border-amber-200 bg-amber-50 hover:bg-amber-100', to: '/partner/outreach' },
                 { label: 'View Comp Plan', icon: <BarChart2 className="w-4 h-4" />, color: 'text-rose-700 border-rose-200 bg-rose-50 hover:bg-rose-100', to: '/partner/compensation' },
                 { label: 'Academy', icon: <BookOpen className="w-4 h-4" />, color: 'text-teal-700 border-teal-200 bg-teal-50 hover:bg-teal-100', to: '/academy' },
+                { label: 'Share My Win', icon: <MessageSquare className="w-4 h-4" />, color: 'text-blue-700 border-blue-200 bg-blue-50 hover:bg-blue-100', onClick: () => setShowTestimonialModal(true) },
               ].map((action, i) => {
                 const cls = `w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-sm font-medium transition-colors ${action.color}`;
                 if ('to' in action && action.to) {
@@ -709,5 +713,13 @@ export default function PartnerDashboard() {
 
       </div>
     </PartnerHubLayout>
+    {showTestimonialModal && user && (
+      <TestimonialSubmitModal
+        userId={user.id}
+        role="partner"
+        onClose={() => setShowTestimonialModal(false)}
+      />
+    )}
+    </>
   );
 }

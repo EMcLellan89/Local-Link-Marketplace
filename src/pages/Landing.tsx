@@ -47,6 +47,7 @@ const NAV_LINKS = [
   { label: 'Food & Dining', path: '/food' },
   { label: 'Kids & Family', path: '/kids-family' },
   { label: 'Start a Business', path: '/business' },
+  { label: 'Results', path: '/results', hot: true },
   { label: 'Make Money', path: '/earn', hot: true },
 ];
 
