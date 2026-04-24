@@ -318,6 +318,7 @@ const SalesDashboard = lazy(() => import('./pages/internal/SalesDashboard'));
 const WorkQueuePage = lazy(() => import('./pages/internal/WorkQueuePage'));
 const AdminSalesTeamPage = lazy(() => import('./pages/admin/AdminSalesTeamPage'));
 const AdminFulfillmentPage = lazy(() => import('./pages/admin/AdminFulfillmentPage'));
+const InternationalPayrollPage = lazy(() => import('./pages/admin/InternationalPayrollPage'));
 
 // Admin Course Management
 const AdminCoursesList = lazy(() => import('./pages/admin/AdminCoursesList'));
@@ -1868,6 +1869,7 @@ function AppRoutes() {
 
       <Route path="/admin/sales-team" element={<AdminSalesTeamPage />} />
       <Route path="/admin/fulfillment" element={<AdminFulfillmentPage />} />
+      <Route path="/admin/international-payroll" element={<InternationalPayrollPage />} />
 
       <Route path="/partner/expansion" element={<ExpansionRequestPage />} />
 
