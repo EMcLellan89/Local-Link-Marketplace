@@ -173,6 +173,7 @@ const PartnerCRMDashboard = lazy(() => import('./pages/partner/PartnerCRMDashboa
 const PartnerCRMUpgrade = lazy(() => import('./pages/partner/PartnerCRMUpgrade'));
 const PartnerCRMSuccess = lazy(() => import('./pages/partner/PartnerCRMSuccess'));
 const PartnerBillingPage = lazy(() => import('./pages/partner/PartnerBillingPage'));
+const PartnerCompensationPage = lazy(() => import('./pages/partner/PartnerCompensationPage'));
 const PartnerOnboardingPage = lazy(() => import('./pages/partner/PartnerOnboardingPage'));
 const Partner7DayChallenge = lazy(() => import('./pages/partner/Partner7DayChallenge'));
 const PartnerLeaderboard = lazy(() => import('./pages/partner/PartnerLeaderboard'));
@@ -1937,6 +1938,12 @@ function AppRoutes() {
       <Route path="/partner/billing" element={
         <ProtectedRoute>
           <PartnerBillingPage />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/partner/compensation" element={
+        <ProtectedRoute>
+          <PartnerCompensationPage />
         </ProtectedRoute>
       } />
 
