@@ -305,6 +305,14 @@ const PartnerCompliancePage = lazy(() => import('./pages/partner/PartnerComplian
 const PartnerLeadPipelinePage = lazy(() => import('./pages/partner/PartnerLeadPipelinePage'));
 const PartnerTaxCenterPage = lazy(() => import('./pages/partner/PartnerTaxCenterPage'));
 
+// Partner missing pages
+const PartnerShareKitPage = lazy(() => import('./pages/partner/PartnerShareKitPage'));
+const PartnerMarketingKitPage = lazy(() => import('./pages/partner/PartnerMarketingKitPage'));
+const PartnerOutreachPage = lazy(() => import('./pages/partner/PartnerOutreachPage'));
+const PartnerTerritoriesPage = lazy(() => import('./pages/partner/PartnerTerritoriesPage'));
+const PartnerAnalyticsPage = lazy(() => import('./pages/partner/PartnerAnalyticsPage'));
+const PartnerCommunicationsPage = lazy(() => import('./pages/partner/PartnerCommunicationsPage'));
+
 // Internal Sales Team / Fulfillment
 const SalesDashboard = lazy(() => import('./pages/internal/SalesDashboard'));
 const WorkQueuePage = lazy(() => import('./pages/internal/WorkQueuePage'));
@@ -2248,6 +2256,18 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      {/* Partner pages that were missing routes */}
+      <Route path="/partner/share-kit" element={<ProtectedRoute><PartnerShareKitPage /></ProtectedRoute>} />
+      <Route path="/partner/marketing-kit" element={<ProtectedRoute><PartnerMarketingKitPage /></ProtectedRoute>} />
+      <Route path="/partner/outreach" element={<ProtectedRoute><PartnerOutreachPage /></ProtectedRoute>} />
+      <Route path="/partner/territories" element={<ProtectedRoute><PartnerTerritoriesPage /></ProtectedRoute>} />
+      <Route path="/partner/analytics" element={<ProtectedRoute><PartnerAnalyticsPage /></ProtectedRoute>} />
+      <Route path="/partner/communications" element={<ProtectedRoute><PartnerCommunicationsPage /></ProtectedRoute>} />
+      {/* accounting-pro alias */}
+      <Route path="/partner/accounting-pro" element={<ProtectedRoute allowedRoles={['partner']}><PartnerAccountingProPage /></ProtectedRoute>} />
+      {/* apply redirect */}
+      <Route path="/partner/apply" element={<Navigate to="/partners/apply" replace />} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
