@@ -5,7 +5,7 @@ import {
   Bot, FileText, Globe, Target, Phone,
   CreditCard, Briefcase, UserPlus, Mail, Settings,
   LayoutDashboard, Megaphone, ArrowLeftRight, Menu, X, Printer,
-  Star, BarChart3, FileStack, HelpCircle, Video, GraduationCap, MessageCircle, TrendingUp
+  Star, BarChart3, FileStack, HelpCircle, Video, GraduationCap, MessageCircle, TrendingUp, Tag
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import Button from '../ui/Button';
@@ -38,6 +38,7 @@ export default function BusinessHubLayout({ children }: BusinessHubLayoutProps) 
     { to: '/merchant/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/academy', icon: GraduationCap, label: 'Local-Link Academy', badge: 'NEW' },
     { to: '/merchant/executive-solutions', icon: TrendingUp, label: 'Executive Solutions', badge: 'NEW' },
+    { to: '/marketplace/business-deals', icon: Tag, label: 'Business Tools & Deals', badge: 'NEW' },
     { to: '/merchant/deals', icon: ShoppingBag, label: 'Deals & Promotions' },
     { to: '/merchant/reviews', icon: Star, label: 'Reviews & Ratings', badge: 'NEW' },
     { to: '/merchant/analytics', icon: BarChart3, label: 'Analytics', badge: 'NEW' },

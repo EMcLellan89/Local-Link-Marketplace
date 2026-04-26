@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import BusinessHubLayout from '../../components/layout/BusinessHubLayout';
 import {
   Package, TrendingUp, Sparkles, Filter,
   Search, Tag, ArrowRight, Star
@@ -75,13 +76,16 @@ export default function BusinessDealsHub() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
+      <BusinessHubLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2BB673]"></div>
+        </div>
+      </BusinessHubLayout>
     );
   }
 
   return (
+    <BusinessHubLayout>
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
@@ -207,16 +211,17 @@ export default function BusinessDealsHub() {
               Check out our Growth Guides library for step-by-step tutorials, playbooks, and strategies.
             </p>
             <Link
-              to="/marketplace/growth-guides"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              to="/academy"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#2BB673] text-white rounded-lg hover:bg-[#25a062] transition-colors"
             >
-              Browse Growth Guides
+              Browse Academy Courses
               <ArrowRight className="h-5 w-5" />
             </Link>
           </div>
         </div>
       </div>
     </div>
+    </BusinessHubLayout>
   );
 }
 
