@@ -1,4 +1,4 @@
-import { CheckCircle, TrendingUp, DollarSign, Users, Calendar, BarChart, ArrowRight, XCircle } from 'lucide-react';
+import { CheckCircle, TrendingUp, Star, Users, Calendar, BarChart, ArrowRight, XCircle, Bell, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../components/ui/Button';
 import Card, { CardBody } from '../components/ui/Card';
@@ -11,54 +11,59 @@ export default function ForBusinesses() {
   const problems = [
     {
       icon: XCircle,
-      title: 'High Commissions',
-      description: 'Many deal sites take 50-70% of your revenue'
+      title: 'No Local Visibility',
+      description: 'Customers don\'t know about your deals, events, or specials'
     },
     {
       icon: XCircle,
-      title: 'Slow Payouts',
-      description: 'You wait weeks to get your money'
+      title: 'No Customer List',
+      description: 'You have no way to reach customers directly with promotions'
     },
     {
       icon: XCircle,
-      title: 'No Customer Data',
-      description: 'You don\'t get emails or phone numbers — they do'
+      title: 'One-Time Visitors',
+      description: 'Customers come once and you never hear from them again'
     }
   ];
 
   const solutions = [
     {
-      icon: DollarSign,
-      title: '20-35% Commission',
-      description: 'You keep 65-80% of every sale'
+      icon: Calendar,
+      title: 'Post Deals & Events',
+      description: 'Share your promotions, specials, and upcoming events with the local community — no payment processing required'
     },
     {
-      icon: TrendingUp,
-      title: 'Instant or Weekly Payouts',
-      description: 'Get your money fast, not in 30-60 days'
+      icon: Bell,
+      title: 'Email & Text Sign-Ups',
+      description: 'Customers subscribe to your store\'s list directly — you own that relationship'
+    },
+    {
+      icon: Heart,
+      title: 'Customers Save Your Store',
+      description: 'Shoppers favorite your business so they never miss a deal or event you post'
     },
     {
       icon: Users,
-      title: 'You Keep Customer Data',
-      description: 'Build your own list with emails and phone numbers'
+      title: 'Build Your Own Audience',
+      description: 'Every sign-up and favorite grows your customer database for ongoing promotions'
     },
     {
       icon: Calendar,
       title: 'Monthly Postcard Promotion',
-      description: 'Featured on postcards mailed to 5,000+ homes'
+      description: 'Featured on postcards mailed to 5,000+ homes in your area'
     },
     {
       icon: BarChart,
-      title: 'QR-Based Analytics',
-      description: 'Track views, purchases, and redemptions in real-time'
+      title: 'Engagement Analytics',
+      description: 'See how many customers saved, expressed interest, or signed up from your posts'
     }
   ];
 
   const howItWorks = [
     {
       step: '1',
-      title: 'Create Your Deal',
-      description: 'Set the price, value, and quantity available'
+      title: 'Post Your Deal or Event',
+      description: 'Share your promotions, specials, and upcoming events with local customers'
     },
     {
       step: '2',
@@ -67,13 +72,13 @@ export default function ForBusinesses() {
     },
     {
       step: '3',
-      title: 'Customers Buy',
-      description: 'You get paid fast with a fair commission'
+      title: 'Customers Save & Follow',
+      description: 'Customers favorite your store, sign up for your email or text list, and express interest in your offers'
     },
     {
       step: '4',
-      title: 'They Redeem with QR',
-      description: 'New customers walk in and you get their contact info'
+      title: 'They Walk In Ready to Buy',
+      description: 'New customers visit your business and you capture their contact info for ongoing promotions'
     }
   ];
 
@@ -112,12 +117,12 @@ export default function ForBusinesses() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-6xl font-bold text-slate-900 mb-6 leading-tight">
-              Stop Losing 50-70%
-              <span className="block text-[#2BB673] mt-2">on Groupon Deals</span>
+              Reach More Local Customers
+              <span className="block text-[#2BB673] mt-2">Build a Following. Drive Foot Traffic.</span>
             </h1>
             <p className="text-xl text-slate-600 mb-10 leading-relaxed">
-              Local Link Marketplace helps you attract new customers, get paid fast, and keep more
-              profit — with built-in promotion on our monthly Local Link Postcards.
+              Local Link Marketplace lets you post deals and events, grow your email and text subscriber list,
+              and turn one-time visitors into loyal regulars — with built-in promotion on our monthly Local Link Postcards.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
@@ -143,9 +148,9 @@ export default function ForBusinesses() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-slate-900 mb-4">
-              Why Most Deal Platforms Hurt Small Businesses
+              The Problem with How Most Businesses Promote Locally
             </h2>
-            <p className="text-xl text-slate-600">The problems with traditional deal sites</p>
+            <p className="text-xl text-slate-600">Common challenges local businesses face without the right platform</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {problems.map((problem, index) => (
@@ -167,9 +172,9 @@ export default function ForBusinesses() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-slate-900 mb-4">
-              Local Deals Built for Local Businesses
+              Everything You Need to Promote Locally
             </h2>
-            <p className="text-xl text-slate-600">Our fair and profitable approach</p>
+            <p className="text-xl text-slate-600">Post, promote, and build your audience — all in one place</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {solutions.map((solution, index) => (
@@ -212,7 +217,7 @@ export default function ForBusinesses() {
       <section className="py-20 bg-gradient-to-b from-slate-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl font-bold text-slate-900 mb-6">Pricing Snapshot</h2>
-          <p className="text-lg text-slate-600 mb-12">All plans include LocalLink CRM + Marketplace listing</p>
+          <p className="text-lg text-slate-600 mb-12">All plans include LocalLink CRM, Marketplace listing, and deal/event posting</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             <Card variant="bordered" className="hover:shadow-lg transition-shadow">
               <CardBody className="space-y-4">
@@ -284,10 +289,10 @@ export default function ForBusinesses() {
       <section className="py-20 bg-gradient-to-br from-[#2BB673] to-[#25a062]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            We're Filling Spots for the Next Postcard Now
+            Start Building Your Local Audience Today
           </h2>
           <p className="text-xl text-white/90 mb-10">
-            We limit the number of businesses per category. Once your category is filled, we'll start a waitlist.
+            Spots on the next postcard are limited by category. Get listed before your category fills up.
           </p>
           <Button
             size="lg"
