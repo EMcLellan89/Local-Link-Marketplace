@@ -7,6 +7,26 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
+async function sendEmail(to: string, subject: string, html: string) {
+  const key = Deno.env.get("SENDGRID_API_KEY");
+  const from = Deno.env.get("EMAIL_FROM") || "partners@locallinkmarketplace.com";
+  if (!key) return;
+  try {
+    await fetch("https://api.sendgrid.com/v3/mail/send", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        personalizations: [{ to: [{ email: to }] }],
+        from: { email: from },
+        subject,
+        content: [{ type: "text/html", value: html }],
+      }),
+    });
+  } catch (e) {
+    console.error("sendEmail error:", e);
+  }
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
@@ -14,9 +34,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      throw new Error("Missing authorization header");
-    }
+    if (!authHeader) throw new Error("Missing authorization header");
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -25,19 +43,10 @@ Deno.serve(async (req: Request) => {
     );
 
     const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      throw new Error("Unauthorized");
-    }
+    if (userError || !user) throw new Error("Unauthorized");
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    if (!profile || profile.role !== "admin") {
-      throw new Error("Admin access required");
-    }
+    const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+    if (!profile || profile.role !== "admin") throw new Error("Admin access required");
 
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -47,50 +56,32 @@ Deno.serve(async (req: Request) => {
     if (req.method === "GET") {
       const { data: requests } = await supabaseAdmin
         .from("expansion_requests")
-        .select(`
-          *,
-          partners (
-            id,
-            company_name,
-            email
-          )
-        `)
+        .select(`*, partners(id, company_name, email)`)
         .order("created_at", { ascending: false })
         .limit(200);
-
-      return Response.json(
-        { requests: requests || [] },
-        { headers: corsHeaders }
-      );
+      return Response.json({ requests: requests || [] }, { headers: corsHeaders });
     }
 
-    const { action, request_id, admin_notes, territory_id, create_if_missing, territory_type, currency_code, language_code } = await req.json();
-
-    if (!request_id) {
-      throw new Error("request_id required");
-    }
+    const body = await req.json();
+    const { action, request_id, admin_notes, territory_id, create_if_missing, territory_type, currency_code, language_code } = body;
+    if (!request_id) throw new Error("request_id required");
 
     const { data: expansionRequest } = await supabaseAdmin
-      .from("expansion_requests")
-      .select("*")
-      .eq("id", request_id)
-      .maybeSingle();
+      .from("expansion_requests").select("*").eq("id", request_id).maybeSingle();
+    if (!expansionRequest) throw new Error("Expansion request not found");
 
-    if (!expansionRequest) {
-      throw new Error("Expansion request not found");
-    }
+    // Fetch partner info for notifications
+    const { data: partner } = await supabaseAdmin
+      .from("partners").select("email, company_name, primary_contact")
+      .eq("id", expansionRequest.partner_id).maybeSingle();
+
+    const appUrl = Deno.env.get("APP_BASE_URL") || "https://locallinkmarketplace.com";
 
     if (action === "update_status") {
-      const { status } = await req.json();
-      if (!["Requested", "UnderReview", "Approved", "Declined"].includes(status)) {
-        throw new Error("Invalid status");
-      }
+      const { status } = body;
+      if (!["Requested", "UnderReview", "Approved", "Declined"].includes(status)) throw new Error("Invalid status");
 
-      await supabaseAdmin
-        .from("expansion_requests")
-        .update({ status })
-        .eq("id", request_id);
-
+      await supabaseAdmin.from("expansion_requests").update({ status }).eq("id", request_id);
       await supabaseAdmin.from("audit_logs").insert({
         actor_user_id: user.id,
         action: "EXPANSION_STATUS_UPDATED",
@@ -99,82 +90,69 @@ Deno.serve(async (req: Request) => {
         metadata: { status },
       });
 
+      // Notify partner when moved to UnderReview
+      if (status === "UnderReview" && partner?.email) {
+        await sendEmail(
+          partner.email,
+          "Your LocalLink Expansion Request is Under Review",
+          `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px">
+            <h2 style="color:#1e293b">Expansion Request Update</h2>
+            <p style="color:#475569">Hi ${partner.primary_contact || partner.company_name},</p>
+            <p style="color:#475569">Your expansion request for <strong>${expansionRequest.requested_name}</strong> is now under review. We'll notify you as soon as a decision has been made, typically within 2-3 business days.</p>
+            <p style="color:#64748b;font-size:13px;margin-top:24px">— The LocalLink Team</p>
+          </div>`
+        );
+      }
+
       return Response.json({ ok: true }, { headers: corsHeaders });
     }
 
     if (action === "approve") {
-      const { data: eligibilityData } = await supabase.functions.invoke(
-        "compute-eligibility",
-        { body: { partner_id: expansionRequest.partner_id } }
-      );
-
-      if (!eligibilityData || !eligibilityData.eligible) {
+      const { data: eligibilityData } = await supabase.functions.invoke("compute-eligibility", {
+        body: { partner_id: expansionRequest.partner_id },
+      });
+      if (!eligibilityData?.eligible) {
         const score = eligibilityData?.score || 0;
         const reasons = (eligibilityData?.reasons || []).join(" ");
-        throw new Error(
-          `Partner not eligible for expansion (score ${score}/100): ${reasons}`
-        );
+        throw new Error(`Partner not eligible for expansion (score ${score}/100): ${reasons}`);
       }
 
       let territory = null;
-
       if (territory_id) {
-        const { data: t } = await supabaseAdmin
-          .from("territories")
-          .select("*")
-          .eq("id", territory_id)
-          .maybeSingle();
+        const { data: t } = await supabaseAdmin.from("territories").select("*").eq("id", territory_id).maybeSingle();
         territory = t;
       } else {
-        const { data: t } = await supabaseAdmin
-          .from("territories")
-          .select("*")
+        const { data: t } = await supabaseAdmin.from("territories").select("*")
           .ilike("territory_name", expansionRequest.requested_name)
-          .eq("country_code", expansionRequest.country_code)
-          .maybeSingle();
+          .eq("country_code", expansionRequest.country_code).maybeSingle();
         territory = t;
       }
 
       if (!territory && create_if_missing) {
-        const { data: created } = await supabaseAdmin
-          .from("territories")
-          .insert({
-            territory_name: expansionRequest.requested_name,
-            territory_type: territory_type || "Metro",
-            country_code: expansionRequest.country_code,
-            currency_code: currency_code || "USD",
-            language_code: language_code || "en",
-            status: "Available",
-          })
-          .select()
-          .single();
+        const { data: created } = await supabaseAdmin.from("territories").insert({
+          territory_name: expansionRequest.requested_name,
+          territory_type: territory_type || "Metro",
+          country_code: expansionRequest.country_code,
+          currency_code: currency_code || "USD",
+          language_code: language_code || "en",
+          status: "Available",
+        }).select().single();
         territory = created;
       }
 
-      if (!territory) {
-        throw new Error("No territory found and not created");
-      }
+      if (!territory) throw new Error("No territory found and not created");
+      if (territory.status === "Locked") throw new Error("Territory is locked");
 
-      if (territory.status === "Locked") {
-        throw new Error("Territory is locked");
-      }
+      await supabaseAdmin.from("territories").update({
+        status: "Assigned",
+        assigned_partner_id: expansionRequest.partner_id,
+        last_activity_at: new Date().toISOString(),
+      }).eq("id", territory.id);
 
-      await supabaseAdmin
-        .from("territories")
-        .update({
-          status: "Assigned",
-          assigned_partner_id: expansionRequest.partner_id,
-          last_activity_at: new Date().toISOString(),
-        })
-        .eq("id", territory.id);
-
-      await supabaseAdmin
-        .from("expansion_requests")
-        .update({
-          status: "Approved",
-          admin_notes: admin_notes || `Assigned territory ${territory.territory_name}`,
-        })
-        .eq("id", request_id);
+      await supabaseAdmin.from("expansion_requests").update({
+        status: "Approved",
+        admin_notes: admin_notes || `Assigned territory ${territory.territory_name}`,
+      }).eq("id", request_id);
 
       await supabaseAdmin.from("audit_logs").insert({
         actor_user_id: user.id,
@@ -184,20 +162,36 @@ Deno.serve(async (req: Request) => {
         metadata: { territory_id: territory.id, partner_id: expansionRequest.partner_id },
       });
 
-      return Response.json(
-        { ok: true, territory_id: territory.id },
-        { headers: corsHeaders }
-      );
+      // Notify partner of approval
+      if (partner?.email) {
+        await sendEmail(
+          partner.email,
+          "Expansion Approved — New Territory Assigned!",
+          `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px">
+            <div style="background:#2BB673;color:white;padding:12px 20px;border-radius:8px;margin-bottom:24px">
+              <strong>EXPANSION APPROVED</strong>
+            </div>
+            <h2 style="color:#1e293b">Congratulations, ${partner.primary_contact || partner.company_name}!</h2>
+            <p style="color:#475569;font-size:16px">Your expansion request has been approved and you've been assigned the territory of <strong>${territory.territory_name}</strong>.</p>
+            ${admin_notes ? `<p style="color:#475569"><strong>Notes:</strong> ${admin_notes}</p>` : ''}
+            <p style="margin:28px 0">
+              <a href="${appUrl}/partner/dashboard" style="display:inline-block;padding:14px 28px;background:#2BB673;color:white;text-decoration:none;border-radius:8px;font-weight:bold">
+                View Your Dashboard
+              </a>
+            </p>
+            <p style="color:#64748b;font-size:13px">— The LocalLink Team</p>
+          </div>`
+        );
+      }
+
+      return Response.json({ ok: true, territory_id: territory.id }, { headers: corsHeaders });
     }
 
     if (action === "decline") {
-      await supabaseAdmin
-        .from("expansion_requests")
-        .update({
-          status: "Declined",
-          admin_notes: admin_notes || null,
-        })
-        .eq("id", request_id);
+      await supabaseAdmin.from("expansion_requests").update({
+        status: "Declined",
+        admin_notes: admin_notes || null,
+      }).eq("id", request_id);
 
       await supabaseAdmin.from("audit_logs").insert({
         actor_user_id: user.id,
@@ -207,14 +201,27 @@ Deno.serve(async (req: Request) => {
         metadata: { admin_notes: admin_notes || "" },
       });
 
+      // Notify partner of decline
+      if (partner?.email) {
+        await sendEmail(
+          partner.email,
+          "Update on Your LocalLink Expansion Request",
+          `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px">
+            <h2 style="color:#1e293b">Expansion Request Update</h2>
+            <p style="color:#475569">Hi ${partner.primary_contact || partner.company_name},</p>
+            <p style="color:#475569;font-size:16px">After review, we are unable to approve your expansion request for <strong>${expansionRequest.requested_name}</strong> at this time.</p>
+            ${admin_notes ? `<p style="color:#475569"><strong>Reason:</strong> ${admin_notes}</p>` : ''}
+            <p style="color:#475569">You may submit a new request in the future. If you have questions, please reply to this email.</p>
+            <p style="color:#64748b;font-size:13px;margin-top:24px">— The LocalLink Team</p>
+          </div>`
+        );
+      }
+
       return Response.json({ ok: true }, { headers: corsHeaders });
     }
 
     throw new Error("Unknown action");
-  } catch (error) {
-    return Response.json(
-      { error: error.message },
-      { status: 400, headers: corsHeaders }
-    );
+  } catch (error: any) {
+    return Response.json({ error: error.message }, { status: 400, headers: corsHeaders });
   }
 });

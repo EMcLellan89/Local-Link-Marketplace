@@ -46,6 +46,21 @@ export default function PartnerApplication() {
 
       if (submitError) throw submitError;
 
+      // Send acknowledgement email via edge function (fire-and-forget)
+      supabase.functions.invoke('send-email', {
+        body: {
+          to: formData.email.toLowerCase().trim(),
+          subject: 'Your LocalLink Partner Application Was Received',
+          html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px">
+            <h2 style="color:#2BB673">Application Received!</h2>
+            <p style="color:#475569;font-size:16px">Hi ${formData.contact_name},</p>
+            <p style="color:#475569">Thank you for applying to become a LocalLink territory partner. Your application for <strong>${formData.requested_territory}</strong> has been received and is under review.</p>
+            <p style="color:#475569">Our team will reach out within 2-3 business days to discuss next steps.</p>
+            <p style="color:#64748b;font-size:13px;margin-top:24px">— The LocalLink Team</p>
+          </div>`
+        }
+      }).catch(() => {});
+
       setSubmitted(true);
     } catch (err: any) {
       setError(err.message || 'Failed to submit application');

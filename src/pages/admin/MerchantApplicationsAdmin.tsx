@@ -124,6 +124,15 @@ export default function MerchantApplicationsAdmin() {
 
       if (error) throw error;
 
+      // Notify applicant of status change
+      const notifyStatuses = ['approved', 'rejected', 'under review'];
+      if (notifyStatuses.includes(modalData.status)) {
+        const mappedStatus = modalData.status === 'under review' ? 'under_review' : modalData.status;
+        supabase.functions.invoke('merchant-application-notify', {
+          body: { application_id: selectedApp.id, status: mappedStatus, admin_notes: modalData.adminNotes || undefined }
+        }).catch(() => {});
+      }
+
       await fetchApplications();
       closeModal();
       alert('Application updated successfully!');

@@ -73,6 +73,8 @@ export default function PurchaseConfirmationPage() {
       if (data) {
         setPurchase(data as PurchaseDetails);
         await generateQRCode(data.id);
+        // Fire-and-forget confirmation emails
+        supabase.functions.invoke('purchase-confirmation', { body: { purchase_id: data.id } }).catch(() => {});
       }
     } catch (err) {
       console.error('Error fetching purchase:', err);

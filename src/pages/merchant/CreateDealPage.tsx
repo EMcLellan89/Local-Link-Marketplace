@@ -151,6 +151,18 @@ export default function CreateDealPage() {
 
       if (error) throw error;
 
+      // Get the inserted deal id to notify admin
+      const { data: newDeal } = await supabase
+        .from('deals')
+        .select('id')
+        .eq('merchant_id', merchantId)
+        .eq('slug', dealData.slug)
+        .maybeSingle();
+
+      if (newDeal?.id) {
+        supabase.functions.invoke('deal-notify-admin', { body: { deal_id: newDeal.id } }).catch(() => {});
+      }
+
       await incrementUsage('merchant', merchantId, FEATURE_KEYS.MERCHANT.ACTIVE_DEALS);
 
       navigate('/merchant/deals');
