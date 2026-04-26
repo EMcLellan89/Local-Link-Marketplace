@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Printer, Upload, Package, Check, X, Palette } from 'lucide-react';
+import { Printer, Upload, Package, Check, X, Palette, ExternalLink, Gift, ShoppingBag } from 'lucide-react';
 import BusinessHubLayout from '../../components/layout/BusinessHubLayout';
 import Card, { CardBody, CardHeader } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -359,34 +359,70 @@ export default function PrintingServicesPage() {
           </div>
         )}
 
-        <Card variant="bordered" className="bg-gradient-to-br from-slate-50 to-slate-100 border-slate-300 mt-8">
+        {/* Promotional Items Store Banner */}
+        <div className="mt-8 rounded-2xl overflow-hidden border border-[#2BB673]/20 bg-gradient-to-br from-[#2BB673]/5 via-white to-emerald-50">
+          <div className="px-8 py-10 md:px-12">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
+              <div className="flex-shrink-0">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#2BB673] to-emerald-600 flex items-center justify-center shadow-lg shadow-[#2BB673]/25">
+                  <Gift className="w-10 h-10 text-white" />
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="inline-flex items-center gap-1.5 bg-[#2BB673]/10 text-[#2BB673] text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full mb-3">
+                  <ShoppingBag className="w-3.5 h-3.5" />
+                  Promotional Products Store
+                </div>
+                <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-2">
+                  Order Promotional Items for Your Business
+                </h2>
+                <p className="text-slate-600 text-base leading-relaxed mb-1">
+                  Browse thousands of branded promotional products — apparel, drinkware, bags, tech accessories, and more. All customizable with your business logo.
+                </p>
+                <p className="text-sm text-slate-500">
+                  Shirts, sweatshirts, hats, pens, mugs, tote bags, and anything in between. If you can put a logo on it, we can source it.
+                </p>
+              </div>
+              <div className="flex-shrink-0 w-full md:w-auto">
+                <a
+                  href="https://mypipelinesolutions.espwebsites.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 px-8 py-4 bg-[#2BB673] hover:bg-[#25a062] text-white font-bold rounded-xl transition-all shadow-lg shadow-[#2BB673]/25 hover:shadow-[#2BB673]/40 hover:-translate-y-0.5 text-base w-full md:w-auto"
+                >
+                  <ShoppingBag className="w-5 h-5" />
+                  Shop Promo Items
+                  <ExternalLink className="w-4 h-4 opacity-80" />
+                </a>
+                <p className="text-xs text-center text-slate-400 mt-2">Opens in a new tab</p>
+              </div>
+            </div>
+
+            <div className="mt-8 pt-6 border-t border-slate-200 grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { label: 'Apparel', detail: 'Shirts, polos, hoodies' },
+                { label: 'Drinkware', detail: 'Mugs, tumblers, bottles' },
+                { label: 'Bags & Totes', detail: 'Branded carry bags' },
+                { label: 'Tech & More', detail: 'USB, pens, desk items' },
+              ].map(item => (
+                <div key={item.label} className="text-center">
+                  <p className="font-semibold text-slate-800 text-sm">{item.label}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{item.detail}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Embroidery & Silk Screen */}
+        <Card variant="bordered" className="bg-gradient-to-br from-slate-50 to-slate-100 border-slate-300">
           <CardBody>
-            <div className="text-center space-y-4">
-              <h2 className="text-2xl font-bold text-slate-900">Embroidery and Silk Screen Services</h2>
-              <div className="space-y-2 text-slate-700">
-                <p className="text-lg">
-                  <strong>Business Logo Shirts and Sweatshirts</strong>
-                </p>
-                <p className="text-lg">
-                  <strong>Promotional Items with Business Logo</strong>
-                </p>
-                <p className="text-xl font-semibold text-[#2BB673] mt-4">
-                  Anything you need printed we can do it. Ask us we will quote it!
-                </p>
-              </div>
-              <div className="pt-4 border-t border-slate-300">
-                <p className="text-sm text-slate-600">
-                  Browse thousands of promotional items at{' '}
-                  <a
-                    href="https://www.printfection.com/swag/category/all-swag/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[#2BB673] hover:text-[#239a5e] font-semibold underline"
-                  >
-                    printfection.com
-                  </a>
-                </p>
-              </div>
+            <div className="text-center space-y-3">
+              <h2 className="text-xl font-bold text-slate-900">Custom Embroidery & Silk Screen</h2>
+              <p className="text-slate-700">Business logo shirts, sweatshirts, and embroidered apparel</p>
+              <p className="text-[#2BB673] font-semibold">
+                Anything you need printed — we can do it. Ask us and we'll quote it!
+              </p>
             </div>
           </CardBody>
         </Card>
