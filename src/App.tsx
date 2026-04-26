@@ -1,14 +1,13 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { AdminAuthProvider } from './contexts/AdminAuthContext';
+import { AdminAuthProvider, useAdminAuth } from './contexts/AdminAuthContext';
 import { InternalTeamAuthProvider, useInternalTeamAuth } from './contexts/InternalTeamAuthContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AttachReferralOnLogin } from './components/AttachReferralOnLogin';
 import DevModeRoleSwitcher from './components/DevModeRoleSwitcher';
 
 const Landing = lazy(() => import('./pages/Landing'));
-const ResultsPage = lazy(() => import('./pages/ResultsPage'));
 const UnifiedLogin = lazy(() => import('./pages/UnifiedLogin'));
 const ForBusinesses = lazy(() => import('./pages/ForBusinesses'));
 const BusinessPricing = lazy(() => import('./pages/BusinessPricing'));
@@ -19,13 +18,6 @@ const FAQ = lazy(() => import('./pages/FAQ'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const DealsPage = lazy(() => import('./pages/customer/DealsPage'));
-const OffersPage = lazy(() => import('./pages/customer/OffersPage'));
-const CommunityPage = lazy(() => import('./pages/customer/CommunityPage'));
-const FoodDiningPage = lazy(() => import('./pages/customer/FoodDiningPage'));
-const KidsFamilyPage = lazy(() => import('./pages/customer/KidsFamilyPage'));
-const MyFeedPage = lazy(() => import('./pages/customer/MyFeedPage'));
-const BusinessProfilePage = lazy(() => import('./pages/customer/BusinessProfilePage'));
-const PartnerCommunityPage = lazy(() => import('./pages/partner/PartnerCommunityPage'));
 const DealDetailPage = lazy(() => import('./pages/customer/DealDetailPage'));
 const PurchaseConfirmationPage = lazy(() => import('./pages/customer/PurchaseConfirmationPage'));
 const PurchasesPage = lazy(() => import('./pages/customer/PurchasesPage'));
@@ -174,7 +166,6 @@ const PartnerCRMDashboard = lazy(() => import('./pages/partner/PartnerCRMDashboa
 const PartnerCRMUpgrade = lazy(() => import('./pages/partner/PartnerCRMUpgrade'));
 const PartnerCRMSuccess = lazy(() => import('./pages/partner/PartnerCRMSuccess'));
 const PartnerBillingPage = lazy(() => import('./pages/partner/PartnerBillingPage'));
-const PartnerCompensationPage = lazy(() => import('./pages/partner/PartnerCompensationPage'));
 const PartnerOnboardingPage = lazy(() => import('./pages/partner/PartnerOnboardingPage'));
 const Partner7DayChallenge = lazy(() => import('./pages/partner/Partner7DayChallenge'));
 const PartnerLeaderboard = lazy(() => import('./pages/partner/PartnerLeaderboard'));
@@ -265,19 +256,6 @@ const BlogGrowthCourseDashboard = lazy(() => import('./pages/course/BlogGrowthCo
 const AutoScaleMarketplace = lazy(() => import('./pages/merchant/AutoScaleMarketplace'));
 const AutoScaleSalesPage = lazy(() => import('./pages/partner/AutoScaleSalesPage'));
 
-// Universal CRM
-const CRMHubPage = lazy(() => import('./pages/merchant/CRMHubPage'));
-const CRMLeadsPage = lazy(() => import('./pages/merchant/CRMLeadsPage'));
-const CRMFinancialsPage = lazy(() => import('./pages/merchant/CRMFinancialsPage'));
-const CRMCustomersPage = lazy(() => import('./pages/merchant/CRMCustomersPage'));
-const CRMOpportunitiesPage = lazy(() => import('./pages/merchant/CRMOpportunitiesPage'));
-const CRMActivitiesPage = lazy(() => import('./pages/merchant/CRMActivitiesPage'));
-const CRMTasksPage = lazy(() => import('./pages/merchant/CRMTasksPage'));
-const CRMMessagesPage = lazy(() => import('./pages/merchant/CRMMessagesPage'));
-const CRMOffersPage = lazy(() => import('./pages/merchant/CRMOffersPage'));
-const CRMTransactionsPage = lazy(() => import('./pages/merchant/CRMTransactionsPage'));
-const CRMInvoicesPage = lazy(() => import('./pages/merchant/CRMInvoicesPage'));
-
 // StoryLab
 const StoryLabCheckoutSuccess = lazy(() => import('./pages/storylab/CheckoutSuccess'));
 const StoryLabCheckoutCancel = lazy(() => import('./pages/storylab/CheckoutCancel'));
@@ -292,35 +270,6 @@ const PartnerOutreachLogPage = lazy(() => import('./pages/partner/PartnerOutreac
 const AdminBadgesManager = lazy(() => import('./pages/admin/AdminBadgesManager'));
 const AdminPartnerBadgesPage = lazy(() => import('./pages/admin/AdminPartnerBadgesPage'));
 const AdminSystemEventsPage = lazy(() => import('./pages/admin/AdminSystemEventsPage'));
-
-// Admin Partner Quality / Payouts / Commission Rules / Disputes / Ad Engine
-const AdminPartnerQualityPage = lazy(() => import('./pages/admin/AdminPartnerQualityPage'));
-const AdminPayoutApprovalPage = lazy(() => import('./pages/admin/AdminPayoutApprovalPage'));
-const AdminCommissionRulesPage = lazy(() => import('./pages/admin/AdminCommissionRulesPage'));
-const AdminAttributionDisputePage = lazy(() => import('./pages/admin/AdminAttributionDisputePage'));
-const AdminAdEnginePage = lazy(() => import('./pages/admin/AdminAdEnginePage'));
-const FinancialReconciliationPage = lazy(() => import('./pages/admin/FinancialReconciliationPage'));
-
-// Partner Compliance / Leads / Tax
-const PartnerCompliancePage = lazy(() => import('./pages/partner/PartnerCompliancePage'));
-const PartnerLeadPipelinePage = lazy(() => import('./pages/partner/PartnerLeadPipelinePage'));
-const PartnerTaxCenterPage = lazy(() => import('./pages/partner/PartnerTaxCenterPage'));
-
-// Partner missing pages
-const PartnerShareKitPage = lazy(() => import('./pages/partner/PartnerShareKitPage'));
-const PartnerMarketingKitPage = lazy(() => import('./pages/partner/PartnerMarketingKitPage'));
-const PartnerOutreachPage = lazy(() => import('./pages/partner/PartnerOutreachPage'));
-const PartnerTerritoriesPage = lazy(() => import('./pages/partner/PartnerTerritoriesPage'));
-const PartnerAnalyticsPage = lazy(() => import('./pages/partner/PartnerAnalyticsPage'));
-const PartnerCommunicationsPage = lazy(() => import('./pages/partner/PartnerCommunicationsPage'));
-
-// Internal Sales Team / Fulfillment
-const SalesDashboard = lazy(() => import('./pages/internal/SalesDashboard'));
-const WorkQueuePage = lazy(() => import('./pages/internal/WorkQueuePage'));
-const AdminSalesTeamPage = lazy(() => import('./pages/admin/AdminSalesTeamPage'));
-const AdminFulfillmentPage = lazy(() => import('./pages/admin/AdminFulfillmentPage'));
-const InternationalPayrollPage = lazy(() => import('./pages/admin/InternationalPayrollPage'));
-const TestimonialsApprovalPage = lazy(() => import('./pages/admin/TestimonialsApprovalPage'));
 
 // Admin Course Management
 const AdminCoursesList = lazy(() => import('./pages/admin/AdminCoursesList'));
@@ -387,6 +336,24 @@ function InternalTeamRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { adminUser, loading } = useAdminAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-950">
+        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#2BB673]"></div>
+      </div>
+    );
+  }
+
+  if (!adminUser) {
+    return <Navigate to="/admin/login" replace />;
+  }
+
+  return <>{children}</>;
+}
+
 function AppRoutes() {
   const { user, profile, loading } = useAuth();
 
@@ -410,7 +377,6 @@ function AppRoutes() {
       <Route path="/faq" element={<FAQ />} />
       <Route path="/earn" element={<EarnHub />} />
       <Route path="/join" element={<JoinPage />} />
-      <Route path="/results" element={<ResultsPage />} />
       <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
       <Route path="/unified-login" element={user ? <Navigate to="/dashboard" replace /> : <UnifiedLogin />} />
       <Route path="/register" element={user ? <Navigate to="/dashboard" replace /> : <Register />} />
@@ -434,7 +400,7 @@ function AppRoutes() {
         path="/dashboard"
         element={
           <ProtectedRoute>
-            {profile?.role === 'customer' && <Navigate to="/community" replace />}
+            {profile?.role === 'customer' && <DealsPage />}
             {profile?.role === 'merchant' && <Navigate to="/merchant/dashboard" replace />}
             {profile?.role === 'admin' && <Navigate to="/admin/dashboard" replace />}
             {profile?.role === 'partner' && <Navigate to="/partner/dashboard" replace />}
@@ -446,12 +412,6 @@ function AppRoutes() {
       <Route path="/ref/:referralSlug" element={<PartnerReferralLandingPage />} />
 
       <Route path="/deals" element={user ? <DealsPage /> : <Navigate to="/login" replace />} />
-      <Route path="/offers" element={user ? <OffersPage /> : <Navigate to="/login" replace />} />
-      <Route path="/community" element={<CommunityPage />} />
-      <Route path="/food" element={<FoodDiningPage />} />
-      <Route path="/kids-family" element={<KidsFamilyPage />} />
-      <Route path="/my-feed" element={<MyFeedPage />} />
-      <Route path="/businesses/:slug" element={<BusinessProfilePage />} />
 
       <Route
         path="/deal/:id"
@@ -602,105 +562,6 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={['merchant']}>
             <CRMMigrationPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/merchant/crm-hub"
-        element={
-          <ProtectedRoute allowedRoles={['merchant']}>
-            <CRMHubPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/merchant/crm/leads"
-        element={
-          <ProtectedRoute allowedRoles={['merchant']}>
-            <CRMLeadsPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/merchant/crm/financials"
-        element={
-          <ProtectedRoute allowedRoles={['merchant']}>
-            <CRMFinancialsPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/merchant/crm/customers"
-        element={
-          <ProtectedRoute allowedRoles={['merchant']}>
-            <CRMCustomersPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/merchant/crm/opportunities"
-        element={
-          <ProtectedRoute allowedRoles={['merchant']}>
-            <CRMOpportunitiesPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/merchant/crm/activities"
-        element={
-          <ProtectedRoute allowedRoles={['merchant']}>
-            <CRMActivitiesPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/merchant/crm/tasks"
-        element={
-          <ProtectedRoute allowedRoles={['merchant']}>
-            <CRMTasksPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/merchant/crm/messages"
-        element={
-          <ProtectedRoute allowedRoles={['merchant']}>
-            <CRMMessagesPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/merchant/crm/offers"
-        element={
-          <ProtectedRoute allowedRoles={['merchant']}>
-            <CRMOffersPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/merchant/crm/transactions"
-        element={
-          <ProtectedRoute allowedRoles={['merchant']}>
-            <CRMTransactionsPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/merchant/crm/invoices"
-        element={
-          <ProtectedRoute allowedRoles={['merchant']}>
-            <CRMInvoicesPage />
           </ProtectedRoute>
         }
       />
@@ -1656,76 +1517,48 @@ function AppRoutes() {
 
       <Route path="/admin/login" element={<AdminLogin />} />
 
-      <Route path="/admin/dashboard" element={<EnhancedAdminDashboard />} />
-
-      <Route path="/admin/pulse" element={<AdminPulseDashboard />} />
-
-      <Route path="/admin/badges" element={<AdminBadgesManager />} />
-
-      <Route path="/admin/partner-badges" element={<AdminPartnerBadgesPage />} />
-
-      <Route path="/admin/system-events" element={<AdminSystemEventsPage />} />
-
-      <Route path="/admin/partner-applications" element={<PartnerApplications />} />
-      <Route path="/admin/partner-manager" element={<AdminPartnerManager />} />
-
-      <Route path="/admin/analytics" element={<PartnerAnalytics />} />
-
-      <Route path="/admin/territories" element={<TerritoryManagement />} />
-
-      <Route path="/admin/territories/create" element={<TerritoryCreationPage />} />
-
-      <Route path="/admin/territories/inactivity" element={<InactivityScannerPage />} />
-
-      <Route path="/admin/expansion-requests" element={<ExpansionReviewPage />} />
-
-      <Route path="/admin/merchant-applications" element={<MerchantApplicationsAdmin />} />
-
-      <Route path="/admin/ugc" element={<UGCManagementPage />} />
-
-      <Route path="/admin/affiliate-commissions" element={<AdminAffiliateCommissions />} />
-
-      <Route path="/admin/affiliate-products" element={<AdminProductsRatesPage />} />
-
-      <Route path="/admin/platform-vapi" element={<PlatformVapiConfig />} />
-
-      <Route path="/admin/jobs" element={<AdminJobsPage />} />
-
-      <Route path="/admin/jobs/:job_id" element={<AdminJobDetailPage />} />
-
-      <Route path="/admin/deliverables-review" element={<AdminDeliverablesReview />} />
-
-      <Route path="/admin/executive-dashboard" element={<ExecutiveDashboardV2 />} />
-
-      <Route path="/admin/budget-buster" element={<BudgetBusterAnalytics />} />
-
-      <Route path="/admin/crm" element={<AdminCRMDashboard />} />
-      <Route path="/admin/accounting" element={<AccountingDashboard />} />
-      <Route path="/admin/business-dashboard" element={<BusinessDashboard />} />
-      <Route path="/admin/commission-payouts" element={<CommissionPayoutsPage />} />
-      <Route path="/admin/1099-manager" element={<Admin1099Manager />} />
-      <Route path="/admin/dash/local-link" element={<LocalLinkDashboard />} />
-      <Route path="/admin/dash/external" element={<ExternalBusinessesDashboard />} />
-      <Route path="/admin/top-partners" element={<TopPartnersPage />} />
-      <Route path="/admin/taxes/quarterly" element={<QuarterlyTaxEstimatesPage />} />
-
-      <Route path="/admin/dfy/orders" element={<AdminDFYOrdersPage />} />
-      <Route path="/admin/dfy/orders/:orderId" element={<AdminDFYOrderDetailPage />} />
-      <Route path="/admin/commissions" element={<AdminCommissionsPage />} />
-      <Route path="/admin/partner-quality" element={<AdminPartnerQualityPage />} />
-      <Route path="/admin/payout-approval" element={<AdminPayoutApprovalPage />} />
-      <Route path="/admin/commission-rules" element={<AdminCommissionRulesPage />} />
-      <Route path="/admin/attribution-disputes" element={<AdminAttributionDisputePage />} />
-      <Route path="/admin/ads" element={<AdminAdEnginePage />} />
-      <Route path="/admin/reconciliation" element={<FinancialReconciliationPage />} />
-      <Route path="/admin/academy/modules" element={<AcademyModulesPage />} />
-      <Route path="/admin/academy/lessons" element={<AcademyLessonsPage />} />
-      <Route path="/admin/academy/exam-questions" element={<AcademyExamQuestionsPage />} />
-      <Route path="/admin/academy/product-mapping" element={<AcademyProductMapping />} />
-      <Route path="/admin/courses" element={<AdminCoursesList />} />
-      <Route path="/admin/courses/:courseId" element={<AdminCourseEditor />} />
-      <Route path="/admin/creatives" element={<CreativeManager />} />
-      <Route path="/admin/stripe/sku-manager" element={<StripeSKUManager />} />
+      <Route path="/admin/dashboard" element={<AdminRoute><EnhancedAdminDashboard /></AdminRoute>} />
+      <Route path="/admin/pulse" element={<AdminRoute><AdminPulseDashboard /></AdminRoute>} />
+      <Route path="/admin/badges" element={<AdminRoute><AdminBadgesManager /></AdminRoute>} />
+      <Route path="/admin/partner-badges" element={<AdminRoute><AdminPartnerBadgesPage /></AdminRoute>} />
+      <Route path="/admin/system-events" element={<AdminRoute><AdminSystemEventsPage /></AdminRoute>} />
+      <Route path="/admin/partner-applications" element={<AdminRoute><PartnerApplications /></AdminRoute>} />
+      <Route path="/admin/partner-manager" element={<AdminRoute><AdminPartnerManager /></AdminRoute>} />
+      <Route path="/admin/analytics" element={<AdminRoute><PartnerAnalytics /></AdminRoute>} />
+      <Route path="/admin/territories" element={<AdminRoute><TerritoryManagement /></AdminRoute>} />
+      <Route path="/admin/territories/create" element={<AdminRoute><TerritoryCreationPage /></AdminRoute>} />
+      <Route path="/admin/territories/inactivity" element={<AdminRoute><InactivityScannerPage /></AdminRoute>} />
+      <Route path="/admin/expansion-requests" element={<AdminRoute><ExpansionReviewPage /></AdminRoute>} />
+      <Route path="/admin/merchant-applications" element={<AdminRoute><MerchantApplicationsAdmin /></AdminRoute>} />
+      <Route path="/admin/ugc" element={<AdminRoute><UGCManagementPage /></AdminRoute>} />
+      <Route path="/admin/affiliate-commissions" element={<AdminRoute><AdminAffiliateCommissions /></AdminRoute>} />
+      <Route path="/admin/affiliate-products" element={<AdminRoute><AdminProductsRatesPage /></AdminRoute>} />
+      <Route path="/admin/platform-vapi" element={<AdminRoute><PlatformVapiConfig /></AdminRoute>} />
+      <Route path="/admin/jobs" element={<AdminRoute><AdminJobsPage /></AdminRoute>} />
+      <Route path="/admin/jobs/:job_id" element={<AdminRoute><AdminJobDetailPage /></AdminRoute>} />
+      <Route path="/admin/deliverables-review" element={<AdminRoute><AdminDeliverablesReview /></AdminRoute>} />
+      <Route path="/admin/executive-dashboard" element={<AdminRoute><ExecutiveDashboardV2 /></AdminRoute>} />
+      <Route path="/admin/budget-buster" element={<AdminRoute><BudgetBusterAnalytics /></AdminRoute>} />
+      <Route path="/admin/crm" element={<AdminRoute><AdminCRMDashboard /></AdminRoute>} />
+      <Route path="/admin/accounting" element={<AdminRoute><AccountingDashboard /></AdminRoute>} />
+      <Route path="/admin/business-dashboard" element={<AdminRoute><BusinessDashboard /></AdminRoute>} />
+      <Route path="/admin/commission-payouts" element={<AdminRoute><CommissionPayoutsPage /></AdminRoute>} />
+      <Route path="/admin/1099-manager" element={<AdminRoute><Admin1099Manager /></AdminRoute>} />
+      <Route path="/admin/dash/local-link" element={<AdminRoute><LocalLinkDashboard /></AdminRoute>} />
+      <Route path="/admin/dash/external" element={<AdminRoute><ExternalBusinessesDashboard /></AdminRoute>} />
+      <Route path="/admin/top-partners" element={<AdminRoute><TopPartnersPage /></AdminRoute>} />
+      <Route path="/admin/taxes/quarterly" element={<AdminRoute><QuarterlyTaxEstimatesPage /></AdminRoute>} />
+      <Route path="/admin/dfy/orders" element={<AdminRoute><AdminDFYOrdersPage /></AdminRoute>} />
+      <Route path="/admin/dfy/orders/:orderId" element={<AdminRoute><AdminDFYOrderDetailPage /></AdminRoute>} />
+      <Route path="/admin/commissions" element={<AdminRoute><AdminCommissionsPage /></AdminRoute>} />
+      <Route path="/admin/academy/modules" element={<AdminRoute><AcademyModulesPage /></AdminRoute>} />
+      <Route path="/admin/academy/lessons" element={<AdminRoute><AcademyLessonsPage /></AdminRoute>} />
+      <Route path="/admin/academy/exam-questions" element={<AdminRoute><AcademyExamQuestionsPage /></AdminRoute>} />
+      <Route path="/admin/academy/product-mapping" element={<AdminRoute><AcademyProductMapping /></AdminRoute>} />
+      <Route path="/admin/courses" element={<AdminRoute><AdminCoursesList /></AdminRoute>} />
+      <Route path="/admin/courses/:courseId" element={<AdminRoute><AdminCourseEditor /></AdminRoute>} />
+      <Route path="/admin/creatives" element={<AdminRoute><CreativeManager /></AdminRoute>} />
+      <Route path="/admin/stripe/sku-manager" element={<AdminRoute><StripeSKUManager /></AdminRoute>} />
 
       <Route path="/team/dashboard" element={<TeamDashboard />} />
       <Route path="/team/manager" element={<ManagerDashboard />} />
@@ -1852,29 +1685,6 @@ function AppRoutes() {
         }
       />
 
-      <Route
-        path="/internal/sales-dashboard"
-        element={
-          <InternalTeamRoute>
-            <SalesDashboard />
-          </InternalTeamRoute>
-        }
-      />
-
-      <Route
-        path="/internal/work-queue"
-        element={
-          <InternalTeamRoute>
-            <WorkQueuePage />
-          </InternalTeamRoute>
-        }
-      />
-
-      <Route path="/admin/sales-team" element={<AdminSalesTeamPage />} />
-      <Route path="/admin/fulfillment" element={<AdminFulfillmentPage />} />
-      <Route path="/admin/international-payroll" element={<InternationalPayrollPage />} />
-      <Route path="/admin/testimonials" element={<TestimonialsApprovalPage />} />
-
       <Route path="/partner/expansion" element={<ExpansionRequestPage />} />
 
       <Route path="/partners/apply" element={<PartnerApplication />} />
@@ -1890,12 +1700,6 @@ function AppRoutes() {
       <Route path="/partner/dashboard" element={
         <ProtectedRoute>
           <PartnerDashboard />
-        </ProtectedRoute>
-      } />
-
-      <Route path="/partner/community" element={
-        <ProtectedRoute>
-          <PartnerCommunityPage />
         </ProtectedRoute>
       } />
 
@@ -1920,24 +1724,6 @@ function AppRoutes() {
       <Route path="/partner/certifications" element={
         <ProtectedRoute>
           <PartnerCertificationsPage />
-        </ProtectedRoute>
-      } />
-
-      <Route path="/partner/compliance" element={
-        <ProtectedRoute>
-          <PartnerCompliancePage />
-        </ProtectedRoute>
-      } />
-
-      <Route path="/partner/leads" element={
-        <ProtectedRoute>
-          <PartnerLeadPipelinePage />
-        </ProtectedRoute>
-      } />
-
-      <Route path="/partner/tax" element={
-        <ProtectedRoute>
-          <PartnerTaxCenterPage />
         </ProtectedRoute>
       } />
 
@@ -2016,12 +1802,6 @@ function AppRoutes() {
       <Route path="/partner/billing" element={
         <ProtectedRoute>
           <PartnerBillingPage />
-        </ProtectedRoute>
-      } />
-
-      <Route path="/partner/compensation" element={
-        <ProtectedRoute>
-          <PartnerCompensationPage />
         </ProtectedRoute>
       } />
 
@@ -2262,18 +2042,6 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-
-      {/* Partner pages that were missing routes */}
-      <Route path="/partner/share-kit" element={<ProtectedRoute><PartnerShareKitPage /></ProtectedRoute>} />
-      <Route path="/partner/marketing-kit" element={<ProtectedRoute><PartnerMarketingKitPage /></ProtectedRoute>} />
-      <Route path="/partner/outreach" element={<ProtectedRoute><PartnerOutreachPage /></ProtectedRoute>} />
-      <Route path="/partner/territories" element={<ProtectedRoute><PartnerTerritoriesPage /></ProtectedRoute>} />
-      <Route path="/partner/analytics" element={<ProtectedRoute><PartnerAnalyticsPage /></ProtectedRoute>} />
-      <Route path="/partner/communications" element={<ProtectedRoute><PartnerCommunicationsPage /></ProtectedRoute>} />
-      {/* accounting-pro alias */}
-      <Route path="/partner/accounting-pro" element={<ProtectedRoute allowedRoles={['partner']}><PartnerAccountingProPage /></ProtectedRoute>} />
-      {/* apply redirect */}
-      <Route path="/partner/apply" element={<Navigate to="/partners/apply" replace />} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../contexts/AuthContext";
-import { DollarSign, TrendingUp, Clock, AlertCircle, CheckCircle2, ExternalLink, BookOpen } from "lucide-react";
+import { DollarSign, TrendingUp, Clock, AlertCircle, CheckCircle2, ExternalLink } from "lucide-react";
 
 type Row = {
   id: string;
@@ -122,23 +121,14 @@ export default function PartnerEarningsPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-10">
       <div className="border rounded-2xl bg-white p-6 shadow-sm">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <DollarSign className="w-8 h-8 text-green-600" />
-            <div>
-              <h1 className="text-2xl font-semibold">Earnings</h1>
-              <p className="mt-1 text-gray-600">
-                Your commissions from DFY sales you referred.
-              </p>
-            </div>
+        <div className="flex items-center gap-3">
+          <DollarSign className="w-8 h-8 text-green-600" />
+          <div>
+            <h1 className="text-2xl font-semibold">Earnings</h1>
+            <p className="mt-1 text-gray-600">
+              Your commissions from DFY sales you referred.
+            </p>
           </div>
-          <Link
-            to="/partner/compensation"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600 hover:text-emerald-700 border border-emerald-200 rounded-lg px-3 py-2 hover:bg-emerald-50 transition-colors flex-shrink-0"
-          >
-            <BookOpen className="w-4 h-4" />
-            Comp Plan
-          </Link>
         </div>
 
         {needsPayoutSetup && totals.owed > 0 && (

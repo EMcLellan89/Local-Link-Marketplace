@@ -8,8 +8,7 @@ import {
   Calendar,
   AlertCircle,
   Calculator,
-  CheckCircle,
-  Globe
+  CheckCircle
 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Card, { CardBody, CardHeader } from '../../components/ui/Card';
@@ -42,18 +41,11 @@ interface QuarterlyTax {
   total_tax_cents: number;
 }
 
-interface ContractorYTD {
-  ytd_contractor_expense_cents: number;
-  active_contractor_count: number;
-  pending_sync_count: number;
-}
-
 export default function AccountingDashboard() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [upcomingTaxes, setUpcomingTaxes] = useState<TaxObligation[]>([]);
   const [currentQuarter, setCurrentQuarter] = useState<QuarterlyTax | null>(null);
-  const [contractorYTD, setContractorYTD] = useState<ContractorYTD | null>(null);
 
   useEffect(() => {
     loadData();
@@ -61,7 +53,7 @@ export default function AccountingDashboard() {
 
   async function loadData() {
     try {
-      const [statsResult, taxesResult, contractorResult] = await Promise.all([
+      const [statsResult, taxesResult] = await Promise.all([
         supabase.rpc('get_accounting_dashboard_stats'),
         supabase
           .from('accounting_tax_obligations')
@@ -69,15 +61,11 @@ export default function AccountingDashboard() {
           .eq('status', 'pending')
           .gte('due_date', new Date().toISOString().split('T')[0])
           .order('due_date', { ascending: true })
-          .limit(5),
-        supabase.rpc('get_intl_contractor_ytd', { p_year: new Date().getFullYear() })
+          .limit(5)
       ]);
 
       if (statsResult.data) setStats(statsResult.data);
       if (taxesResult.data) setUpcomingTaxes(taxesResult.data);
-      if (contractorResult.data && contractorResult.data.length > 0) {
-        setContractorYTD(contractorResult.data[0]);
-      }
 
       const quarter = Math.floor((new Date().getMonth() / 3)) + 1;
       const year = new Date().getFullYear();
@@ -118,7 +106,7 @@ export default function AccountingDashboard() {
           <p className="text-green-100">Tax tracking, payroll management, and 1099 generation</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card>
             <CardBody>
               <div className="flex items-start justify-between">
@@ -180,33 +168,6 @@ export default function AccountingDashboard() {
               </div>
             </CardBody>
           </Card>
-
-          <Card>
-            <CardBody>
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Intl Contractor Spend</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {formatCurrency(contractorYTD?.ytd_contractor_expense_cents || 0)}
-                  </p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs text-gray-500">
-                      {contractorYTD?.active_contractor_count || 0} active
-                    </span>
-                    {(contractorYTD?.pending_sync_count || 0) > 0 && (
-                      <span className="text-xs text-orange-600 font-medium">
-                        · {contractorYTD?.pending_sync_count} unsynced
-                      </span>
-                    )}
-                  </div>
-                  <Link to="/admin/international-payroll" className="text-sm text-blue-600 hover:underline mt-1 inline-block">
-                    Manage payroll
-                  </Link>
-                </div>
-                <Globe className="w-8 h-8 text-[#2BB673]" />
-              </div>
-            </CardBody>
-          </Card>
         </div>
 
         <Card>
@@ -214,7 +175,7 @@ export default function AccountingDashboard() {
             <h2 className="text-xl font-bold text-gray-900">Quick Actions</h2>
           </CardHeader>
           <CardBody>
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Link to="/admin/accounting/taxes">
                 <Button variant="primary" className="w-full justify-center">
                   <Calculator className="w-5 h-5 mr-2" />
@@ -231,12 +192,6 @@ export default function AccountingDashboard() {
                 <Button variant="secondary" className="w-full justify-center">
                   <FileText className="w-5 h-5 mr-2" />
                   Generate 1099s
-                </Button>
-              </Link>
-              <Link to="/admin/international-payroll">
-                <Button variant="secondary" className="w-full justify-center">
-                  <Globe className="w-5 h-5 mr-2" />
-                  Intl Contractors
                 </Button>
               </Link>
               <Link to="/admin/accounting/accountants">
@@ -349,7 +304,7 @@ export default function AccountingDashboard() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Link to="/admin/accounting/taxes">
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardBody>
@@ -389,22 +344,6 @@ export default function AccountingDashboard() {
                     {stats?.partners_for_1099 || 0}
                   </p>
                   <p className="text-xs text-gray-500">Partners Ready</p>
-                </div>
-              </CardBody>
-            </Card>
-          </Link>
-
-          <Link to="/admin/international-payroll">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer border-[#2BB673]/30">
-              <CardBody>
-                <div className="text-center py-4">
-                  <Globe className="w-12 h-12 text-[#2BB673] mx-auto mb-3" />
-                  <h3 className="font-semibold text-gray-900 mb-1">Intl Contractors</h3>
-                  <p className="text-sm text-gray-600">Philippines & global contractor payroll</p>
-                  <p className="text-2xl font-bold text-[#2BB673] mt-2">
-                    {formatCurrency(contractorYTD?.ytd_contractor_expense_cents || 0)}
-                  </p>
-                  <p className="text-xs text-gray-500">YTD Expense</p>
                 </div>
               </CardBody>
             </Card>

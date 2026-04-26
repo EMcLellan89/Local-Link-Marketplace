@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MapPin, Tag, Clock, AlertCircle, Heart, Share2, Star, CalendarDays, TrendingUp, Users, CheckCircle } from 'lucide-react';
+import { MapPin, Tag, Clock, AlertCircle, Heart, Share2, Star } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Card, { CardBody, CardHeader } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import BackButton from '../../components/ui/BackButton';
-import AppointmentBookingModal from '../../components/AppointmentBookingModal';
 
 interface DealDetail {
   id: string;
@@ -22,8 +21,6 @@ interface DealDetail {
   quantity_sold: number;
   per_customer_limit: number | null;
   end_at: string | null;
-  bookable: boolean;
-  booking_duration_minutes: number | null;
   merchant: {
     id: string;
     business_name: string;
@@ -31,16 +28,7 @@ interface DealDetail {
     city: string;
     state: string;
     phone: string;
-    booking_enabled: boolean;
-    booking_lead_time_hours: number;
-    booking_advance_days: number;
   };
-}
-
-interface MerchantStats {
-  totalAppointments: number;
-  completedAppointments: number;
-  totalDeals: number;
 }
 
 interface Review {
@@ -71,8 +59,6 @@ export default function DealDetailPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [averageRating, setAverageRating] = useState(0);
   const [showShareMenu, setShowShareMenu] = useState(false);
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [merchantStats, setMerchantStats] = useState<MerchantStats | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -83,34 +69,6 @@ export default function DealDetailPage() {
       }
     }
   }, [id, user]);
-
-  useEffect(() => {
-    if (deal?.merchant?.id) fetchMerchantStats(deal.merchant.id);
-  }, [deal?.merchant?.id]);
-
-  const fetchMerchantStats = async (merchantId: string) => {
-    try {
-      const [apptRes, dealsRes] = await Promise.all([
-        supabase
-          .from('deal_appointments')
-          .select('status', { count: 'exact' })
-          .eq('merchant_id', merchantId),
-        supabase
-          .from('deals')
-          .select('id', { count: 'exact' })
-          .eq('merchant_id', merchantId)
-          .eq('status', 'active'),
-      ]);
-      const allAppts = apptRes.data ?? [];
-      setMerchantStats({
-        totalAppointments: apptRes.count ?? allAppts.length,
-        completedAppointments: allAppts.filter((a: any) => a.status === 'completed').length,
-        totalDeals: dealsRes.count ?? 0,
-      });
-    } catch (e) {
-      // stats are non-critical
-    }
-  };
 
   const fetchDeal = async () => {
     setLoading(true);
@@ -132,18 +90,13 @@ export default function DealDetailPage() {
           quantity_sold,
           per_customer_limit,
           end_at,
-          bookable,
-          booking_duration_minutes,
           merchant:merchants (
             id,
             business_name,
             address_line1,
             city,
             state,
-            phone,
-            booking_enabled,
-            booking_lead_time_hours,
-            booking_advance_days
+            phone
           )
         `)
         .eq('id', id)
@@ -477,97 +430,50 @@ export default function DealDetailPage() {
                 )}
               </div>
 
-              <div className="space-y-3 pt-4 border-t border-slate-200">
-                {isAvailable() ? (
-                  <>
-                    {deal.per_customer_limit && (
-                      <p className="text-sm text-slate-600">
-                        Limit: {deal.per_customer_limit} per customer
-                      </p>
-                    )}
+              {isAvailable() ? (
+                <div className="space-y-3 pt-4 border-t border-slate-200">
+                  {deal.per_customer_limit && (
+                    <p className="text-sm text-slate-600">
+                      Limit: {deal.per_customer_limit} per customer
+                    </p>
+                  )}
 
-                    <div className="flex items-center gap-3">
-                      <label className="text-sm font-medium text-slate-700">Quantity:</label>
-                      <select
-                        value={quantity}
-                        onChange={(e) => setQuantity(Number(e.target.value))}
-                        className="border border-slate-300 rounded-lg px-3 py-2"
-                      >
-                        {Array.from({ length: Math.min(deal.per_customer_limit || 5, 5) }, (_, i) => i + 1).map((n) => (
-                          <option key={n} value={n}>{n}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="text-lg font-medium text-slate-900">
-                      Total: {formatPrice(deal.price_cents * quantity)}
-                    </div>
-
-                    <Button
-                      fullWidth
-                      size="lg"
-                      onClick={handlePurchase}
-                      disabled={purchasing}
+                  <div className="flex items-center gap-3">
+                    <label className="text-sm font-medium text-slate-700">Quantity:</label>
+                    <select
+                      value={quantity}
+                      onChange={(e) => setQuantity(Number(e.target.value))}
+                      className="border border-slate-300 rounded-lg px-3 py-2"
                     >
-                      {purchasing ? 'Processing...' : 'Buy Now'}
-                    </Button>
-                  </>
-                ) : (
-                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                    This deal is no longer available
+                      {Array.from({ length: Math.min(deal.per_customer_limit || 5, 5) }, (_, i) => i + 1).map((n) => (
+                        <option key={n} value={n}>{n}</option>
+                      ))}
+                    </select>
                   </div>
-                )}
 
-                {deal.bookable && deal.merchant.booking_enabled && (
+                  <div className="text-lg font-medium text-slate-900">
+                    Total: {formatPrice(deal.price_cents * quantity)}
+                  </div>
+
                   <Button
                     fullWidth
                     size="lg"
-                    variant="outline"
-                    onClick={() => setShowBookingModal(true)}
+                    onClick={handlePurchase}
+                    disabled={purchasing}
                   >
-                    <CalendarDays className="w-4 h-4 mr-2" />
-                    Book an Appointment
+                    {purchasing ? 'Processing...' : 'Buy Now'}
                   </Button>
-                )}
-              </div>
+                </div>
+              ) : (
+                <div className="pt-4 border-t border-slate-200">
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                    This deal is no longer available
+                  </div>
+                </div>
+              )}
             </CardBody>
           </Card>
         </div>
-
-        {merchantStats && (
-          <Card variant="bordered">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-[#2BB673]" />
-                <h2 className="text-lg font-bold text-slate-900">
-                  {deal.merchant.business_name} on Our Platform
-                </h2>
-              </div>
-              <p className="text-sm text-slate-500 mt-1">
-                See how active this business is with our community
-              </p>
-            </CardHeader>
-            <CardBody>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-slate-50 rounded-xl">
-                  <CalendarDays className="w-6 h-6 text-[#2BB673] mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-slate-900">{merchantStats.totalAppointments}</div>
-                  <div className="text-xs text-slate-500 mt-1">Total Appointments</div>
-                </div>
-                <div className="text-center p-4 bg-slate-50 rounded-xl">
-                  <CheckCircle className="w-6 h-6 text-blue-500 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-slate-900">{merchantStats.completedAppointments}</div>
-                  <div className="text-xs text-slate-500 mt-1">Completed</div>
-                </div>
-                <div className="text-center p-4 bg-slate-50 rounded-xl">
-                  <Users className="w-6 h-6 text-amber-500 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-slate-900">{merchantStats.totalDeals}</div>
-                  <div className="text-xs text-slate-500 mt-1">Active Deals</div>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-        )}
 
         <Card variant="bordered">
           <CardHeader>
@@ -658,13 +564,6 @@ export default function DealDetailPage() {
           </CardBody>
         </Card>
       </div>
-
-      {showBookingModal && deal && (
-        <AppointmentBookingModal
-          deal={deal}
-          onClose={() => setShowBookingModal(false)}
-        />
-      )}
     </DashboardLayout>
   );
 }

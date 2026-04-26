@@ -49,50 +49,23 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    // Idempotency: skip already-processed events
-    const { error: insertErr } = await supabaseAdmin
-      .from("stripe_webhook_events")
-      .insert({ stripe_event_id: event.id, event_type: event.type, processed_at: new Date().toISOString(), status: "processing" });
+    switch (event.type) {
+      case "checkout.session.completed":
+        await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
+        break;
 
-    if (insertErr?.code === "23505") {
-      console.log("Duplicate webhook event, skipping:", event.id);
-      return new Response(JSON.stringify({ received: true, duplicate: true }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+      case "customer.subscription.updated":
+      case "customer.subscription.deleted":
+        await handleSubscriptionChange(event.data.object as Stripe.Subscription);
+        break;
 
-    try {
-      switch (event.type) {
-        case "checkout.session.completed":
-          await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
-          break;
+      case "invoice.paid":
+        await handleInvoicePaid(event.data.object as Stripe.Invoice);
+        break;
 
-        case "customer.subscription.updated":
-        case "customer.subscription.deleted":
-          await handleSubscriptionChange(event.data.object as Stripe.Subscription);
-          break;
-
-        case "invoice.paid":
-          await handleInvoicePaid(event.data.object as Stripe.Invoice);
-          break;
-
-        default:
-          console.log(`Unhandled event type: ${event.type}`);
-          break;
-      }
-
-      await supabaseAdmin
-        .from("stripe_webhook_events")
-        .update({ status: "processed" })
-        .eq("stripe_event_id", event.id);
-
-    } catch (handlerErr: any) {
-      await supabaseAdmin
-        .from("stripe_webhook_events")
-        .update({ status: "failed", error_message: handlerErr.message })
-        .eq("stripe_event_id", event.id);
-      throw handlerErr;
+      default:
+        console.log(`Unhandled event type: ${event.type}`);
+        break;
     }
 
     return new Response(JSON.stringify({ received: true }), {

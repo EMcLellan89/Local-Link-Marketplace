@@ -34,7 +34,7 @@ const merchantTiers = [
     crm: 'Professional CRM',
     contacts: 5000,
     accounting: 'Books Lite',
-    color: 'from-blue-500 to-blue-700',
+    color: 'from-blue-500 to-indigo-600',
     badge: 'LOCKED RATE',
     features: [
       'Everything in Starter',

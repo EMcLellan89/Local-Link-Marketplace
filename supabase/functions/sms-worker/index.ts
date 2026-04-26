@@ -1,6 +1,3 @@
-/**
- * SMS queue worker — previously used Twilio. Now uses Brevo transactional SMS.
- */
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const corsHeaders = {
@@ -9,8 +6,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Client-Info, Apikey',
 };
 
-const BREVO_API_KEY = Deno.env.get('BREVO_API_KEY');
-const BREVO_SMS_SENDER = Deno.env.get('BREVO_SMS_SENDER') || 'LocalLink';
+const TWILIO_ACCOUNT_SID = Deno.env.get('TWILIO_ACCOUNT_SID');
+const TWILIO_AUTH_TOKEN = Deno.env.get('TWILIO_AUTH_TOKEN');
+const TWILIO_PHONE_NUMBER = Deno.env.get('TWILIO_PHONE_NUMBER');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
@@ -29,7 +27,9 @@ Deno.serve(async (req: Request) => {
       .lte('send_after', new Date().toISOString())
       .limit(50);
 
-    if (fetchError) throw fetchError;
+    if (fetchError) {
+      throw fetchError;
+    }
 
     if (!queuedSMS || queuedSMS.length === 0) {
       return new Response(
@@ -38,39 +38,44 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const results = { sent: 0, failed: 0, errors: [] as string[] };
+    const results = {
+      sent: 0,
+      failed: 0,
+      errors: [] as string[],
+    };
 
     for (const sms of queuedSMS) {
       try {
-        if (BREVO_API_KEY) {
-          const brevoResp = await fetch('https://api.brevo.com/v3/transactionalSMS/sms', {
-            method: 'POST',
-            headers: {
-              'api-key': BREVO_API_KEY,
-              'Content-Type': 'application/json',
-              Accept: 'application/json',
-            },
-            body: JSON.stringify({
-              sender: BREVO_SMS_SENDER,
-              recipient: sms.phone_number,
-              content: sms.body,
-              type: 'transactional',
-            }),
-          });
+        if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_PHONE_NUMBER) {
+          const twilioResponse = await fetch(
+            `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': `Basic ${btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`)}`,
+              },
+              body: new URLSearchParams({
+                To: sms.phone_number,
+                From: TWILIO_PHONE_NUMBER,
+                Body: sms.body,
+              }),
+            }
+          );
 
-          if (!brevoResp.ok) {
-            const errJson = await brevoResp.json().catch(() => ({}));
-            throw new Error(errJson?.message || `Brevo SMS error (${brevoResp.status})`);
+          if (!twilioResponse.ok) {
+            const errorData = await twilioResponse.text();
+            throw new Error(`Twilio API error: ${errorData}`);
           }
 
-          const brevoData = await brevoResp.json();
+          const twilioData = await twilioResponse.json();
 
           await supabase
             .from('sms_queue')
             .update({
               status: 'sent',
               sent_at: new Date().toISOString(),
-              provider_id: String(brevoData.messageId || ''),
+              twilio_sid: twilioData.sid,
               updated_at: new Date().toISOString(),
             })
             .eq('id', sms.id);
@@ -84,7 +89,7 @@ Deno.serve(async (req: Request) => {
             .update({
               status: 'sent',
               sent_at: new Date().toISOString(),
-              provider_id: 'dev-mode-' + sms.id,
+              twilio_sid: 'dev-mode-' + sms.id,
               updated_at: new Date().toISOString(),
             })
             .eq('id', sms.id);
@@ -107,14 +112,24 @@ Deno.serve(async (req: Request) => {
     }
 
     return new Response(
-      JSON.stringify({ processed: queuedSMS.length, ...results }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({
+        processed: queuedSMS.length,
+        sent: results.sent,
+        failed: results.failed,
+        errors: results.errors,
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
     );
   } catch (error) {
     console.error('SMS worker error:', error);
     return new Response(
       JSON.stringify({ error: String(error) }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
     );
   }
 });

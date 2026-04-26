@@ -171,9 +171,9 @@ export default function PartnerCRMDashboard() {
       if (contactsRes.data) setContacts(contactsRes.data);
       if (dealsRes.data) setDeals(dealsRes.data);
 
-      const pipelineValue = dealsRes.data?.filter(d => ['prospecting', 'qualified', 'proposal', 'negotiation'].includes(d.stage)).reduce((sum, d) => sum + d.deal_value_cents, 0) || 0;
-      const expectedCommission = dealsRes.data?.filter(d => ['prospecting', 'qualified', 'proposal', 'negotiation'].includes(d.stage)).reduce((sum, d) => sum + (d.total_commission_cents ?? 0), 0) || 0;
-      const wonDeals = dealsRes.data?.filter(d => d.stage === 'closed_won').length || 0;
+      const pipelineValue = dealsRes.data?.filter(d => ['lead', 'qualified', 'proposal', 'negotiation'].includes(d.stage)).reduce((sum, d) => sum + d.deal_value_cents, 0) || 0;
+      const expectedCommission = dealsRes.data?.filter(d => ['lead', 'qualified', 'proposal', 'negotiation'].includes(d.stage)).reduce((sum, d) => sum + d.expected_commission_cents, 0) || 0;
+      const wonDeals = dealsRes.data?.filter(d => d.stage === 'closed-won').length || 0;
 
       setStats({
         totalCompanies: companiesRes.data?.length || 0,

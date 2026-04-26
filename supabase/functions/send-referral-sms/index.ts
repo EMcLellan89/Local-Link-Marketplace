@@ -79,10 +79,11 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
-    const brevoSmsSender = Deno.env.get("BREVO_SMS_SENDER") || "LocalLink";
+    const twilioAccountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
+    const twilioAuthToken = Deno.env.get("TWILIO_AUTH_TOKEN");
+    const twilioFromNumber = Deno.env.get("TWILIO_FROM_NUMBER");
 
-    if (!BREVO_API_KEY) {
+    if (!twilioAccountSid || !twilioAuthToken || !twilioFromNumber) {
       return new Response(JSON.stringify({ error: "SMS service not configured" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -221,23 +222,25 @@ Deno.serve(async (req: Request) => {
     const rewardLine = `You earn ${formatCurrency(program.reward_value_cents)} • Friend gets ${formatCurrency(program.referee_incentive_value_cents)}`;
     const text = `${program.program_name || "Refer & Earn"}: ${rewardLine}\nShare your link:\n${shortUrl}`;
 
-    // Send SMS via Brevo
-    const smsResponse = await fetch("https://api.brevo.com/v3/transactionalSMS/sms", {
+    // Send SMS via Twilio
+    const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`;
+    const auth = btoa(`${twilioAccountSid}:${twilioAuthToken}`);
+
+    const formData = new URLSearchParams();
+    formData.append("To", phone);
+    formData.append("From", twilioFromNumber);
+    formData.append("Body", text);
+
+    const smsResponse = await fetch(twilioUrl, {
       method: "POST",
       headers: {
-        "api-key": BREVO_API_KEY,
-        "Content-Type": "application/json",
-        Accept: "application/json",
+        "Authorization": `Basic ${auth}`,
+        "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: JSON.stringify({
-        sender: brevoSmsSender,
-        recipient: phone,
-        content: text,
-        type: "transactional",
-      }),
+      body: formData.toString(),
     });
 
-    const smsResult = await smsResponse.json().catch(() => ({}));
+    const smsResult = await smsResponse.json();
 
     if (!smsResponse.ok) {
       console.error("SMS send error:", smsResult);
@@ -257,7 +260,7 @@ Deno.serve(async (req: Request) => {
       ok: true,
       share_code: shareCode,
       share_url: shortUrl,
-      message_id: smsResult.messageId,
+      sms_sid: smsResult.sid
     }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

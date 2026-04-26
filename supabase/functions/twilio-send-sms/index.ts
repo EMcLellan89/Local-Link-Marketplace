@@ -1,7 +1,3 @@
-/**
- * Renamed context: Previously used Twilio. Now uses Brevo SMS API.
- * Function slug kept for backward compatibility with existing callers.
- */
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const corsHeaders = {
@@ -12,20 +8,30 @@ const corsHeaders = {
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 200, headers: corsHeaders });
+    return new Response(null, {
+      status: 200,
+      headers: corsHeaders,
+    });
   }
 
   try {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+      {
+        global: {
+          headers: { Authorization: req.headers.get('Authorization')! },
+        },
+      }
     );
 
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-    if (userError || !user) throw new Error('Unauthorized');
+    if (userError || !user) {
+      throw new Error('Unauthorized');
+    }
 
     const { merchantId, toNumber, body, leadId } = await req.json();
+
     if (!merchantId || !toNumber || !body) {
       throw new Error('merchantId, toNumber, and body are required');
     }
@@ -35,61 +41,87 @@ Deno.serve(async (req: Request) => {
       .select('user_id')
       .eq('id', merchantId)
       .eq('user_id', user.id)
-      .maybeSingle();
+      .single();
 
-    if (!merchant) throw new Error('Merchant not found or unauthorized');
+    if (!merchant) {
+      throw new Error('Merchant not found or unauthorized');
+    }
 
-    // Load comm config (now stores Brevo sender phone)
     const { data: config } = await supabaseClient
-      .from('comm_configurations')
+      .from('twilio_configurations')
       .select('*')
       .eq('merchant_id', merchantId)
       .eq('is_active', true)
       .eq('sms_enabled', true)
-      .maybeSingle();
+      .single();
 
-    const BREVO_API_KEY = config?.brevo_api_key || Deno.env.get('BREVO_API_KEY');
-    const senderPhone = config?.sender_phone || Deno.env.get('BREVO_SMS_SENDER') || 'LocalLink';
+    if (!config || !config.account_sid || !config.auth_token_encrypted || !config.phone_number) {
+      throw new Error('Twilio SMS not configured for this merchant');
+    }
 
-    if (!BREVO_API_KEY) throw new Error('Brevo SMS not configured');
+    const accountSid = config.account_sid;
+    const authToken = config.auth_token_encrypted;
+    const fromNumber = config.phone_number;
 
-    const resp = await fetch('https://api.brevo.com/v3/transactionalSMS/sms', {
-      method: 'POST',
-      headers: {
-        'api-key': BREVO_API_KEY,
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify({
-        sender: senderPhone,
-        recipient: toNumber,
-        content: body,
-        type: 'transactional',
-      }),
+    const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
+
+    const params = new URLSearchParams({
+      To: toNumber,
+      From: fromNumber,
+      Body: body,
+      StatusCallback: `${Deno.env.get('SUPABASE_URL')}/functions/v1/twilio-status-webhook`,
     });
 
-    const json = await resp.json().catch(() => ({}));
-    if (!resp.ok) throw new Error(json?.message || `Brevo SMS failed (${resp.status})`);
+    const basicAuth = btoa(`${accountSid}:${authToken}`);
 
-    await supabaseClient.from('comm_sms_logs').insert({
+    const response = await fetch(twilioUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${basicAuth}`,
+      },
+      body: params.toString(),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.text();
+      throw new Error(`Twilio API error: ${errorData}`);
+    }
+
+    const message = await response.json();
+
+    await supabaseClient.from('twilio_sms_logs').insert({
       merchant_id: merchantId,
       lead_id: leadId || null,
-      message_id: String(json.messageId || Date.now()),
+      message_sid: message.sid,
       direction: 'outbound',
-      from_number: senderPhone,
+      from_number: fromNumber,
       to_number: toNumber,
-      body,
-      status: 'sent',
+      body: body,
+      status: message.status,
+      num_media: message.num_media || 0,
+      cost_cents: 0,
     });
 
     return new Response(
-      JSON.stringify({ success: true, messageId: json.messageId }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ success: true, messageSid: message.sid, status: message.status }),
+      {
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
+      }
     );
   } catch (error: any) {
     return new Response(
       JSON.stringify({ error: error.message }),
-      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      {
+        status: 400,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
+      }
     );
   }
 });
