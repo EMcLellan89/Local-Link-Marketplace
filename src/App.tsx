@@ -400,7 +400,7 @@ function AppRoutes() {
         path="/dashboard"
         element={
           <ProtectedRoute>
-            {profile?.role === 'customer' && <DealsPage />}
+            {profile?.role === 'customer' && <Navigate to="/pulse" replace />}
             {profile?.role === 'merchant' && <Navigate to="/merchant/dashboard" replace />}
             {profile?.role === 'admin' && <Navigate to="/admin/dashboard" replace />}
             {profile?.role === 'partner' && <Navigate to="/partner/dashboard" replace />}
@@ -411,7 +411,7 @@ function AppRoutes() {
       <Route path="/r/:landingSlug" element={<ReferralLandingPage />} />
       <Route path="/ref/:referralSlug" element={<PartnerReferralLandingPage />} />
 
-      <Route path="/deals" element={user ? <DealsPage /> : <Navigate to="/login" replace />} />
+      <Route path="/deals" element={<Navigate to="/pulse" replace />} />
 
       <Route
         path="/deal/:id"
@@ -476,14 +476,7 @@ function AppRoutes() {
         }
       />
 
-      <Route
-        path="/pulse"
-        element={
-          <ProtectedRoute allowedRoles={['customer']}>
-            <PulseFeedPage />
-          </ProtectedRoute>
-        }
-      />
+      <Route path="/pulse" element={<PulseFeedPage />} />
 
       <Route
         path="/pulse/leaderboard"
