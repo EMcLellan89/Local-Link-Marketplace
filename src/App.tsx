@@ -18,6 +18,7 @@ const FAQ = lazy(() => import('./pages/FAQ'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const DealsPage = lazy(() => import('./pages/customer/DealsPage'));
+const CommunityPage = lazy(() => import('./pages/customer/CommunityPage'));
 const DealDetailPage = lazy(() => import('./pages/customer/DealDetailPage'));
 const PurchaseConfirmationPage = lazy(() => import('./pages/customer/PurchaseConfirmationPage'));
 const PurchasesPage = lazy(() => import('./pages/customer/PurchasesPage'));
@@ -400,7 +401,7 @@ function AppRoutes() {
         path="/dashboard"
         element={
           <ProtectedRoute>
-            {profile?.role === 'customer' && <DealsPage />}
+            {profile?.role === 'customer' && <Navigate to="/community" replace />}
             {profile?.role === 'merchant' && <Navigate to="/merchant/dashboard" replace />}
             {profile?.role === 'admin' && <Navigate to="/admin/dashboard" replace />}
             {profile?.role === 'partner' && <Navigate to="/partner/dashboard" replace />}
@@ -411,7 +412,9 @@ function AppRoutes() {
       <Route path="/r/:landingSlug" element={<ReferralLandingPage />} />
       <Route path="/ref/:referralSlug" element={<PartnerReferralLandingPage />} />
 
-      <Route path="/deals" element={user ? <DealsPage /> : <Navigate to="/login" replace />} />
+      <Route path="/deals" element={<Navigate to="/community" replace />} />
+
+      <Route path="/community" element={<CommunityPage />} />
 
       <Route
         path="/deal/:id"
