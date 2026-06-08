@@ -19,6 +19,13 @@ const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const DealsPage = lazy(() => import('./pages/customer/DealsPage'));
 const CommunityPage = lazy(() => import('./pages/customer/CommunityPage'));
+const TownPage = lazy(() => import('./pages/community/TownPage'));
+const GovernmentPage = lazy(() => import('./pages/community/GovernmentPage'));
+const NonprofitsPage = lazy(() => import('./pages/community/NonprofitsPage'));
+const SchoolsPage = lazy(() => import('./pages/community/SchoolsPage'));
+const VolunteerPage = lazy(() => import('./pages/community/VolunteerPage'));
+const CommunityResourcesPage = lazy(() => import('./pages/community/CommunityResourcesPage'));
+const EmergencyAlertsPage = lazy(() => import('./pages/community/EmergencyAlertsPage'));
 const DealDetailPage = lazy(() => import('./pages/customer/DealDetailPage'));
 const PurchaseConfirmationPage = lazy(() => import('./pages/customer/PurchaseConfirmationPage'));
 const PurchasesPage = lazy(() => import('./pages/customer/PurchasesPage'));
@@ -415,6 +422,13 @@ function AppRoutes() {
       <Route path="/deals" element={<Navigate to="/community" replace />} />
 
       <Route path="/community" element={<CommunityPage />} />
+      <Route path="/community/:slug" element={<TownPage />} />
+      <Route path="/government" element={<GovernmentPage />} />
+      <Route path="/nonprofits" element={<NonprofitsPage />} />
+      <Route path="/schools" element={<SchoolsPage />} />
+      <Route path="/volunteer" element={<VolunteerPage />} />
+      <Route path="/community-resources" element={<CommunityResourcesPage />} />
+      <Route path="/emergency-alerts" element={<EmergencyAlertsPage />} />
 
       <Route
         path="/deal/:id"
