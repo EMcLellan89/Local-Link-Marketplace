@@ -26,6 +26,9 @@ const SchoolsPage = lazy(() => import('./pages/community/SchoolsPage'));
 const VolunteerPage = lazy(() => import('./pages/community/VolunteerPage'));
 const CommunityResourcesPage = lazy(() => import('./pages/community/CommunityResourcesPage'));
 const EmergencyAlertsPage = lazy(() => import('./pages/community/EmergencyAlertsPage'));
+const CommunityDirectoryPage = lazy(() => import('./pages/community/CommunityDirectoryPage'));
+const CertifiedPage = lazy(() => import('./pages/community/CertifiedPage'));
+const RewardsPage = lazy(() => import('./pages/community/RewardsPage'));
 const DealDetailPage = lazy(() => import('./pages/customer/DealDetailPage'));
 const PurchaseConfirmationPage = lazy(() => import('./pages/customer/PurchaseConfirmationPage'));
 const PurchasesPage = lazy(() => import('./pages/customer/PurchasesPage'));
@@ -429,6 +432,9 @@ function AppRoutes() {
       <Route path="/volunteer" element={<VolunteerPage />} />
       <Route path="/community-resources" element={<CommunityResourcesPage />} />
       <Route path="/emergency-alerts" element={<EmergencyAlertsPage />} />
+      <Route path="/directory" element={<CommunityDirectoryPage />} />
+      <Route path="/certified" element={<CertifiedPage />} />
+      <Route path="/rewards" element={<RewardsPage />} />
 
       <Route
         path="/deal/:id"

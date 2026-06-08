@@ -5,7 +5,7 @@ import {
   AlertTriangle, HandHeart, Search, ChevronDown, Tag,
   Calendar, Megaphone, BookOpen, TreePine, PawPrint,
   Briefcase, ShoppingBag, BadgeAlert, Phone, ExternalLink,
-  ArrowRight, Store, Shield, Star,
+  ArrowRight, Store, Shield, Star, BookMarked, Award, Gift,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import DashboardLayout from '../../components/layout/DashboardLayout';
@@ -307,8 +307,8 @@ export default function CommunityPage() {
             </div>
           </div>
 
-          {/* 7-side quick nav */}
-          <div className="mt-6 grid grid-cols-4 md:grid-cols-7 gap-2">
+          {/* Quick nav */}
+          <div className="mt-6 grid grid-cols-5 md:grid-cols-10 gap-2">
             {[
               { icon: Shield, label: 'Government', route: '/government' },
               { icon: Store, label: 'Merchants', route: '/deals' },
@@ -317,6 +317,9 @@ export default function CommunityPage() {
               { icon: Heart, label: 'Nonprofits', route: '/nonprofits' },
               { icon: GraduationCap, label: 'Schools', route: '/schools' },
               { icon: HandHeart, label: 'Volunteer', route: '/volunteer' },
+              { icon: BookMarked, label: 'Directory', route: '/directory' },
+              { icon: Award, label: 'Certified', route: '/certified' },
+              { icon: Gift, label: 'Rewards', route: '/rewards' },
             ].map(({ icon: Icon, label, route }) => (
               <button
                 key={label}
